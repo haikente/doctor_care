@@ -141,26 +141,23 @@ class _Hba1cChartState extends State<Hba1cChart> {
                       ],
                     ),
                   )
-                : InteractiveViewer(
-                    transformationController: _transformationController,
-                    minScale: 0.5,
-                    maxScale: 3.0,
-                    boundaryMargin: EdgeInsets.all(50),
-                    child: Stack(
+                 : Stack(
                       children: [
-                        // Layer 1: Axes và grid cố định
                         Positioned.fill(
                           child: CustomPaint(
                             painter: Hba1cAxesPainter(widget.data),
                           ),
                         ),
-                        
-                        // Layer 2: Data scrollable
                         Positioned.fill(
                           child: Padding(
                             padding: EdgeInsets.only(left: leftMargin, right: 10),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
+                            child: InteractiveViewer(
+                              transformationController: _transformationController,
+                              minScale: 1.0,
+                              maxScale: 3.0,
+                              constrained: true,
+                              scaleEnabled: true, // Giữ chart không vượt quá boundary
+                              panEnabled: true,
                               child: SizedBox(
                                 width: widget.data.length * pointSpacing + 60,
                                 child: CustomPaint(
@@ -173,7 +170,6 @@ class _Hba1cChartState extends State<Hba1cChart> {
                       ],
                     ),
                   ),
-          ),
         ],
       ),
     );
