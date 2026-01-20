@@ -6,3 +6,32 @@ abstract class Spo2heartrateEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class LoadSpo2HeartRateRecords extends Spo2heartrateEvent {}
+
+class AddSpo2HeartRateRecord extends Spo2heartrateEvent {
+  final SpO2HeartRate record;
+
+  const AddSpo2HeartRateRecord(this.record);
+
+  @override
+  List<Object> get props => [record];
+}
+
+class UpdateSpo2HeartRateRecord extends Spo2heartrateEvent {
+  final SpO2HeartRate record;
+
+  const UpdateSpo2HeartRateRecord(this.record);
+
+  @override
+  List<Object> get props => [record];
+}
+
+class DeleteSpo2HeartRateRecord extends Spo2heartrateEvent {
+  final String id;
+
+  const DeleteSpo2HeartRateRecord(this.id);
+
+  @override
+  List<Object> get props => [id];
+}

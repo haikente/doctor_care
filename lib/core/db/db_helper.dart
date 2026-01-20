@@ -6,7 +6,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 3;
+  static const _dbVersion = 4;
 
   Database? _database;
 
@@ -69,6 +69,17 @@ class DbHelper {
       )
     ''');
 
+    // ✅ BMI/Weight table
+    await db.execute('''
+      CREATE TABLE bmi_weight (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        weight REAL NOT NULL,
+        height REAL NOT NULL,
+        timestamp TEXT NOT NULL,
+        note TEXT
+      )
+    ''');
+
     print('✅ Created all tables (version $version)');
   }
 
@@ -80,7 +91,7 @@ class DbHelper {
       try {
         // 1. Kiểm tra xem bảng temperature có tồn tại không
         final tables = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='temperature'"
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='temperature'",
         );
 
         if (tables.isNotEmpty) {
@@ -152,6 +163,20 @@ class DbHelper {
         rethrow;
       }
     }
+
+    // ✅ Upgrade to version 4: Create bmi_weight table
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS bmi_weight (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          weight REAL NOT NULL,
+          height REAL NOT NULL,
+          timestamp TEXT NOT NULL,
+          note TEXT
+        )
+      ''');
+      print('✅ Created bmi_weight table (v4)');
+    }
   }
 
   Future<void> deleteDatabase() async {
@@ -165,7 +190,7 @@ class DbHelper {
   Future<void> checkSchema() async {
     final db = await database;
     final result = await db.rawQuery(
-      "SELECT sql FROM sqlite_master WHERE type='table' AND name='temperature'"
+      "SELECT sql FROM sqlite_master WHERE type='table' AND name='temperature'",
     );
     print('📊 Temperature table schema: ${result.first['sql']}');
   }

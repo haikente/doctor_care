@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "972427288907",
+    "project_id": "drcare-90960",
+    "storage_bucket": "drcare-90960.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972427288907:android:203815a1d4f8ff678108ce",
+        "android_client_info": {
+          "package_name": "com.example.doctor_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqqs6koyx7rBagWtC6uikiiHLsqdqnJY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

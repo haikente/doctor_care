@@ -1,8 +1,9 @@
 import 'package:doctor_care/core/pages/app_color.dart';
-import 'package:doctor_care/presentation/bloc/themestate_cubit.dart';
+import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -12,16 +13,13 @@ class Profilepage extends StatelessWidget {
     // ✅ Get theme state
     final isDarkMode = context.watch<ThemeCubit>().isDarkMode;
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        title: Text(
-          'Hồ sơ',
-          style: theme.appBarTheme.titleTextStyle,
-        ),
+        title: Text('Hồ sơ', style: theme.appBarTheme.titleTextStyle),
         centerTitle: true,
         actions: [
           IconButton(
@@ -41,10 +39,7 @@ class Profilepage extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: isDarkMode
-                      ? [
-                          Color(0xFF1E1E1E),
-                          Color(0xFF121212),
-                        ]
+                      ? [Color(0xFF1E1E1E), Color(0xFF121212)]
                       : [
                           AppColor.background,
                           AppColor.background.withOpacity(0.8),
@@ -54,7 +49,7 @@ class Profilepage extends StatelessWidget {
               child: Column(
                 children: [
                   Gap(20),
-                  
+
                   // Avatar
                   Stack(
                     children: [
@@ -110,9 +105,9 @@ class Profilepage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   Gap(15),
-                  
+
                   Text(
                     'Nguyễn Văn A',
                     style: TextStyle(
@@ -121,9 +116,9 @@ class Profilepage extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  
+
                   Gap(5),
-                  
+
                   Text(
                     'nguyenvana@example.com',
                     style: TextStyle(
@@ -131,9 +126,9 @@ class Profilepage extends StatelessWidget {
                       color: Colors.white.withOpacity(0.9),
                     ),
                   ),
-                  
+
                   Gap(20),
-                  
+
                   // Stats Row
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 20),
@@ -149,28 +144,40 @@ class Profilepage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStatItem('125', 'Bản ghi', Icons.assessment_outlined),
+                        _buildStatItem(
+                          '125',
+                          'Bản ghi',
+                          Icons.assessment_outlined,
+                        ),
                         Container(
                           width: 1,
                           height: 40,
                           color: Colors.white.withOpacity(0.3),
                         ),
-                        _buildStatItem('45', 'Ngày dùng', Icons.calendar_today_outlined),
+                        _buildStatItem(
+                          '45',
+                          'Ngày dùng',
+                          Icons.calendar_today_outlined,
+                        ),
                         Container(
                           width: 1,
                           height: 40,
                           color: Colors.white.withOpacity(0.3),
                         ),
-                        _buildStatItem('12', 'Thành tích', Icons.emoji_events_outlined),
+                        _buildStatItem(
+                          '12',
+                          'Thành tích',
+                          Icons.emoji_events_outlined,
+                        ),
                       ],
                     ),
                   ),
-                  
+
                   Gap(25),
                 ],
               ),
             ),
-            
+
             // ========== MENU SECTIONS ==========
             Padding(
               padding: EdgeInsets.all(15),
@@ -179,52 +186,49 @@ class Profilepage extends StatelessWidget {
                 children: [
                   _buildSectionTitle('Cài đặt', theme),
                   Gap(10),
-                  _buildMenuCard(
-                    theme,
-                    [
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.notifications_outlined,
-                        title: 'Thông báo',
-                        subtitle: 'Quản lý thông báo nhắc nhở',
-                        trailing: Switch(
-                          value: true,
-                          onChanged: (value) {},
-                          activeColor: theme.primaryColor,
-                        ),
-                        onTap: null,
+                  _buildMenuCard(theme, [
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.notifications_outlined,
+                      title: 'Thông báo',
+                      subtitle: 'Quản lý thông báo nhắc nhở',
+                      trailing: Switch(
+                        value: true,
+                        onChanged: (value) {},
+                        activeColor: theme.primaryColor,
                       ),
-                      Divider(height: 1, indent: 60, color: theme.dividerColor),
-                      
-                      // ✅ Dark Mode Switch
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                        title: 'Chế độ tối',
-                        subtitle: isDarkMode ? 'Đang bật' : 'Đang tắt',
-                        trailing: Switch(
-                          value: isDarkMode,
-                          onChanged: (value) {
-                            context.read<ThemeCubit>().toggleTheme();
-                          },
-                          activeColor: theme.primaryColor,
-                        ),
-                        onTap: null,
+                      onTap: null,
+                    ),
+                    Divider(height: 1, indent: 60, color: theme.dividerColor),
+
+                    // ✅ Dark Mode Switch
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                      title: 'Chế độ tối',
+                      subtitle: isDarkMode ? 'Đang bật' : 'Đang tắt',
+                      trailing: Switch(
+                        value: isDarkMode,
+                        onChanged: (value) {
+                          context.read<ThemeCubit>().toggleTheme();
+                        },
+                        activeColor: theme.primaryColor,
                       ),
-                      
-                      Divider(height: 1, indent: 60, color: theme.dividerColor),
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.language_outlined,
-                        title: 'Ngôn ngữ',
-                        subtitle: 'Tiếng Việt',
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-                  
+                      onTap: null,
+                    ),
+
+                    Divider(height: 1, indent: 60, color: theme.dividerColor),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.language_outlined,
+                      title: 'Ngôn ngữ',
+                      subtitle: 'Tiếng Việt',
+                      onTap: () {},
+                    ),
+                  ]),
+
                   Gap(20),
-                  
+
                   // Logout Button
                   Container(
                     width: double.infinity,
@@ -245,7 +249,10 @@ class Profilepage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15),
                         onTap: () => _showLogoutDialog(context, theme),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -265,7 +272,7 @@ class Profilepage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   Gap(30),
                 ],
               ),
@@ -277,7 +284,7 @@ class Profilepage extends StatelessWidget {
   }
 
   // ========== UPDATED WIDGETS ==========
-  
+
   Widget _buildStatItem(String value, String label, IconData icon) {
     return Column(
       children: [
@@ -294,10 +301,7 @@ class Profilepage extends StatelessWidget {
         Gap(2),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.8),
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)),
         ),
       ],
     );
@@ -398,9 +402,7 @@ class Profilepage extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Row(
           children: [
             Icon(Icons.logout, color: Colors.red),
@@ -423,6 +425,7 @@ class Profilepage extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
+              context.read<AuthBloc>().add(SignOutEvent());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -430,7 +433,7 @@ class Profilepage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text('Đăng xuất'),
+            child: Text('Đăng xuất', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
