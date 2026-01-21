@@ -275,10 +275,10 @@ void initState() {
 
               if (widget.bloodPressure == null) {
               context.read<BloodPressureCubit>().insertBloodPressureRecord(bloodPressure);
-              AppSnackBar.show(context: context, type: SnackBarType.add);
+              AppSnackBar.showBloodPressure(context: context, type: SnackBarType.add);
               } else {
               context.read<BloodPressureCubit>().updateBloodPressureRecord(bloodPressure);
-              AppSnackBar.show(context: context, type: SnackBarType.update);
+              AppSnackBar.showBloodPressure(context: context, type: SnackBarType.update);
               }
               Navigator.pop(context);
                }

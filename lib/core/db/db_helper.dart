@@ -1,3 +1,4 @@
+import 'package:doctor_care/domain/entities/spO2heartrate.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -6,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 4;
+  static const _dbVersion = 5; // ✅ Tăng version để force upgrade
 
   Database? _database;
 
@@ -177,6 +178,77 @@ class DbHelper {
       ''');
       print('✅ Created bmi_weight table (v4)');
     }
+
+    // ✅ Upgrade to version 5: Fix temperature table schema & Create spo2heartrate table
+    if (oldVersion < 5) {
+      try {
+        // 1. Fix temperature table
+        final tables = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='temperature'",
+        );
+
+        if (tables.isNotEmpty) {
+          // Check current columns
+          final columns = await db.rawQuery('PRAGMA table_info(temperature)');
+          final columnNames = columns.map((col) => col['name'] as String).toList();
+          
+          print('📊 Current temperature columns: $columnNames');
+
+          // If 'date' column exists but 'timestamp' doesn't, migrate
+          if (columnNames.contains('date') && !columnNames.contains('timestamp')) {
+            print('🔄 Migrating temperature table from date to timestamp');
+            
+            // Backup old data
+            final oldData = await db.query('temperature');
+            print('📦 Backing up ${oldData.length} records');
+
+            // Drop old table
+            await db.execute('DROP TABLE temperature');
+
+            // Create new table with correct schema
+            await db.execute('''
+              CREATE TABLE temperature (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                value REAL NOT NULL,
+                timestamp TEXT NOT NULL,
+                measurementLocation TEXT NOT NULL DEFAULT 'armpit',
+                note TEXT
+              )
+            ''');
+
+            // Migrate data
+            for (var record in oldData) {
+              await db.insert('temperature', {
+                'value': record['value'],
+                'timestamp': record['date'], // date → timestamp
+                'measurementLocation': 'armpit',
+                'note': null,
+              });
+            }
+            
+            print('✅ Migrated ${oldData.length} records to new schema (v5)');
+          } else {
+            print('✅ Temperature table already has correct schema');
+          }
+        }
+
+        // 2. Create spo2heartrate table if not exists
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS spo2heartrate (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            spo2 INTEGER NOT NULL CHECK(spo2 >= 0 AND spo2 <= 100),
+            heartRate INTEGER NOT NULL CHECK(heartRate >= 30 AND heartRate <= 250),
+            timestamp TEXT NOT NULL,
+            note TEXT
+          )
+        ''');
+        print('✅ Created spo2heartrate table (v5)');
+        
+      } catch (e) {
+        print('❌ Error upgrading to v5: $e');
+        rethrow;
+      }
+    }
   }
 
   Future<void> deleteDatabase() async {
@@ -189,9 +261,39 @@ class DbHelper {
 
   Future<void> checkSchema() async {
     final db = await database;
-    final result = await db.rawQuery(
+    
+    // Check all tables
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    );
+    print('📊 All tables: ${tables.map((t) => t['name']).toList()}');
+    
+    // Check temperature schema
+    final tempSchema = await db.rawQuery(
       "SELECT sql FROM sqlite_master WHERE type='table' AND name='temperature'",
     );
-    print('📊 Temperature table schema: ${result.first['sql']}');
+    if (tempSchema.isNotEmpty) {
+      print('📊 Temperature schema: ${tempSchema.first['sql']}');
+    }
+    
+    // Check spo2heartrate schema
+    final spo2Schema = await db.rawQuery(
+      "SELECT sql FROM sqlite_master WHERE type='table' AND name='spo2heartrate'",
+    );
+    if (spo2Schema.isNotEmpty) {
+      print('📊 Spo2HeartRate schema: ${spo2Schema.first['sql']}');
+    } else {
+      print('⚠️ Table spo2heartrate does not exist!');
+    }
   }
+
+  // Force recreate database - USE THIS TO FIX SCHEMA ISSUES
+  Future<void> recreateDatabase() async {
+    print('🔄 Recreating database...');
+    await deleteDatabase();
+    _database = await _initDatabase();
+    print('✅ Database recreated successfully');
+  }
+
+  Future<void> updateSpo2HeartRate(SpO2HeartRate record) async {}
 }

@@ -8,6 +8,7 @@ import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_state.dart';
 import 'package:doctor_care/presentation/pages/screens/HbA1c/hba1c_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/NavigationBar/navigationbar.dart';
+import 'package:doctor_care/presentation/pages/screens/Spo2HeartRate/spo2_heartrate_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/Temperature/temperature_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/bloodPressure/blood_pressure_screen.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
@@ -142,6 +143,7 @@ class MyApp extends StatelessWidget {
               '/bloodpressure': (context) => const BloodPressureScreen(),
               '/hba1c': (context) => const Hba1cScreen(),
               '/temperature': (context) => const TemperatureScreen(),
+              '/spo2heart': (context) => const Spo2HeartRateScreen(),
             },
           );
         },

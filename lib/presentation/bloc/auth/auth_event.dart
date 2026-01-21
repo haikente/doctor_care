@@ -12,7 +12,6 @@ class CheckAuthStatusEvent extends AuthEvent {}
 class SignInEvent extends AuthEvent {
   final String email;
   final String password;
-
   const SignInEvent(this.email, this.password);
 
   @override

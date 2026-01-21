@@ -1,4 +1,5 @@
 import 'package:doctor_care/core/images/images.dart';
+import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/auth/register_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/auth/forgot_password_screen.dart';
@@ -26,6 +27,25 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _emailController.addListener(_onInputChanged);
     _passwordController.addListener(_onInputChanged);
+    _loadSavedCredentials();
+  }
+
+  /// Load email và remember me đã lưu
+  Future<void> _loadSavedCredentials() async {
+    final rememberMe = await AuthStorageService.getRememberMe();
+    final savedEmail = await AuthStorageService.getSavedEmail();
+    
+    if (mounted) {
+      setState(() {
+        _rememberMe = rememberMe;
+        if (savedEmail != null) {
+          _emailController.text = savedEmail;
+        }
+      });
+    }
+    
+    // Debug
+    await AuthStorageService.debugPrint();
   }
 
   void _onInputChanged() {
@@ -49,6 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
+            // Lưu remember me khi login thành công
+            AuthStorageService.saveRememberMe(
+              _rememberMe,
+              _emailController.text.trim(),
+            );
+            
             // Clear error khi login thành công
             setState(() {
               _errorMessage = null;

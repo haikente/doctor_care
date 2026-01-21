@@ -155,7 +155,6 @@ void _validate() {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d{0,2}\.?\d{0,2}')),
                 ],
                 onChanged: (value) {
-                  // Kiểm tra nếu giá trị > 99 thì cắt về 99
                   if (value.isNotEmpty) {
                     final numValue = double.tryParse(value);
                     if (numValue != null && numValue > 99) {
@@ -200,11 +199,11 @@ void _validate() {
 
               if (widget.temperature == null) {
               context.read<TemperatureCubit>().addTemperatureRecords(temperatures);
-              AppSnackBar.show(context: context, type: SnackBarType.add);
+              AppSnackBar.showtemperature(context: context, type: SnackBarType.add);
               print("Thành công");
               } else {
               context.read<TemperatureCubit>().updateTemperatureRecord(temperatures);
-              AppSnackBar.show(context: context, type: SnackBarType.update);
+              AppSnackBar.showtemperature(context: context, type: SnackBarType.update);
               }
               Navigator.pop(context);
               }),

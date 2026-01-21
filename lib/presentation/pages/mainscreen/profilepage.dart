@@ -1,9 +1,13 @@
 import 'package:doctor_care/core/pages/app_color.dart';
+import 'package:doctor_care/core/services/auth_storage_service.dart';
+import 'package:doctor_care/core/services/image_upload_service.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
+import 'package:doctor_care/presentation/pages/screens/profile/edit_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -21,17 +25,10 @@ class Profilepage extends StatelessWidget {
         elevation: 0,
         title: Text('Hồ sơ', style: theme.appBarTheme.titleTextStyle),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings_outlined, color: theme.iconTheme.color),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ========== HEADER SECTION ==========
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -51,80 +48,131 @@ class Profilepage extends StatelessWidget {
                   Gap(20),
 
                   // Avatar
-                  Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.colorScheme.surface,
-                            width: 4,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: theme.colorScheme.surface,
-                          child: Icon(
-                            Icons.person,
-                            size: 50,
-                            color: theme.primaryColor,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            padding: EdgeInsets.all(6),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      final String? photoUrl = state is Authenticated 
+                          ? state.user.profilePhotoUrl 
+                          : null;
+                      
+                      return Stack(
+                        children: [
+                          Container(
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surface,
                               shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.surface,
+                                width: 4,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 5,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 5),
                                 ),
                               ],
                             ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 18,
-                              color: theme.primaryColor,
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundColor: theme.colorScheme.surface,
+                              backgroundImage: photoUrl != null 
+                                  ? NetworkImage(photoUrl) 
+                                  : null,
+                              child: photoUrl == null
+                                  ? Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: theme.primaryColor,
+                                    )
+                                  : null,
                             ),
                           ),
-                        ),
-                      ),
-                    ],
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () => _showPhotoOptions(context, state),
+                              child: Container(
+                                padding: EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surface,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.camera_alt,
+                                  size: 18,
+                                  color: theme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
 
                   Gap(15),
 
-                  Text(
-                    'Nguyễn Văn A',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-
-                  Gap(5),
-
-                  Text(
-                    'nguyenvana@example.com',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      if (state is Authenticated) {
+                        return Column(
+                          children: [
+                            Text(
+                              state.user.fullName ?? 'Người dùng',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Gap(5),
+                            Text(
+                              state.user.email,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                            if (state.user.phoneNumber != null) ...[
+                              Gap(3),
+                              Text(
+                                state.user.phoneNumber!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      }
+                      return Column(
+                        children: [
+                          Text(
+                            'Người dùng',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Gap(5),
+                          Text(
+                            'Loading...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
 
                   Gap(20),
@@ -224,6 +272,28 @@ class Profilepage extends StatelessWidget {
                       title: 'Ngôn ngữ',
                       subtitle: 'Tiếng Việt',
                       onTap: () {},
+                    ),
+                  ]),
+
+                  Gap(20),
+
+                  // Account Section
+                  _buildSectionTitle('Tài khoản', theme),
+                  Gap(10),
+                  _buildMenuCard(theme, [
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.person_outline,
+                      title: 'Chỉnh sửa thông tin',
+                      subtitle: 'Cập nhật thông tin cá nhân',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProfileScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ]),
 
@@ -423,8 +493,11 @@ class Profilepage extends StatelessWidget {
             child: Text('Hủy', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
+              // Clear remember me data khi logout
+              await AuthStorageService.clearRememberMe();
+              // Logout
               context.read<AuthBloc>().add(SignOutEvent());
             },
             style: ElevatedButton.styleFrom(
@@ -438,5 +511,229 @@ class Profilepage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showPhotoOptions(BuildContext context, AuthState state) {
+    if (state is! Authenticated) return;
+    
+    final theme = Theme.of(context);
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Gap(10),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Gap(20),
+            ListTile(
+              leading: Icon(Icons.photo_library, color: theme.primaryColor),
+              title: Text(
+                'Chọn từ thư viện',
+                style: TextStyle(color: theme.colorScheme.onSurface),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _uploadPhoto(context, state.user.uid, ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt, color: theme.primaryColor),
+              title: Text(
+                'Chụp ảnh mới',
+                style: TextStyle(color: theme.colorScheme.onSurface),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _uploadPhoto(context, state.user.uid, ImageSource.camera);
+              },
+            ),
+            if (state.user.profilePhotoUrl != null)
+              ListTile(
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text(
+                  'Xóa ảnh đại diện',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deletePhoto(context, state.user.uid);
+                },
+              ),
+            Gap(10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _uploadPhoto(
+    BuildContext context,
+    String userId,
+    ImageSource source,
+  ) async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              Gap(15),
+              Text('Đang tải ảnh lên...'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final String? photoUrl = await ImageUploadService.uploadProfilePhoto(
+        userId: userId,
+        source: source,
+        onProgress: (progress) {
+          // Update progress if needed
+          print('Upload progress: ${(progress * 100).toStringAsFixed(0)}%');
+        },
+      );
+
+      // Close loading dialog
+      if (context.mounted) Navigator.pop(context);
+
+      if (photoUrl != null) {
+        // Reload user data
+        if (context.mounted) {
+          context.read<AuthBloc>().add(CheckAuthStatusEvent());
+        }
+        
+        // Show success message
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cập nhật ảnh đại diện thành công!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Show error message
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Không thể tải ảnh lên. Vui lòng thử lại!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) Navigator.pop(context);
+      
+      // Show error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deletePhoto(BuildContext context, String userId) async {
+    // Show confirmation dialog
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Xác nhận'),
+        content: Text('Bạn có chắc chắn muốn xóa ảnh đại diện?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    // Show loading
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    try {
+      // Delete from storage
+      await ImageUploadService.deleteOldProfilePhoto(userId);
+      
+      // Update Firestore
+      await ImageUploadService.updateUserProfilePhoto(
+        userId: userId,
+        photoUrl: '',
+      );
+
+      // Close loading
+      if (context.mounted) Navigator.pop(context);
+
+      // Reload user data
+      if (context.mounted) {
+        context.read<AuthBloc>().add(CheckAuthStatusEvent());
+      }
+
+      // Show success
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã xóa ảnh đại diện'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading
+      if (context.mounted) Navigator.pop(context);
+      
+      // Show error
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

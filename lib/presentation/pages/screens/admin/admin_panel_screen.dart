@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -48,9 +49,8 @@ class AdminPanelScreen extends StatelessWidget {
                                     child: const Text('Hủy'),
                                   ),
                                   TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      context.read<AuthBloc>().add(SignOutEvent());
+                                    onPressed: () async {
+                                      Navigator.pop(context, true);
                                     },
                                     child: const Text('Đăng xuất'),
                                   ),
@@ -59,10 +59,10 @@ class AdminPanelScreen extends StatelessWidget {
                             );
                             
                             if (confirm == true && context.mounted) {
-                              await FirebaseAuth.instance.signOut();
-                              if (context.mounted) {
-                                Navigator.pushReplacementNamed(context, '/');
-                              }
+                              // Clear remember me data
+                              await AuthStorageService.clearRememberMe();
+                              // Logout
+                              context.read<AuthBloc>().add(SignOutEvent());
                             }
                           },
                           icon: const Icon(Icons.logout, color: Colors.red),
@@ -226,7 +226,7 @@ class AdminPanelScreen extends StatelessWidget {
                         context,
                         theme,
                         icon: Icons.people,
-                        title: 'Quản lý Users',
+                        title: 'Quản lý Người dùng',
                         subtitle: 'Xem và quản lý tất cả người dùng',
                         color: Colors.blue,
                         onTap: () {
@@ -437,7 +437,7 @@ class AdminPanelScreen extends StatelessWidget {
                   ),
                   const Gap(16),
                   const Text(
-                    'Danh sách Users',
+                    'Danh sách Người dùng',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -468,10 +468,14 @@ class AdminPanelScreen extends StatelessWidget {
                       final email = userData['email'] ?? 'No email';
                       final role = userData['role'] ?? 'patient';
                       final uid = userData['uid'] ?? users[index].id;
+                      final fullName = userData['fullName'] ?? 'Chưa cập nhật';
+                      final phoneNumber = userData['phoneNumber'];
+                      final gender = userData['gender'];
+                      final bloodType = userData['bloodType'];
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
+                        child: ExpansionTile(
                           leading: CircleAvatar(
                             backgroundColor: role == 'admin'
                                 ? Colors.red.shade100
@@ -485,9 +489,12 @@ class AdminPanelScreen extends StatelessWidget {
                                   : Colors.blue,
                             ),
                           ),
-                          title: Text(email),
+                          title: Text(
+                            fullName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text(
-                            'UID: ${uid.substring(0, 8)}...',
+                            email,
                             style: const TextStyle(fontSize: 12),
                           ),
                           trailing: Chip(
@@ -505,6 +512,84 @@ class AdminPanelScreen extends StatelessWidget {
                                 ? Colors.red.shade50
                                 : Colors.blue.shade50,
                           ),
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInfoRow('📧 Email', email),
+                                  _buildInfoRow('🆔 UID', uid),
+                                  if (phoneNumber != null)
+                                    _buildInfoRow('📱 Số điện thoại', phoneNumber),
+                                  if (gender != null)
+                                    _buildInfoRow('👤 Giới tính', 
+                                      gender == 'male' ? 'Nam' : 
+                                      gender == 'female' ? 'Nữ' : 'Khác'),
+                                  if (bloodType != null)
+                                    _buildInfoRow('🩸 Nhóm máu', bloodType),
+                                  if (userData['dateOfBirth'] != null)
+                                    _buildInfoRow('🎂 Ngày sinh', 
+                                      DateTime.parse(userData['dateOfBirth'])
+                                          .toString()
+                                          .substring(0, 10)),
+                                  if (userData['height'] != null)
+                                    _buildInfoRow('📏 Chiều cao', 
+                                      '${userData['height']} cm'),
+                                  if (userData['weight'] != null)
+                                    _buildInfoRow('⚖️ Cân nặng', 
+                                      '${userData['weight']} kg'),
+                                  if (userData['address'] != null)
+                                    _buildInfoRow('🏠 Địa chỉ', userData['address']),
+                                  if (userData['emergencyContact'] != null)
+                                    _buildInfoRow('🆘 Liên hệ khẩn cấp', 
+                                      userData['emergencyContact']),
+                                  if (userData['emergencyPhone'] != null)
+                                    _buildInfoRow('📞 SĐT khẩn cấp', 
+                                      userData['emergencyPhone']),
+                                  if (userData['allergies'] != null && 
+                                      (userData['allergies'] as List).isNotEmpty)
+                                    _buildInfoRow('⚠️ Dị ứng', 
+                                      (userData['allergies'] as List).join(', ')),
+                                  if (userData['chronicDiseases'] != null &&
+                                      (userData['chronicDiseases'] as List).isNotEmpty)
+                                    _buildInfoRow('🏥 Bệnh mãn tính', 
+                                      (userData['chronicDiseases'] as List).join(', ')),
+                                  if (userData['medications'] != null &&
+                                      (userData['medications'] as List).isNotEmpty)
+                                    _buildInfoRow('💊 Thuốc đang dùng', 
+                                      (userData['medications'] as List).join(', ')),
+                                  const Gap(8),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () {
+                                            _showEditUserDialog(context, users[index].id, userData);
+                                          },
+                                          icon: const Icon(Icons.edit, size: 16),
+                                          label: const Text('Chỉnh sửa'),
+                                        ),
+                                      ),
+                                      const Gap(8),
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () {
+                                            _showDeleteUserDialog(context, users[index].id, email);
+                                          },
+                                          icon: const Icon(Icons.delete, size: 16),
+                                          label: const Text('Xóa'),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.red,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -576,6 +661,99 @@ class AdminPanelScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ========== HELPER METHODS ==========
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditUserDialog(BuildContext context, String docId, Map<String, dynamic> userData) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('✏️ Chỉnh sửa thông tin'),
+        content: const Text('Chức năng chỉnh sửa sẽ được phát triển trong phiên bản tiếp theo.\n\nBạn có thể chỉnh sửa trực tiếp trong Firebase Console.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteUserDialog(BuildContext context, String docId, String email) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('⚠️ Xóa người dùng'),
+        content: Text('Bạn có chắc muốn xóa người dùng "$email"?\n\nHành động này không thể hoàn tác!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(docId)
+                    .delete();
+                
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✅ Đã xóa người dùng thành công'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('❌ Lỗi: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Xóa'),
           ),
         ],
       ),

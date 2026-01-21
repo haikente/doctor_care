@@ -443,6 +443,19 @@ class Homepage extends StatelessWidget {
           ],
         ),
       ),
+      //AI phân tích bữa ăn
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          //Navigator.pushNamed(context, '/ai_meal_analysis');
+        },
+        backgroundColor: Colors.blue.shade600,
+        tooltip: 'AI',
+        child: Icon(
+          Icons.smart_toy_outlined,
+          color: Colors.white,
+          size: 28,
+        ),  
+      ),
     );
   }
 }

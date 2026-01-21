@@ -48,6 +48,17 @@ class Healthpage extends StatelessWidget {
                       route: '/temperature',
                     ),
                   ),
+                  Gap(15),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 100,
+                    child: HealthFeatureCard(
+                      title: 'SPO2 & Nhịp tim',
+                      icon: Icons.thermostat_outlined,
+                      color: Colors.purple.shade400,
+                      route:  '/spo2heart',
+                    ),
+                  ),
                 ],
               ),
             ),

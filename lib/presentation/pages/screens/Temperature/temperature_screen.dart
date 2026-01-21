@@ -131,8 +131,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                                 },
                                 onReset: () {
                                   setState(() {
-                                    startDate = temperature.first.timestamp;
-                                    endDate = temperature.last.timestamp;
+                                    startDate = null;
+                                    endDate = null;
                                     selectedStatus = "";
                                   });
                                 },
@@ -142,7 +142,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.science_outlined, color: Colors.black54,),
+                          child: Icon(Icons.filter_list, color: Colors.black54,),
                         )
                       ],
                     ),
@@ -174,7 +174,12 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                               ),
                               Gap(6),
                               GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  setState(() {
+                                    startDate = null;
+                                    endDate = null;
+                                  });
+                                },
                                 child: Icon(Icons.clear, size: 14, color: Colors.blue.shade900,))
                             ],
                            ),
@@ -212,6 +217,54 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                     ),
                   ),
                   
+                  // Empty state khi filter không có kết quả
+                  if (filteredRecords.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 60),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                            Gap(16),
+                            Text(
+                              'Không tìm thấy kết quả',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Gap(8),
+                            Text(
+                              'Thử thay đổi bộ lọc của bạn',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                            Gap(20),
+                            TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  startDate = null;
+                                  endDate = null;
+                                  selectedStatus = "";
+                                });
+                              },
+                              icon: Icon(Icons.refresh),
+                              label: Text('Xóa bộ lọc'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.blue.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  
+                  // List view
+                  if (filteredRecords.isNotEmpty)
                   ListView.builder(
                     shrinkWrap: true, //dùng trong column
                     physics: const NeverScrollableScrollPhysics(), // không cuộn riêng
