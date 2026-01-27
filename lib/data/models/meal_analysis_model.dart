@@ -8,6 +8,7 @@ class MealAnalysisModel extends MealAnalysis {
     super.id,
     required super.timestamp,
     required super.imagePath,
+    super.dishName,
     required super.foodItems,
     super.userId,
     super.notes,
@@ -20,6 +21,7 @@ class MealAnalysisModel extends MealAnalysis {
       id: entity.id,
       timestamp: entity.timestamp,
       imagePath: entity.imagePath,
+      dishName: entity.dishName,
       foodItems: entity.foodItems,
       userId: entity.userId,
       notes: entity.notes,
@@ -33,6 +35,7 @@ class MealAnalysisModel extends MealAnalysis {
       id: json['id'] as int?,
       timestamp: DateTime.parse(json['timestamp'] as String),
       imagePath: json['imagePath'] as String,
+      dishName: json['dishName'] as String?,
       foodItems: (json['foodItems'] as List<dynamic>)
           .map((item) => FoodItemModel.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -48,6 +51,7 @@ class MealAnalysisModel extends MealAnalysis {
       'id': id,
       'timestamp': timestamp.toIso8601String(),
       'imagePath': imagePath,
+      'dishName': dishName,
       'foodItems': foodItems
           .map((item) => FoodItemModel.fromEntity(item).toJson())
           .toList(),
@@ -66,6 +70,7 @@ class MealAnalysisModel extends MealAnalysis {
       id: map['id'] as int?,
       timestamp: DateTime.parse(map['timestamp'] as String),
       imagePath: map['image_path'] as String,
+      dishName: map['dish_name'] as String?,
       foodItems: foodItems ?? [],
       userId: map['user_id'] as String?,
       notes: map['notes'] as String?,
@@ -79,6 +84,7 @@ class MealAnalysisModel extends MealAnalysis {
       'id': id,
       'timestamp': timestamp.toIso8601String(),
       'image_path': imagePath,
+      'dish_name': dishName,
       'user_id': userId,
       'notes': notes,
       'health_recommendations': healthRecommendations,
@@ -91,6 +97,7 @@ class MealAnalysisModel extends MealAnalysis {
       id: id,
       timestamp: timestamp,
       imagePath: imagePath,
+      dishName: dishName,
       foodItems: foodItems,
       userId: userId,
       notes: notes,

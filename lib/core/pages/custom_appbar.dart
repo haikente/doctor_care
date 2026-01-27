@@ -7,15 +7,16 @@ class CustomStackAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool centerTitle;
   final Widget? icon;
-  
+  final TabBar? bottom;
 
   const CustomStackAppBar({
     super.key,
     this.onBack,
-    this.onInfo, 
-    required this.title, 
-    this.centerTitle = false, 
+    this.onInfo,
+    required this.title,
+    this.centerTitle = false,
     this.icon,
+    this.bottom,
   });
 
   @override
@@ -26,93 +27,90 @@ class CustomStackAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Stack(
       children: [
         // Nền AppBar
-        Container(
-          height: preferredSize.height,
-          color: AppColor.background,
-        ),
+        Container(height: preferredSize.height, color: AppColor.background),
 
         // Các đường bút trên cùng (vẽ ở trên nền, trước nội dung)
-        Positioned.fill(
-          child: CustomPaint(
-            painter: BrushLinesPainter(),
-          ),
-        ),
+        Positioned.fill(child: CustomPaint(painter: BrushLinesPainter())),
 
         // Sóng đáy AppBar
         Positioned(
           bottom: 0,
           left: 0,
           right: 0,
-          child: CustomPaint(
-            size: Size(MediaQuery.of(context).size.width, 20),
+          child: CustomPaint(size: Size(MediaQuery.of(context).size.width, 20)),
+        ),
+
+        // ...existing code...
+
+        // Nội dung AppBar (icon + title + action)
+        SafeArea(
+          child: SizedBox(
+            height: 70,
+            child: Row(
+              children: [
+                // ✅ FIX 1: Luôn có SizedBox để cân bằng
+                if (onBack != null)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: onBack,
+                  )
+                else
+                  const SizedBox(
+                    width: 48,
+                  ), // ✅ Placeholder khi không có back button
+                // Title
+                Expanded(
+                  child: centerTitle
+                      ? Center(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                ),
+
+                // ✅ FIX 2: Luôn có SizedBox bên phải để cân bằng
+                if (onInfo != null)
+                  IconButton(
+                    icon:
+                        icon ??
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                    onPressed: onInfo,
+                  )
+                else
+                  const SizedBox(
+                    width: 48,
+                  ), // ✅ Placeholder khi không có info button
+              ],
+            ),
           ),
         ),
 
-      // ...existing code...
-
-// Nội dung AppBar (icon + title + action)
-SafeArea(
-  child: SizedBox(
-    height: 70,
-    child: Row(
-      children: [
-        // ✅ FIX 1: Luôn có SizedBox để cân bằng
-        if (onBack != null)
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-            onPressed: onBack,
-          )
-        else
-          const SizedBox(width: 48), // ✅ Placeholder khi không có back button
-
-        // Title
-        Expanded(
-          child: centerTitle
-              ? Center(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                )
-              : Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-        ),
-
-        // ✅ FIX 2: Luôn có SizedBox bên phải để cân bằng
-        if (onInfo != null)
-          IconButton(
-            icon: icon ??
-                const Icon(
-                  Icons.info_outline_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-            onPressed: onInfo,
-          )
-        else
-          const SizedBox(width: 48), // ✅ Placeholder khi không có info button
-      ],
-    ),
-  ),
-),
-
-// ...existing code...
+        // ...existing code...
       ],
     );
   }
 }
-
-
 
 class BrushLinesPainter extends CustomPainter {
   @override
@@ -128,7 +126,12 @@ class BrushLinesPainter extends CustomPainter {
     // Line 1: sóng nhẹ uốn lượn ngang trên cùng
     final path1 = Path();
     path1.moveTo(0, height * 0.2);
-    path1.quadraticBezierTo(width * 0.25, height * 0.1, width * 0.5, height * 0.25);
+    path1.quadraticBezierTo(
+      width * 0.25,
+      height * 0.1,
+      width * 0.5,
+      height * 0.25,
+    );
     path1.quadraticBezierTo(width * 0.75, height * 0.4, width, height * 0.3);
     canvas.drawPath(path1, paint);
 
@@ -139,7 +142,12 @@ class BrushLinesPainter extends CustomPainter {
     // Line 3: sóng nhẹ uốn lượn ngang phía dưới line 2
     final path3 = Path();
     path3.moveTo(0, height * 0.6);
-    path3.quadraticBezierTo(width * 0.3, height * 0.5, width * 0.6, height * 0.7);
+    path3.quadraticBezierTo(
+      width * 0.3,
+      height * 0.5,
+      width * 0.6,
+      height * 0.7,
+    );
     path3.quadraticBezierTo(width * 0.85, height * 0.9, width, height * 0.65);
     canvas.drawPath(path3, paint);
   }

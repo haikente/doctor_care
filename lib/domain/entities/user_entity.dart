@@ -4,27 +4,28 @@ class UserEntity extends Equatable {
   final String uid;
   final String email;
   final String role; // 'admin' or 'patient'
-  
+
   // Profile photo
   final String? profilePhotoUrl;
-  
+
   // Thông tin bệnh nhân
   final String? fullName;
   final String? phoneNumber;
   final DateTime? dateOfBirth;
   final String? gender; // 'male', 'female', 'other'
-  final String? bloodType; // 'A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
+  final String?
+  bloodType; // 'A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
   final double? height; // cm
   final double? weight; // kg
   final String? address;
   final String? emergencyContact;
   final String? emergencyPhone;
-  
+
   // Medical history
   final List<String>? allergies;
   final List<String>? chronicDiseases;
   final List<String>? medications;
-  
+
   // Metadata
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -74,7 +75,7 @@ class UserEntity extends Equatable {
   String? get bmiStatus {
     final bmiValue = bmi;
     if (bmiValue == null) return null;
-    
+
     if (bmiValue < 18.5) return 'Thiếu cân';
     if (bmiValue < 25) return 'Bình thường';
     if (bmiValue < 30) return 'Thừa cân';
@@ -83,24 +84,24 @@ class UserEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        uid,
-        email,
-        role,
-        profilePhotoUrl,
-        fullName,
-        phoneNumber,
-        dateOfBirth,
-        gender,
-        bloodType,
-        height,
-        weight,
-        address,
-        emergencyContact,
-        emergencyPhone,
-        allergies,
-        chronicDiseases,
-        medications,
-        createdAt,
-        updatedAt,
-      ];
+    uid,
+    email,
+    role,
+    profilePhotoUrl,
+    fullName,
+    phoneNumber,
+    dateOfBirth,
+    gender,
+    bloodType,
+    height,
+    weight,
+    address,
+    emergencyContact,
+    emergencyPhone,
+    allergies,
+    chronicDiseases,
+    medications,
+    createdAt,
+    updatedAt,
+  ];
 }

@@ -7,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 7;
+  static const _dbVersion = 8;
 
   Database? _database;
 
@@ -104,7 +104,8 @@ class DbHelper {
         image_path TEXT NOT NULL,
         user_id TEXT,
         notes TEXT,
-        health_recommendations TEXT
+        health_recommendations TEXT,
+        dish_name TEXT
       )
     ''');
 
@@ -342,6 +343,32 @@ class DbHelper {
       print('✅ Created meal_analysis and food_items tables (v7)');
     }
 
+    // ✅ Upgrade to version 8: Add dish_name to meal_analysis
+    if (oldVersion < 8) {
+      try {
+        final tables = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='meal_analysis'",
+        );
+
+        if (tables.isNotEmpty) {
+          // Check if dish_name column exists
+          final columns = await db.rawQuery('PRAGMA table_info(meal_analysis)');
+          final columnNames = columns
+              .map((col) => col['name'] as String)
+              .toList();
+
+          if (!columnNames.contains('dish_name')) {
+            await db.execute(
+              'ALTER TABLE meal_analysis ADD COLUMN dish_name TEXT',
+            );
+            print('✅ Added dish_name column to meal_analysis table (v8)');
+          }
+        }
+      } catch (e) {
+        print('❌ Error adding dish_name column: $e');
+      }
+    }
+
     print('✅ Database upgrade completed');
   }
 
@@ -408,7 +435,8 @@ class DbHelper {
           image_path TEXT NOT NULL,
           user_id TEXT,
           notes TEXT,
-          health_recommendations TEXT
+          health_recommendations TEXT,
+          dish_name TEXT
         )
       ''');
 
@@ -432,6 +460,23 @@ class DbHelper {
       ''');
 
       print('✅ Forced creation of meal analysis tables');
+    } else {
+      // Check if dish_name column exists (in case table exists but column missing)
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(meal_analysis)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+
+        if (!columnNames.contains('dish_name')) {
+          await db.execute(
+            'ALTER TABLE meal_analysis ADD COLUMN dish_name TEXT',
+          );
+          print('✅ Added dish_name column to existing meal_analysis table');
+        }
+      } catch (e) {
+        print('❌ Error checking/adding dish_name column: $e');
+      }
     }
   }
 }

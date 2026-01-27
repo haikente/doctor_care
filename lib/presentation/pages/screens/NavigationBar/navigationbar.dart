@@ -108,7 +108,7 @@ class _NavigationbarState extends State<Navigationbar> {
                     children: [
                       //icon AI phân tích bữa ăn
                       Icon(
-                        Icons.fastfood,
+                        Icons.fastfood_outlined,
                         color: _selectedIndex == 1
                             ? Colors.blue.shade800
                             : Colors.grey.shade400,

@@ -35,10 +35,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerFailure("Tài khoản không tồn tại");
       }
 
-      // Fetch Role from Firestore
-      final role = await _getUserRole(user.uid);
+      // Fetch User Data from Firestore
+      final docSnapshot = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        return UserModel.fromMap(
+          docSnapshot.data()!,
+          user.uid,
+          user.email ?? "",
+        );
+      }
 
-      return UserModel(uid: user.uid, email: user.email ?? "", role: role);
+      return UserModel(uid: user.uid, email: user.email ?? "", role: 'patient');
     } on FirebaseAuthException catch (e) {
       // Xử lý chi tiết các mã lỗi Firebase
       switch (e.code) {
@@ -77,8 +87,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel?> getCurrentUser() async {
     final user = firebaseAuth.currentUser;
     if (user != null) {
-      final role = await _getUserRole(user.uid);
-      return UserModel(uid: user.uid, email: user.email ?? "", role: role);
+      try {
+        final docSnapshot = await firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (docSnapshot.exists && docSnapshot.data() != null) {
+          return UserModel.fromMap(
+            docSnapshot.data()!,
+            user.uid,
+            user.email ?? "",
+          );
+        } else {
+          // Fallback if data doesn't exist
+          return UserModel(
+            uid: user.uid,
+            email: user.email ?? "",
+            role: 'patient',
+          );
+        }
+      } catch (e) {
+        // Fallback on error
+        return UserModel(
+          uid: user.uid,
+          email: user.email ?? "",
+          role: 'patient',
+        );
+      }
     }
     return null;
   }
@@ -130,7 +165,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         case 'operation-not-allowed':
           throw ServerFailure('Đăng ký chưa được kích hoạt');
         case 'weak-password':
-          throw ServerFailure('Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn');
+          throw ServerFailure(
+            'Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn',
+          );
         case 'network-request-failed':
           throw ServerFailure('Lỗi kết nối mạng. Kiểm tra internet của bạn');
         default:
@@ -144,9 +181,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> signInWithGoogle() async {
-    try {      
+    try {
       await googleSignIn.signOut();
-      
+
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -202,6 +239,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             .collection('users')
             .doc(user.uid)
             .set(userModel.toMap());
+      }
+
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        return UserModel.fromMap(userDoc.data()!, user.uid, user.email ?? "");
       }
 
       return UserModel(uid: user.uid, email: user.email ?? "", role: role);

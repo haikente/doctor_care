@@ -26,17 +26,22 @@ class MealAnalysisResultScreen extends StatefulWidget {
 class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   late List<FoodItem> _foodItems;
   late TextEditingController _notesController;
+  late TextEditingController _dishNameController;
 
   @override
   void initState() {
     super.initState();
     _foodItems = List.from(widget.mealAnalysis.foodItems);
     _notesController = TextEditingController(text: widget.mealAnalysis.notes);
+    _dishNameController = TextEditingController(
+      text: widget.mealAnalysis.dishName,
+    );
   }
 
   @override
   void dispose() {
     _notesController.dispose();
+    _dishNameController.dispose();
     super.dispose();
   }
 
@@ -56,6 +61,9 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
     final updatedAnalysis = widget.mealAnalysis.copyWith(
       foodItems: _foodItems,
       notes: _notesController.text.isEmpty ? null : _notesController.text,
+      dishName: _dishNameController.text.isEmpty
+          ? null
+          : _dishNameController.text,
     );
 
     context.read<MealAnalysisBloc>().add(
@@ -85,17 +93,7 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kết quả phân tích'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveMealAnalysis,
-            tooltip: 'Lưu',
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Kết quả phân tích'), centerTitle: true),
       body: BlocListener<MealAnalysisBloc, MealAnalysisState>(
         listener: (context, state) {
           if (state is MealAnalysisSaved) {
@@ -128,6 +126,25 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                   width: double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Dish Name Input
+              TextField(
+                controller: _dishNameController,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Tên món ăn',
+                  hintText: 'Nhập tên món ăn',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.restaurant),
                 ),
               ),
               const SizedBox(height: 24),
@@ -203,6 +220,51 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                 },
               ),
 
+              // Health Recommendations
+              if (widget.mealAnalysis.healthRecommendations != null &&
+                  widget.mealAnalysis.healthRecommendations!.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.health_and_safety,
+                            color: Colors.green.shade700,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Lời khuyên sức khỏe',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.mealAnalysis.healthRecommendations!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.green.shade900,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 24),
 
               // Notes section
@@ -230,12 +292,13 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: _saveMealAnalysis,
-                  icon: const Icon(Icons.save, size: 24),
+                  icon: const Icon(Icons.save_outlined, size: 24),
                   label: const Text(
                     'Lưu bữa ăn',
                     style: TextStyle(fontSize: 18),
                   ),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade50,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

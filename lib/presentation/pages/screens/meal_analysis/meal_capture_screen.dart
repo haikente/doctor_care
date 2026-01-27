@@ -7,7 +7,6 @@ import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 import 'package:doctor_care/presentation/pages/screens/meal_analysis/meal_analysis_result_screen.dart';
 
-/// Screen for capturing meal images
 class MealCaptureScreen extends StatefulWidget {
   const MealCaptureScreen({super.key});
 
@@ -58,7 +57,6 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
       body: BlocConsumer<MealAnalysisBloc, MealAnalysisState>(
         listener: (context, state) {
           if (state is MealAnalysisSuccess) {
-            // Navigate to result screen
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -142,11 +140,6 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
                         'Chụp ảnh',
                         style: TextStyle(fontSize: 18),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -164,6 +157,7 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        side: BorderSide(color: Colors.blue.shade100, width: 1),
                       ),
                     ),
                   ),

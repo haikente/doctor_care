@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
@@ -17,10 +18,12 @@ class TrackMeal extends StatefulWidget {
 }
 
 class _TrackMealState extends State<TrackMeal> {
+  String selectedFilter = "Tất cả";
+  final List<String> filterOptions = ["Tất cả", "Hôm nay", "Tuần", "Tháng"];
+
   @override
   void initState() {
     super.initState();
-    // Load meal analyses when screen opens
     context.read<MealAnalysisBloc>().add(const LoadMealAnalysesEvent());
   }
 
@@ -65,71 +68,107 @@ class _TrackMealState extends State<TrackMeal> {
           }
 
           if (state is MealAnalysesLoaded) {
-            if (state.mealAnalyses.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.restaurant_menu,
-                      size: 100,
-                      color: Colors.grey[300],
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Chưa có bữa ăn nào',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Chụp ảnh bữa ăn để bắt đầu theo dõi',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[500]),
-                    ),
-                    const SizedBox(height: 32),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MealCaptureScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Chụp ảnh bữa ăn'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            List<MealAnalysis> filteredMeals = state.mealAnalyses;
+            final now = DateTime.now();
+
+            if (selectedFilter == "Hôm nay") {
+              filteredMeals = state.mealAnalyses.where((m) {
+                return m.timestamp.year == now.year &&
+                    m.timestamp.month == now.month &&
+                    m.timestamp.day == now.day;
+              }).toList();
+            } else if (selectedFilter == "Tuần") {
+              final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+              final endOfWeek = startOfWeek.add(
+                const Duration(days: 6, hours: 23, minutes: 59),
               );
+              filteredMeals = state.mealAnalyses.where((m) {
+                return m.timestamp.isAfter(
+                      startOfWeek.subtract(const Duration(seconds: 1)),
+                    ) &&
+                    m.timestamp.isBefore(endOfWeek);
+              }).toList();
+            } else if (selectedFilter == "Tháng") {
+              filteredMeals = state.mealAnalyses.where((m) {
+                return m.timestamp.year == now.year &&
+                    m.timestamp.month == now.month;
+              }).toList();
             }
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<MealAnalysisBloc>().add(
-                  const LoadMealAnalysesEvent(),
-                );
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.mealAnalyses.length,
-                itemBuilder: (context, index) {
-                  final meal = state.mealAnalyses[index];
-                  return _buildMealCard(context, meal);
-                },
-              ),
+            return Column(
+              children: [
+                // Filter chips
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  color: Colors.white,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: filterOptions.map((filter) {
+                        final isSelected = selectedFilter == filter;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: FilterChip(
+                            label: Text(filter),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedFilter = filter;
+                              });
+                            },
+                            backgroundColor: Colors.grey.shade100,
+                            selectedColor: Colors.blue.shade50,
+                            labelStyle: TextStyle(
+                              color: isSelected
+                                  ? Colors.blue.shade700
+                                  : Colors.grey.shade700,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Colors.blue.shade700
+                                  : Colors.grey.shade300,
+                              width: 1.5,
+                            ),
+                            checkmarkColor: Colors.blue.shade700,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: filteredMeals.isEmpty
+                      ? _buildEmptyState(context, isFiltered: true)
+                      : RefreshIndicator(
+                          onRefresh: () async {
+                            context.read<MealAnalysisBloc>().add(
+                              const LoadMealAnalysesEvent(),
+                            );
+                          },
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: filteredMeals.length,
+                            itemBuilder: (context, index) {
+                              final meal = filteredMeals[index];
+                              return _buildMealCard(context, meal);
+                            },
+                          ),
+                        ),
+                ),
+              ],
             );
           }
-
           return const SizedBox.shrink();
         },
       ),
@@ -139,7 +178,7 @@ class _TrackMealState extends State<TrackMeal> {
             context,
             MaterialPageRoute(builder: (context) => const MealCaptureScreen()),
           ).then((_) {
-            // Reload meals when returning from capture screen
+            // ignore: use_build_context_synchronously
             context.read<MealAnalysisBloc>().add(const LoadMealAnalysesEvent());
           });
         },
@@ -192,26 +231,44 @@ class _TrackMealState extends State<TrackMeal> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date and time
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateFormat.format(meal.timestamp),
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            dateFormat.format(meal.timestamp),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'Món ăn: ${meal.dishName}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 12),
 
-                  // Summary stats
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildStatItem(
                         Icons.local_fire_department,
@@ -225,7 +282,7 @@ class _TrackMealState extends State<TrackMeal> {
                       ),
                       _buildStatItem(
                         Icons.restaurant,
-                        '${meal.foodItems.length} món',
+                        '${meal.foodItems.length} thực phẩm',
                         Colors.blue,
                       ),
                     ],
@@ -233,17 +290,21 @@ class _TrackMealState extends State<TrackMeal> {
 
                   const SizedBox(height: 12),
 
-                  // Food items preview
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
                     children: meal.foodItems.take(3).map((food) {
                       return Chip(
+                        side: BorderSide(color: Colors.blue),
                         label: Text(
                           food.foodName,
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
+                          ),
                         ),
                         visualDensity: VisualDensity.compact,
+                        backgroundColor: Colors.blue[50],
                       );
                     }).toList(),
                   ),
@@ -334,6 +395,52 @@ class _TrackMealState extends State<TrackMeal> {
                   ),
                 const SizedBox(height: 20),
 
+                // Health Recommendations
+                if (meal.healthRecommendations != null &&
+                    meal.healthRecommendations!.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.health_and_safety,
+                              color: Colors.green.shade700,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Lời khuyên sức khỏe',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade900,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          meal.healthRecommendations!,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.green.shade900,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 // Date
                 Text(
                   DateFormat(
@@ -390,7 +497,6 @@ class _TrackMealState extends State<TrackMeal> {
                 ),
                 const SizedBox(height: 20),
 
-                // Food items
                 const Text(
                   'Danh sách thực phẩm',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -398,7 +504,6 @@ class _TrackMealState extends State<TrackMeal> {
                 const SizedBox(height: 12),
                 ...meal.foodItems.map((food) => _buildFoodItemDetail(food)),
 
-                // Notes
                 if (meal.notes != null && meal.notes!.isNotEmpty) ...[
                   const SizedBox(height: 20),
                   const Text(
@@ -421,7 +526,6 @@ class _TrackMealState extends State<TrackMeal> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      Navigator.pop(context);
                       _confirmDelete(context, meal.id!);
                     },
                     icon: const Icon(Icons.delete, color: Colors.red),
@@ -482,25 +586,42 @@ class _TrackMealState extends State<TrackMeal> {
   }
 
   void _confirmDelete(BuildContext context, int mealId) {
-    showDialog(
+    AppDialog.showDeleteConfirm(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Xác nhận xóa'),
-        content: const Text('Bạn có chắc chắn muốn xóa bữa ăn này?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+      onConfirm: () {
+        Navigator.pop(context);
+        context.read<MealAnalysisBloc>().add(DeleteMealAnalysisEvent(mealId));
+      },
+      title: 'Xác nhận xóa',
+      content: 'Bạn có chắc chắn muốn xóa bữa ăn này?',
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, {bool isFiltered = false}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            isFiltered ? Icons.filter_list_off : Icons.restaurant_menu,
+            size: 64,
+            color: Colors.grey[400],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<MealAnalysisBloc>().add(
-                DeleteMealAnalysisEvent(mealId),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Xóa'),
+          const SizedBox(height: 16),
+          Text(
+            isFiltered
+                ? 'Không có bữa ăn nào trong khoảng thời gian này'
+                : 'Chưa có bữa ăn nào',
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isFiltered
+                ? 'Thử chọn khoảng thời gian khác'
+                : 'Nhấn nút "AI phân tích" để bắt đầu',
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

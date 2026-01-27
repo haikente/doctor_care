@@ -14,7 +14,6 @@ class Profilepage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Get theme state
     final isDarkMode = context.watch<ThemeCubit>().isDarkMode;
     final theme = Theme.of(context);
 
@@ -50,10 +49,10 @@ class Profilepage extends StatelessWidget {
                   // Avatar
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
-                      final String? photoUrl = state is Authenticated 
-                          ? state.user.profilePhotoUrl 
+                      final String? photoUrl = state is Authenticated
+                          ? state.user.profilePhotoUrl
                           : null;
-                      
+
                       return Stack(
                         children: [
                           Container(
@@ -74,8 +73,8 @@ class Profilepage extends StatelessWidget {
                             child: CircleAvatar(
                               radius: 50,
                               backgroundColor: theme.colorScheme.surface,
-                              backgroundImage: photoUrl != null 
-                                  ? NetworkImage(photoUrl) 
+                              backgroundImage: photoUrl != null
+                                  ? NetworkImage(photoUrl)
                                   : null,
                               child: photoUrl == null
                                   ? Icon(
@@ -515,9 +514,9 @@ class Profilepage extends StatelessWidget {
 
   void _showPhotoOptions(BuildContext context, AuthState state) {
     if (state is! Authenticated) return;
-    
+
     final theme = Theme.of(context);
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: theme.colorScheme.surface,
@@ -625,7 +624,7 @@ class Profilepage extends StatelessWidget {
         if (context.mounted) {
           context.read<AuthBloc>().add(CheckAuthStatusEvent());
         }
-        
+
         // Show success message
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -649,7 +648,7 @@ class Profilepage extends StatelessWidget {
     } catch (e) {
       // Close loading dialog
       if (context.mounted) Navigator.pop(context);
-      
+
       // Show error message
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -697,7 +696,7 @@ class Profilepage extends StatelessWidget {
     try {
       // Delete from storage
       await ImageUploadService.deleteOldProfilePhoto(userId);
-      
+
       // Update Firestore
       await ImageUploadService.updateUserProfilePhoto(
         userId: userId,
@@ -724,7 +723,7 @@ class Profilepage extends StatelessWidget {
     } catch (e) {
       // Close loading
       if (context.mounted) Navigator.pop(context);
-      
+
       // Show error
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -17,36 +17,42 @@ class AppDialog {
           backgroundColor: Colors.white,
           title: Column(
             children: [
-              Image.asset(
-                Images.bin, width: 60, height: 60),  
+              Image.asset(Images.bin, width: 60, height: 60),
               Gap(25),
-              Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              Text(
+                title,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
             ],
           ),
-          content: Text(content, textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
+          content: Text(
+            content,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
           actions: [
             Row(
               children: [
                 Gap(5),
                 Expanded(
                   child: CustomButton(
-                  text: "Huỷ", 
-                  onPressed: () => Navigator.pop(dialogContext),
-                  gradient: [Colors.white38, Colors.white38],
-                  textColor: Colors.blue,
-                  borderColor: Colors.blue,
+                    text: "Huỷ",
+                    onPressed: () => Navigator.pop(dialogContext),
+                    gradient: [Colors.white38, Colors.white38],
+                    textColor: Colors.blue,
+                    borderColor: Colors.blue,
                   ),
                 ),
-                Gap(14),
+                Gap(15),
                 Expanded(
                   child: CustomButton(
-                  text: "Đồng ý", 
-                  onPressed: () {
-                    onConfirm();
-                    Navigator.pop(dialogContext);
-                  },
-                  gradient: [Colors.blue.shade400, Colors.blue.shade900],
-                  textColor: Colors.white,
+                    text: "Đồng ý",
+                    onPressed: () {
+                      onConfirm();
+                      Navigator.pop(dialogContext);
+                    },
+                    gradient: [Colors.blue.shade400, Colors.blue.shade900],
+                    textColor: Colors.white,
                   ),
                 ),
               ],
@@ -57,7 +63,7 @@ class AppDialog {
     );
   }
 
-   static Future<void> showInformation({
+  static Future<void> showInformation({
     required BuildContext context,
     String title = 'Thông tin',
     required Widget content,
@@ -119,8 +125,8 @@ class AppDialog {
     bool isScrollControlled = true,
     ShapeBorder? shape,
     BorderRadiusGeometry? borderRadius,
-    Color? backgroundColor, 
-    bool isDismissible = true,    
+    Color? backgroundColor,
+    bool isDismissible = true,
     bool enableDrag = true,
   }) {
     return showModalBottomSheet<void>(
@@ -129,12 +135,16 @@ class AppDialog {
       isDismissible: isDismissible,
       enableDrag: enableDrag,
       backgroundColor: backgroundColor ?? Colors.white,
-      shape: shape ?? RoundedRectangleBorder(
-        borderRadius: borderRadius ?? BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
+      shape:
+          shape ??
+          RoundedRectangleBorder(
+            borderRadius:
+                borderRadius ??
+                BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+          ),
       builder: (BuildContext context) {
         return child; // Sử dụng child parameter thay vì hardcode UI
       },

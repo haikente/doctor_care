@@ -6,6 +6,7 @@ class MealAnalysis extends Equatable {
   final int? id;
   final DateTime timestamp;
   final String imagePath;
+  final String? dishName;
   final List<FoodItem> foodItems;
   final String? userId;
   final String? notes;
@@ -15,6 +16,7 @@ class MealAnalysis extends Equatable {
     this.id,
     required this.timestamp,
     required this.imagePath,
+    this.dishName,
     required this.foodItems,
     this.userId,
     this.notes,
@@ -26,6 +28,7 @@ class MealAnalysis extends Equatable {
     id,
     timestamp,
     imagePath,
+    dishName,
     foodItems,
     userId,
     notes,
@@ -87,6 +90,7 @@ class MealAnalysis extends Equatable {
     int? id,
     DateTime? timestamp,
     String? imagePath,
+    String? dishName,
     List<FoodItem>? foodItems,
     String? userId,
     String? notes,
@@ -96,6 +100,7 @@ class MealAnalysis extends Equatable {
       id: id ?? this.id,
       timestamp: timestamp ?? this.timestamp,
       imagePath: imagePath ?? this.imagePath,
+      dishName: dishName ?? this.dishName,
       foodItems: foodItems ?? this.foodItems,
       userId: userId ?? this.userId,
       notes: notes ?? this.notes,

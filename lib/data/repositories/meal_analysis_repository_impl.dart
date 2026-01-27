@@ -1,4 +1,5 @@
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
+import 'package:doctor_care/domain/entities/food_item.dart';
 import 'package:doctor_care/domain/repositories/meal_analysis_repository.dart';
 import 'package:doctor_care/data/datasources/meal_analysis_local_datasource.dart';
 import 'package:doctor_care/core/services/gemini_ai_service.dart';
@@ -16,11 +17,16 @@ class MealAnalysisRepositoryImpl implements MealAnalysisRepository {
     String imagePath,
   ) async {
     try {
-      final foodItems = await _aiService.analyzeMealImage(imagePath);
+      final result = await _aiService.analyzeMealImage(imagePath);
+      final foodItems = result['foodItems'] as List<FoodItem>;
+      final dishName = result['dishName'] as String?;
+      final healthRecommendations = result['healthRecommendations'] as String?;
 
       final mealAnalysis = MealAnalysis(
         timestamp: DateTime.now(),
         imagePath: imagePath,
+        dishName: dishName,
+        healthRecommendations: healthRecommendations,
         foodItems: foodItems,
       );
 
