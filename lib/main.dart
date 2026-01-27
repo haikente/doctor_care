@@ -11,21 +11,32 @@ import 'package:doctor_care/presentation/pages/screens/NavigationBar/navigationb
 import 'package:doctor_care/presentation/pages/screens/Spo2HeartRate/spo2_heartrate_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/Temperature/temperature_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/bloodPressure/blood_pressure_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/BMIWeight/bmi_weight_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/WaterIntake/water_intake_screen.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
 import 'package:doctor_care/presentation/bloc/BMIWeight/bmi_weight_bloc.dart';
+import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/auth/login_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/admin_panel_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await InjectionContainer().init();
+  await initializeDateFormatting('vi', null);
+
+  try {
+    await InjectionContainer().init();
+  } catch (e) {
+    debugPrint('❌ InjectionContainer init failed: $e');
+  }
+
   runApp(const MyApp());
 }
 
@@ -102,6 +113,12 @@ class MyApp extends StatelessWidget {
             deleteBmiweight: di.deleteBmiweight,
           ),
         ),
+
+        // Water Intake
+        BlocProvider(create: (context) => WaterIntakeBloc(di.dbHelper)),
+
+        // Meal Analysis
+        BlocProvider(create: (context) => di.mealAnalysisBloc),
       ],
 
       child: BlocBuilder<ThemeCubit, ThemeState>(
@@ -144,6 +161,8 @@ class MyApp extends StatelessWidget {
               '/hba1c': (context) => const Hba1cScreen(),
               '/temperature': (context) => const TemperatureScreen(),
               '/spo2heart': (context) => const Spo2HeartRateScreen(),
+              '/bmiweight': (context) => const BmiWeightScreen(),
+              '/waterintake': (context) => const WaterIntakeScreen(),
             },
           );
         },

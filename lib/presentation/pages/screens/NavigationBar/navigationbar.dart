@@ -1,8 +1,8 @@
-import 'package:doctor_care/presentation/pages/mainscreen/examinationschedule.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/healthpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/homepage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/notificationpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/profilepage.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/trackmeal.dart';
 import 'package:flutter/material.dart';
 
 class Navigationbar extends StatefulWidget {
@@ -21,11 +21,11 @@ class _NavigationbarState extends State<Navigationbar> {
   }
 
   final List<Widget> _pages = [
-   Homepage(),
-   Examinationschedule(),
-   Healthpage(),
-   Notificationpage(),
-   Profilepage(),
+    Homepage(),
+    TrackMeal(),
+    Healthpage(),
+    Notificationpage(),
+    Profilepage(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class _NavigationbarState extends State<Navigationbar> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
-            colors: _selectedIndex == 0 
+            colors: _selectedIndex == 0
                 ? [Colors.blue.shade400, Colors.blue.shade700]
                 : [Colors.white, Colors.white],
             begin: Alignment.topLeft,
@@ -45,7 +45,7 @@ class _NavigationbarState extends State<Navigationbar> {
           ),
           boxShadow: [
             BoxShadow(
-              color: _selectedIndex == 0 
+              color: _selectedIndex == 0
                   ? Colors.blue.withOpacity(0.4)
                   : Colors.grey.withOpacity(0.3),
               blurRadius: 12,
@@ -65,7 +65,7 @@ class _NavigationbarState extends State<Navigationbar> {
           },
           child: Icon(
             Icons.home_outlined,
-            color: _selectedIndex == 0? Colors.white :Colors.grey,
+            color: _selectedIndex == 0 ? Colors.white : Colors.grey,
             size: 30,
           ),
         ),
@@ -96,7 +96,6 @@ class _NavigationbarState extends State<Navigationbar> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
               Expanded(
                 child: InkWell(
                   onTap: () {
@@ -107,25 +106,32 @@ class _NavigationbarState extends State<Navigationbar> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      //icon AI phân tích bữa ăn
                       Icon(
-                        Icons.calendar_month_outlined,
-                        color: _selectedIndex == 1 ? Colors.blue.shade800 : Colors.grey.shade400,
+                        Icons.fastfood,
+                        color: _selectedIndex == 1
+                            ? Colors.blue.shade800
+                            : Colors.grey.shade400,
                         size: 22,
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Lịch khám',
+                        'Bữa ăn',
                         style: TextStyle(
                           fontSize: 11,
-                          color: _selectedIndex == 1 ? Colors.blue.shade800 : Colors.grey.shade400,
-                          fontWeight: _selectedIndex == 1 ? FontWeight.w600 : FontWeight.normal,
+                          color: _selectedIndex == 1
+                              ? Colors.blue.shade800
+                              : Colors.grey.shade400,
+                          fontWeight: _selectedIndex == 1
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-             
+
               Expanded(
                 child: InkWell(
                   onTap: () {
@@ -138,16 +144,22 @@ class _NavigationbarState extends State<Navigationbar> {
                     children: [
                       Icon(
                         Icons.favorite_border_outlined,
-                        color: _selectedIndex == 2 ? Colors.blue.shade800 : Colors.grey.shade400,
-                         size: 22,
+                        color: _selectedIndex == 2
+                            ? Colors.blue.shade800
+                            : Colors.grey.shade400,
+                        size: 22,
                       ),
                       SizedBox(height: 4),
                       Text(
                         'Sức khoẻ',
                         style: TextStyle(
                           fontSize: 11,
-                          color: _selectedIndex == 2 ? Colors.blue.shade800 : Colors.grey.shade400,
-                          fontWeight: _selectedIndex == 2 ? FontWeight.w600 : FontWeight.normal,
+                          color: _selectedIndex == 2
+                              ? Colors.blue.shade800
+                              : Colors.grey.shade400,
+                          fontWeight: _selectedIndex == 2
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -157,7 +169,7 @@ class _NavigationbarState extends State<Navigationbar> {
               // Spacer for FloatingActionButton
               Spacer(),
               // Right item - Cá nhân
-                Expanded(
+              Expanded(
                 child: InkWell(
                   onTap: () {
                     setState(() {
@@ -169,7 +181,9 @@ class _NavigationbarState extends State<Navigationbar> {
                     children: [
                       Icon(
                         Icons.notifications_none_outlined,
-                        color: _selectedIndex == 3 ? Colors.blue.shade800 : Colors.grey.shade400,
+                        color: _selectedIndex == 3
+                            ? Colors.blue.shade800
+                            : Colors.grey.shade400,
                         size: 22,
                       ),
                       SizedBox(height: 4),
@@ -177,8 +191,12 @@ class _NavigationbarState extends State<Navigationbar> {
                         'Thông báo',
                         style: TextStyle(
                           fontSize: 11,
-                          color: _selectedIndex == 3 ? Colors.blue.shade800 : Colors.grey.shade400,
-                          fontWeight: _selectedIndex == 3 ? FontWeight.w600 : FontWeight.normal,
+                          color: _selectedIndex == 3
+                              ? Colors.blue.shade800
+                              : Colors.grey.shade400,
+                          fontWeight: _selectedIndex == 3
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -198,7 +216,9 @@ class _NavigationbarState extends State<Navigationbar> {
                     children: [
                       Icon(
                         Icons.person_outlined,
-                        color: _selectedIndex == 4 ? Colors.blue.shade800 : Colors.grey.shade400,
+                        color: _selectedIndex == 4
+                            ? Colors.blue.shade800
+                            : Colors.grey.shade400,
                         size: 22,
                       ),
                       SizedBox(height: 4),
@@ -206,8 +226,12 @@ class _NavigationbarState extends State<Navigationbar> {
                         'Cá nhân',
                         style: TextStyle(
                           fontSize: 11,
-                          color: _selectedIndex == 4 ? Colors.blue.shade800 : Colors.grey.shade400,
-                          fontWeight: _selectedIndex == 4 ? FontWeight.w600 : FontWeight.normal,
+                          color: _selectedIndex == 4
+                              ? Colors.blue.shade800
+                              : Colors.grey.shade400,
+                          fontWeight: _selectedIndex == 4
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],

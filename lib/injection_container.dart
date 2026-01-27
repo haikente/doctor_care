@@ -47,6 +47,19 @@ import 'package:doctor_care/domain/usecase/auth/sign_up_usecase.dart';
 import 'package:doctor_care/domain/usecase/auth/sign_out_usecase.dart';
 import 'package:doctor_care/domain/usecase/auth/reset_password_usecase.dart';
 
+// Meal Analysis Imports
+import 'package:doctor_care/core/services/gemini_ai_service.dart';
+import 'package:doctor_care/data/datasources/meal_analysis_local_datasource.dart';
+import 'package:doctor_care/data/repositories/meal_analysis_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/meal_analysis/analyze_meal_image_usecase.dart';
+import 'package:doctor_care/domain/usecase/meal_analysis/save_meal_analysis_usecase.dart';
+import 'package:doctor_care/domain/usecase/meal_analysis/get_all_meal_analyses_usecase.dart';
+import 'package:doctor_care/domain/usecase/meal_analysis/delete_meal_analysis_usecase.dart';
+import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
+
+// Database
+import 'package:doctor_care/core/db/db_helper.dart';
+
 class InjectionContainer {
   static final InjectionContainer _instance = InjectionContainer._internal();
   factory InjectionContainer() => _instance;
@@ -87,6 +100,14 @@ class InjectionContainer {
   InsertBmiweight? _insertBmiweight;
   UpdateBmiWeight? _updateBmiWeight;
   DeleteBmiweight? _deleteBmiweight;
+
+  // Meal Analysis fields
+  MealAnalysisRepositoryImpl? _mealAnalysisRepository;
+  AnalyzeMealImageUseCase? _analyzeMealImageUseCase;
+  SaveMealAnalysisUseCase? _saveMealAnalysisUseCase;
+  GetAllMealAnalysesUseCase? _getAllMealAnalysesUseCase;
+  DeleteMealAnalysisUseCase? _deleteMealAnalysisUseCase;
+  MealAnalysisBloc? _mealAnalysisBloc;
 
   // Auth fields
   AuthRepository? _authRepository;
@@ -135,6 +156,9 @@ class InjectionContainer {
   UpdateBmiWeight get updateBmiWeight => _updateBmiWeight!;
   DeleteBmiweight get deleteBmiweight => _deleteBmiweight!;
 
+  // Meal Analysis Getters
+  MealAnalysisBloc get mealAnalysisBloc => _mealAnalysisBloc!;
+
   // Auth UseCase Getters
   SignInUseCase get signInUseCase => _signInUseCase!;
   SignInWithGoogleUseCase get signInWithGoogleUseCase =>
@@ -143,6 +167,9 @@ class InjectionContainer {
   SignOutUseCase get signOutUseCase => _signOutUseCase!;
   CheckAuthStatusUseCase get checkAuthStatusUseCase => _checkAuthStatusUseCase!;
   ResetPasswordUseCase get resetPasswordUseCase => _resetPasswordUseCase!;
+
+  // DbHelper instance for direct database access
+  late final DbHelper dbHelper = DbHelper.instance;
 
   Future<void> init() async {
     // Auth
@@ -200,6 +227,33 @@ class InjectionContainer {
     _insertBmiweight = InsertBmiweight(repository: _bmiWeightRepository!);
     _updateBmiWeight = UpdateBmiWeight(repository: _bmiWeightRepository!);
     _deleteBmiweight = DeleteBmiweight(repository: _bmiWeightRepository!);
+
+    // Meal Analysis
+    final mealAnalysisLocalDataSource = MealAnalysisLocalDataSource();
+    final geminiAIService = GeminiAIService();
+    _mealAnalysisRepository = MealAnalysisRepositoryImpl(
+      mealAnalysisLocalDataSource,
+      geminiAIService,
+    );
+    _analyzeMealImageUseCase = AnalyzeMealImageUseCase(
+      _mealAnalysisRepository!,
+    );
+    _saveMealAnalysisUseCase = SaveMealAnalysisUseCase(
+      _mealAnalysisRepository!,
+    );
+    _getAllMealAnalysesUseCase = GetAllMealAnalysesUseCase(
+      _mealAnalysisRepository!,
+    );
+    _deleteMealAnalysisUseCase = DeleteMealAnalysisUseCase(
+      _mealAnalysisRepository!,
+    );
+
+    _mealAnalysisBloc = MealAnalysisBloc(
+      analyzeMealImageUseCase: _analyzeMealImageUseCase!,
+      saveMealAnalysisUseCase: _saveMealAnalysisUseCase!,
+      getAllMealAnalysesUseCase: _getAllMealAnalysesUseCase!,
+      deleteMealAnalysisUseCase: _deleteMealAnalysisUseCase!,
+    );
   }
 
   void dispose() {

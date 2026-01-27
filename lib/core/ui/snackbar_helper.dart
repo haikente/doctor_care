@@ -174,6 +174,91 @@ class AppSnackBar {
       ),
     );
   }
+
+
+  static void showbmiweight({
+    required BuildContext context,
+    required SnackBarType type,
+  }) {
+    final config = {
+      SnackBarType.add: _SnackBarConfig(
+        color: Colors.green,
+        icon: Icons.check_circle,
+        text: 'Đã thêm chỉ số cân nặng và chiều cao thành công',
+      ),
+      SnackBarType.update: _SnackBarConfig(
+        color: Colors.orange,
+        icon: Icons.edit,
+        text: 'Cập nhật chỉ số cân nặng và chiều cao thành công',
+      ),
+      SnackBarType.delete: _SnackBarConfig(
+        color: Colors.red,
+        icon: Icons.delete_outline,
+        text: 'Đã xóa chỉ số cân nặng và chiều cao thành công',
+      ),
+    };
+
+    final settings = config[type]!;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: settings.color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Row(
+          children: [
+            Icon(settings.icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(settings.text)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void showwater({
+    required BuildContext context,
+    required SnackBarType type,
+  }) {
+    final config = {
+      SnackBarType.add: _SnackBarConfig(
+        color: Colors.green,
+        icon: Icons.check_circle,
+        text: 'Đã lượng nước uống thành công',
+      ),
+      SnackBarType.update: _SnackBarConfig(
+        color: Colors.orange,
+        icon: Icons.edit,
+        text: 'Cập nhật chỉ số lượng nước uống thành công',
+      ),
+      SnackBarType.delete: _SnackBarConfig(
+        color: Colors.red,
+        icon: Icons.delete_outline,
+        text: 'Đã xóa chỉ số lượng nước uống thành công',
+      ),
+    };
+
+    final settings = config[type]!;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: settings.color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Row(
+          children: [
+            Icon(settings.icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(settings.text)),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SnackBarConfig {

@@ -54,9 +54,31 @@ class Healthpage extends StatelessWidget {
                     height: 100,
                     child: HealthFeatureCard(
                       title: 'SPO2 & Nhịp tim',
-                      icon: Icons.thermostat_outlined,
+                      icon: Icons.water_drop_outlined,
                       color: Colors.purple.shade400,
                       route:  '/spo2heart',
+                    ),
+                  ),
+                  Gap(15),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 100,
+                    child: HealthFeatureCard(
+                      title: 'BMI & Cân nặng',
+                      icon: Icons.monitor_weight_outlined,
+                      color: Colors.blue.shade400,
+                      route: '/bmiweight',
+                    ),
+                  ),
+                  Gap(15),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 100,
+                    child: HealthFeatureCard(
+                      title: 'Lượng nước uống',
+                      icon: Icons.local_drink,
+                      color: Colors.lightBlue.shade400,
+                      route: '/waterintake',
                     ),
                   ),
                 ],

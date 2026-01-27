@@ -7,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 5; // ✅ Tăng version để force upgrade
+  static const _dbVersion = 7;
 
   Database? _database;
 
@@ -21,12 +21,17 @@ class DbHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
 
-    return await openDatabase(
+    final db = await openDatabase(
       path,
       version: _dbVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+
+    // Ensure meal analysis tables exist (fix for dev environment issues)
+    await _ensureMealTablesExist(db);
+
+    return db;
   }
 
   Future _onCreate(Database db, int version) async {
@@ -78,6 +83,47 @@ class DbHelper {
         height REAL NOT NULL,
         timestamp TEXT NOT NULL,
         note TEXT
+      )
+    ''');
+
+    // ✅ Water Intake table
+    await db.execute('''
+      CREATE TABLE water_intake (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount INTEGER NOT NULL,
+        timestamp TEXT NOT NULL,
+        note TEXT
+      )
+    ''');
+
+    // ✅ Meal Analysis table
+    await db.execute('''
+      CREATE TABLE meal_analysis (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT NOT NULL,
+        image_path TEXT NOT NULL,
+        user_id TEXT,
+        notes TEXT,
+        health_recommendations TEXT
+      )
+    ''');
+
+    // ✅ Food Items table
+    await db.execute('''
+      CREATE TABLE food_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        meal_analysis_id INTEGER NOT NULL,
+        food_name TEXT NOT NULL,
+        food_name_en TEXT NOT NULL,
+        portion_grams REAL NOT NULL,
+        calories REAL NOT NULL,
+        glycemic_index INTEGER NOT NULL,
+        protein REAL NOT NULL,
+        carbs REAL NOT NULL,
+        fat REAL NOT NULL,
+        fiber REAL NOT NULL,
+        category TEXT NOT NULL,
+        FOREIGN KEY (meal_analysis_id) REFERENCES meal_analysis(id) ON DELETE CASCADE
       )
     ''');
 
@@ -176,10 +222,8 @@ class DbHelper {
           note TEXT
         )
       ''');
-      print('✅ Created bmi_weight table (v4)');
     }
 
-    // ✅ Upgrade to version 5: Fix temperature table schema & Create spo2heartrate table
     if (oldVersion < 5) {
       try {
         // 1. Fix temperature table
@@ -190,14 +234,17 @@ class DbHelper {
         if (tables.isNotEmpty) {
           // Check current columns
           final columns = await db.rawQuery('PRAGMA table_info(temperature)');
-          final columnNames = columns.map((col) => col['name'] as String).toList();
-          
+          final columnNames = columns
+              .map((col) => col['name'] as String)
+              .toList();
+
           print('📊 Current temperature columns: $columnNames');
 
           // If 'date' column exists but 'timestamp' doesn't, migrate
-          if (columnNames.contains('date') && !columnNames.contains('timestamp')) {
+          if (columnNames.contains('date') &&
+              !columnNames.contains('timestamp')) {
             print('🔄 Migrating temperature table from date to timestamp');
-            
+
             // Backup old data
             final oldData = await db.query('temperature');
             print('📦 Backing up ${oldData.length} records');
@@ -225,7 +272,7 @@ class DbHelper {
                 'note': null,
               });
             }
-            
+
             print('✅ Migrated ${oldData.length} records to new schema (v5)');
           } else {
             print('✅ Temperature table already has correct schema');
@@ -243,12 +290,59 @@ class DbHelper {
           )
         ''');
         print('✅ Created spo2heartrate table (v5)');
-        
       } catch (e) {
         print('❌ Error upgrading to v5: $e');
         rethrow;
       }
     }
+
+    // ✅ Upgrade to version 6: Create water_intake table
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS water_intake (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          amount INTEGER NOT NULL,
+          timestamp TEXT NOT NULL,
+          note TEXT
+        )
+      ''');
+      print('✅ Created water_intake table (v6)');
+    }
+
+    // ✅ Upgrade to version 7: Create meal_analysis and food_items tables
+    if (oldVersion < 7) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS meal_analysis (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          timestamp TEXT NOT NULL,
+          image_path TEXT NOT NULL,
+          user_id TEXT,
+          notes TEXT,
+          health_recommendations TEXT
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS food_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          meal_analysis_id INTEGER NOT NULL,
+          food_name TEXT NOT NULL,
+          food_name_en TEXT NOT NULL,
+          portion_grams REAL NOT NULL,
+          calories REAL NOT NULL,
+          glycemic_index INTEGER NOT NULL,
+          protein REAL NOT NULL,
+          carbs REAL NOT NULL,
+          fat REAL NOT NULL,
+          fiber REAL NOT NULL,
+          category TEXT NOT NULL,
+          FOREIGN KEY (meal_analysis_id) REFERENCES meal_analysis(id) ON DELETE CASCADE
+        )
+      ''');
+      print('✅ Created meal_analysis and food_items tables (v7)');
+    }
+
+    print('✅ Database upgrade completed');
   }
 
   Future<void> deleteDatabase() async {
@@ -261,13 +355,13 @@ class DbHelper {
 
   Future<void> checkSchema() async {
     final db = await database;
-    
+
     // Check all tables
     final tables = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type='table'",
     );
     print('📊 All tables: ${tables.map((t) => t['name']).toList()}');
-    
+
     // Check temperature schema
     final tempSchema = await db.rawQuery(
       "SELECT sql FROM sqlite_master WHERE type='table' AND name='temperature'",
@@ -275,7 +369,7 @@ class DbHelper {
     if (tempSchema.isNotEmpty) {
       print('📊 Temperature schema: ${tempSchema.first['sql']}');
     }
-    
+
     // Check spo2heartrate schema
     final spo2Schema = await db.rawQuery(
       "SELECT sql FROM sqlite_master WHERE type='table' AND name='spo2heartrate'",
@@ -296,4 +390,48 @@ class DbHelper {
   }
 
   Future<void> updateSpo2HeartRate(SpO2HeartRate record) async {}
+
+  Future<void> _ensureMealTablesExist(Database db) async {
+    // Check if meal_analysis table exists
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='meal_analysis'",
+    );
+
+    if (tables.isEmpty) {
+      print('⚠️ Table meal_analysis missing, forcing creation...');
+
+      // Create meal_analysis table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS meal_analysis (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          timestamp TEXT NOT NULL,
+          image_path TEXT NOT NULL,
+          user_id TEXT,
+          notes TEXT,
+          health_recommendations TEXT
+        )
+      ''');
+
+      // Create food_items table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS food_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          meal_analysis_id INTEGER NOT NULL,
+          food_name TEXT NOT NULL,
+          food_name_en TEXT NOT NULL,
+          portion_grams REAL NOT NULL,
+          calories REAL NOT NULL,
+          glycemic_index INTEGER NOT NULL,
+          protein REAL NOT NULL,
+          carbs REAL NOT NULL,
+          fat REAL NOT NULL,
+          fiber REAL NOT NULL,
+          category TEXT NOT NULL,
+          FOREIGN KEY (meal_analysis_id) REFERENCES meal_analysis(id) ON DELETE CASCADE
+        )
+      ''');
+
+      print('✅ Forced creation of meal analysis tables');
+    }
+  }
 }

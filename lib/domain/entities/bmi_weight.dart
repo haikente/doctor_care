@@ -5,7 +5,7 @@ class BMIWeight {
   final int? id;
   final double weight; // kg
   final double height; // cm
-  final DateTime timestamp;
+  final DateTime timestamp; 
   final String? note;
 
   BMIWeight({
@@ -16,6 +16,7 @@ class BMIWeight {
     this.note,
   });
 
+// Tính chỉ số BMI
   double get bmi {
     if (height <= 0) return 0;
     double heightInMeters = height / 100;
