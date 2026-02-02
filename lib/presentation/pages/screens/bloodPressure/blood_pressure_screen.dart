@@ -289,7 +289,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.tune, color: Colors.black54),
+                          child: Icon(Icons.science_outlined, color: Colors.black54),
                         ),
                       ],
                     ),

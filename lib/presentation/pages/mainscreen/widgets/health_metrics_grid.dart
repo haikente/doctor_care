@@ -264,9 +264,9 @@ class HealthMetricsGrid extends StatelessWidget {
                   child: Text(
                     value,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
+                      color: Colors.grey.shade800,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

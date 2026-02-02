@@ -155,7 +155,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.filter_list, color: Colors.black54),
+                          child: Icon(Icons.science_outlined, color: Colors.black54),
                         )
                       ],
                     ),

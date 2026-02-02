@@ -7,7 +7,7 @@ import 'package:doctor_care/core/database_food/food_database_generated.dart';
 /// Service for analyzing meal images using Gemini AI
 class GeminiAIService {
   static const String _defaultApiKey =
-      'AIzaSyDr8yAuGLQYiTVJ1-D12B3sEDgWoLh0Kjw';
+      'AIzaSyCBgSTmQJULCq_iUDsMaLG3UZBfBKWAMsQ';
   late final GenerativeModel _model;
 
   GeminiAIService({String? apiKey}) {
@@ -15,17 +15,13 @@ class GeminiAIService {
     _model = GenerativeModel(model: 'gemini-2.5-flash-lite', apiKey: key);
   }
 
-  /// Analyze a meal image and return detected food items and dish name
+ 
   Future<Map<String, dynamic>> analyzeMealImage(String imagePath) async {
     try {
-      // Read image file
       final imageFile = File(imagePath);
       final imageBytes = await imageFile.readAsBytes();
 
-      // Create prompt for food analysis
       final prompt = _createAnalysisPrompt();
-
-      // Send request to Gemini
       final content = [
         Content.multi([TextPart(prompt), DataPart('image/jpeg', imageBytes)]),
       ];
@@ -33,7 +29,7 @@ class GeminiAIService {
       final response = await _model.generateContent(content);
       final responseText = response.text ?? '';
 
-      // Parse response and create food items
+
       return _parseAIResponse(responseText);
     } catch (e) {
       throw Exception('Failed to analyze meal image: $e');

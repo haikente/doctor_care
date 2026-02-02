@@ -13,6 +13,7 @@ import 'package:doctor_care/presentation/pages/screens/Temperature/temperature_s
 import 'package:doctor_care/presentation/pages/screens/bloodPressure/blood_pressure_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/BMIWeight/bmi_weight_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/WaterIntake/water_intake_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/health_overview/health_overview_screen.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
 import 'package:doctor_care/presentation/bloc/BMIWeight/bmi_weight_bloc.dart';
 import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
@@ -150,13 +151,13 @@ class MyApp extends StatelessWidget {
                 if (state is Authenticated) {
                   return const Navigationbar();
                 }
-                // ✅ Mặc định luôn hiển thị Login Screen
                 return const LoginScreen();
               },
             ),
             routes: {
               '/navigation': (context) => const Navigationbar(),
               '/admin-panel': (context) => const AdminPanelScreen(),
+              '/health-overview': (context) => const HealthOverviewScreen(),
               '/bloodpressure': (context) => const BloodPressureScreen(),
               '/hba1c': (context) => const Hba1cScreen(),
               '/temperature': (context) => const TemperatureScreen(),

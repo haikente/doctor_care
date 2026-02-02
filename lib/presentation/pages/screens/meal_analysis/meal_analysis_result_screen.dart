@@ -58,17 +58,38 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   }
 
   void _saveMealAnalysis() {
+    if (_foodItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cần có ít nhất 1 món ăn để lưu!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final updatedAnalysis = widget.mealAnalysis.copyWith(
       foodItems: _foodItems,
-      notes: _notesController.text.isEmpty ? null : _notesController.text,
-      dishName: _dishNameController.text.isEmpty
+      notes: _notesController.text.trim().isEmpty 
+          ? null 
+          : _notesController.text.trim(),
+      dishName: _dishNameController.text.trim().isEmpty
           ? null
-          : _dishNameController.text,
+          : _dishNameController.text.trim(),
     );
 
-    context.read<MealAnalysisBloc>().add(
-      SaveMealAnalysisEvent(updatedAnalysis),
-    );
+    try {
+      context.read<MealAnalysisBloc>().add(
+        SaveMealAnalysisEvent(updatedAnalysis),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi lưu: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   double get _totalCalories {
@@ -216,7 +237,11 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                 itemCount: _foodItems.length,
                 itemBuilder: (context, index) {
                   final foodItem = _foodItems[index];
-                  return _buildFoodItemCard(foodItem, index);
+                  return _buildFoodItemCard(
+                    foodItem, 
+                    index,
+                    key: ValueKey('${foodItem.foodName}_$index'),
+                  );
                 },
               ),
 
@@ -336,8 +361,13 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
     );
   }
 
-  Widget _buildFoodItemCard(FoodItem foodItem, int index) {
+  Widget _buildFoodItemCard(
+    FoodItem foodItem, 
+    int index, {
+    Key? key,
+  }) {
     return Card(
+      key: key,
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: () => _showEditDialog(foodItem, index),
@@ -428,57 +458,105 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   }
 
   void _showEditDialog(FoodItem foodItem, int index) {
-    final portionController = TextEditingController(
-      text: foodItem.portionGrams.toStringAsFixed(0),
-    );
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Chỉnh sửa: ${foodItem.foodName}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: portionController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Khối lượng (gram)',
-                border: OutlineInputBorder(),
-              ),
+      builder: (context) => _EditFoodItemDialog(
+        foodItem: foodItem,
+        onSave: (updatedItem) {
+          _updateFoodItem(index, updatedItem);
+        },
+      ),
+    );
+  }
+}
+
+/// Separate StatefulWidget for edit dialog to properly manage controller lifecycle
+class _EditFoodItemDialog extends StatefulWidget {
+  final FoodItem foodItem;
+  final Function(FoodItem) onSave;
+
+  const _EditFoodItemDialog({
+    required this.foodItem,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditFoodItemDialog> createState() => _EditFoodItemDialogState();
+}
+
+class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
+  late TextEditingController _portionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _portionController = TextEditingController(
+      text: widget.foodItem.portionGrams.toStringAsFixed(0),
+    );
+  }
+
+  @override
+  void dispose() {
+    _portionController.dispose();
+    super.dispose();
+  }
+
+  void _handleSave() {
+    final newPortion = double.tryParse(_portionController.text) ?? 
+                      widget.foodItem.portionGrams;
+    final ratio = newPortion / widget.foodItem.portionGrams;
+
+    final updatedItem = widget.foodItem.copyWith(
+      portionGrams: newPortion,
+      calories: widget.foodItem.calories * ratio,
+      protein: widget.foodItem.protein * ratio,
+      carbs: widget.foodItem.carbs * ratio,
+      fat: widget.foodItem.fat * ratio,
+      fiber: widget.foodItem.fiber * ratio,
+    );
+
+    widget.onSave(updatedItem);
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Chỉnh sửa: ${widget.foodItem.foodName}'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _portionController,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Khối lượng (gram)',
+              border: OutlineInputBorder(),
+              suffixText: 'g',
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              final newPortion =
-                  double.tryParse(portionController.text) ??
-                  foodItem.portionGrams;
-              final ratio = newPortion / foodItem.portionGrams;
-
-              final updatedItem = foodItem.copyWith(
-                portionGrams: newPortion,
-                calories: foodItem.calories * ratio,
-                protein: foodItem.protein * ratio,
-                carbs: foodItem.carbs * ratio,
-                fat: foodItem.fat * ratio,
-                fiber: foodItem.fiber * ratio,
-              );
-
-              _updateFoodItem(index, updatedItem);
-              Navigator.pop(context);
-            },
-            child: const Text('Lưu'),
+          const SizedBox(height: 12),
+          Text(
+            'Giá trị dinh dưỡng sẽ được tính lại theo tỷ lệ',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
+        ElevatedButton(
+          onPressed: _handleSave,
+          child: const Text('Lưu'),
+        ),
+      ],
     );
-
-    portionController.dispose();
   }
 }
