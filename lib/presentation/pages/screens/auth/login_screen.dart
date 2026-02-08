@@ -69,10 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            // Lưu remember me khi login thành công
-            AuthStorageService.saveRememberMe(
-              _rememberMe,
-              _emailController.text.trim(),
+            // Lưu phiên đăng nhập đầy đủ khi login thành công
+            AuthStorageService.saveLoginSession(
+              odLoginUser: state.user.uid,
+              email: _emailController.text.trim(),
+              role: state.role,
+              rememberMe: _rememberMe,
             );
             
             // Clear error khi login thành công

@@ -494,8 +494,8 @@ class Profilepage extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              // Clear remember me data khi logout
-              await AuthStorageService.clearRememberMe();
+              // Clear tất cả dữ liệu đăng nhập khi logout
+              await AuthStorageService.clearAll();
               // Logout
               context.read<AuthBloc>().add(SignOutEvent());
             },

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
+import 'package:doctor_care/presentation/pages/screens/admin/medical_notes_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/usercase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,17 +22,15 @@ class AdminPanelScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Colors.red.shade50,
-              Colors.orange.shade50,
-            ],
+            colors: [Colors.blue.shade50, Colors.blueAccent],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
+              // Header Section
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     Row(
@@ -42,10 +42,13 @@ class AdminPanelScreen extends StatelessWidget {
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text('Đăng xuất'),
-                                content: const Text('Bạn có chắc muốn đăng xuất?'),
+                                content: const Text(
+                                  'Bạn có chắc muốn đăng xuất?',
+                                ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context, false),
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
                                     child: const Text('Hủy'),
                                   ),
                                   TextButton(
@@ -57,30 +60,30 @@ class AdminPanelScreen extends StatelessWidget {
                                 ],
                               ),
                             );
-                            
+
                             if (confirm == true && context.mounted) {
-                              // Clear remember me data
-                              await AuthStorageService.clearRememberMe();
+                              // Clear tất cả dữ liệu đăng nhập
+                              await AuthStorageService.clearAll();
                               // Logout
                               context.read<AuthBloc>().add(SignOutEvent());
                             }
                           },
-                          icon: const Icon(Icons.logout, color: Colors.red),
+                          icon: const Icon(Icons.logout, color: Colors.blue),
                         ),
                       ],
                     ),
-                    const Gap(16),
-                    
+                    const Gap(12),
+
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.red.shade400, Colors.orange.shade400],
+                          colors: [Colors.blue.shade400, Colors.orange.shade400],
                         ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.red.withOpacity(0.3),
+                            color: Colors.blue.withOpacity(0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -88,45 +91,48 @@ class AdminPanelScreen extends StatelessWidget {
                       ),
                       child: const Icon(
                         Icons.admin_panel_settings,
-                        size: 50,
+                        size: 40,
                         color: Colors.white,
                       ),
                     ),
-                    
-                    const Gap(16),
-                    
+
+                    const Gap(12),
+
                     ShaderMask(
                       shaderCallback: (bounds) => LinearGradient(
-                        colors: [Colors.red.shade700, Colors.orange.shade700],
+                        colors: [Colors.blue.shade700, Colors.orange.shade700],
                       ).createShader(bounds),
                       child: const Text(
-                        'Admin Panel',
+                        'DrCare Bác sĩ',
                         style: TextStyle(
-                          fontSize: 32,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    
-                    const Gap(8),
-                    
+
+                    const Gap(6),
+
                     Text(
                       user?.email ?? 'Admin',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: Colors.blue.shade700,
+                        fontSize: 13,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    
-                    const Gap(8),
-                    
+
+                    const Gap(6),
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade100,
+                        color: Colors.blue.shade100,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -135,13 +141,13 @@ class AdminPanelScreen extends StatelessWidget {
                           Icon(
                             Icons.verified_user,
                             size: 16,
-                            color: Colors.red.shade700,
+                            color: Colors.blue.shade700,
                           ),
                           const Gap(4),
                           Text(
                             'Administrator',
                             style: TextStyle(
-                              color: Colors.red.shade700,
+                              color: Colors.blue.shade700,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -152,11 +158,14 @@ class AdminPanelScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
+              // Stats Section
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('users').snapshots(),
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const SizedBox(
@@ -164,13 +173,17 @@ class AdminPanelScreen extends StatelessWidget {
                         child: Center(child: CircularProgressIndicator()),
                       );
                     }
-                    
+
                     final totalUsers = snapshot.data!.docs.length;
                     final adminCount = snapshot.data!.docs
-                        .where((doc) => (doc.data() as Map<String, dynamic>)['role'] == 'admin')
+                        .where(
+                          (doc) =>
+                              (doc.data() as Map<String, dynamic>)['role'] ==
+                              'admin',
+                        )
                         .length;
                     final patientCount = totalUsers - adminCount;
-                    
+
                     return Row(
                       children: [
                         Expanded(
@@ -178,7 +191,7 @@ class AdminPanelScreen extends StatelessWidget {
                             theme,
                             icon: Icons.people,
                             value: totalUsers.toString(),
-                            label: 'Total Users',
+                            label: 'Tổng',
                             color: Colors.blue,
                           ),
                         ),
@@ -188,7 +201,7 @@ class AdminPanelScreen extends StatelessWidget {
                             theme,
                             icon: Icons.admin_panel_settings,
                             value: adminCount.toString(),
-                            label: 'Admins',
+                            label: 'Bác sĩ',
                             color: Colors.red,
                           ),
                         ),
@@ -198,7 +211,7 @@ class AdminPanelScreen extends StatelessWidget {
                             theme,
                             icon: Icons.person,
                             value: patientCount.toString(),
-                            label: 'Patients',
+                            label: 'Bệnh nhân',
                             color: Colors.green,
                           ),
                         ),
@@ -207,9 +220,10 @@ class AdminPanelScreen extends StatelessWidget {
                   },
                 ),
               ),
-              
-              const Gap(24),
-              
+
+              const Gap(16),
+
+              // Main Content
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -220,7 +234,7 @@ class AdminPanelScreen extends StatelessWidget {
                     ),
                   ),
                   child: ListView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     children: [
                       _buildAdminCard(
                         context,
@@ -233,7 +247,24 @@ class AdminPanelScreen extends StatelessWidget {
                           _showUsersList(context);
                         },
                       ),
-                      
+
+                      _buildAdminCard(
+                        context,
+                        theme,
+                        icon: Icons.note_add,
+                        title: 'Ghi chú chuyên môn',
+                        subtitle: 'Ghi chú chi tiết bệnh nhân',
+                        color: Colors.blue,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MedicalNotesScreen(),
+                            ),
+                          );
+                        },
+                      ),
+
                       _buildAdminCard(
                         context,
                         theme,
@@ -242,10 +273,10 @@ class AdminPanelScreen extends StatelessWidget {
                         subtitle: 'Xem báo cáo và phân tích dữ liệu',
                         color: Colors.purple,
                         onTap: () {
-                          _showStatistics(context);
+                          Usercase().showStatistics(context);
                         },
                       ),
-                      
+
                       _buildAdminCard(
                         context,
                         theme,
@@ -254,10 +285,10 @@ class AdminPanelScreen extends StatelessWidget {
                         subtitle: 'Huyết áp, HbA1c, nhiệt độ',
                         color: Colors.green,
                         onTap: () {
-                          _showHealthData(context);
+                          Usercase().showHealthData(context);
                         },
                       ),
-                      
+
                       _buildAdminCard(
                         context,
                         theme,
@@ -266,10 +297,10 @@ class AdminPanelScreen extends StatelessWidget {
                         subtitle: 'Cài đặt và tùy chỉnh ứng dụng',
                         color: Colors.orange,
                         onTap: () {
-                          _showSettings(context);
+                          Usercase().showSettings(context);
                         },
                       ),
-                      
+
                       _buildAdminCard(
                         context,
                         theme,
@@ -278,7 +309,7 @@ class AdminPanelScreen extends StatelessWidget {
                         subtitle: 'Quản lý dữ liệu và backup',
                         color: Colors.teal,
                         onTap: () {
-                          _showBackupDialog(context);
+                          Usercase().showBackupDialog(context);
                         },
                       ),
                     ],
@@ -300,7 +331,7 @@ class AdminPanelScreen extends StatelessWidget {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -313,22 +344,24 @@ class AdminPanelScreen extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 28),
-          const Gap(8),
+          Icon(icon, color: color, size: 24),
+          const Gap(6),
           Text(
             value,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface,
             ),
           ),
-          const Gap(4),
+          const Gap(3),
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.6),
+              fontSize: 11,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -353,9 +386,7 @@ class AdminPanelScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -363,7 +394,7 @@ class AdminPanelScreen extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Row(
               children: [
                 Container(
@@ -372,9 +403,9 @@ class AdminPanelScreen extends StatelessWidget {
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: color, size: 28),
+                  child: Icon(icon, color: color, size: 26),
                 ),
-                const Gap(16),
+                const Gap(14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,14 +414,18 @@ class AdminPanelScreen extends StatelessWidget {
                         title,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
                       ),
-                      const Gap(4),
+                      const Gap(3),
                       Text(
                         subtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          fontSize: 12,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -437,11 +472,8 @@ class AdminPanelScreen extends StatelessWidget {
                   ),
                   const Gap(16),
                   const Text(
-                    'Danh sách Người dùng',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Danh sách người dùng',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -464,7 +496,8 @@ class AdminPanelScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     itemCount: users.length,
                     itemBuilder: (context, index) {
-                      final userData = users[index].data() as Map<String, dynamic>;
+                      final userData =
+                          users[index].data() as Map<String, dynamic>;
                       final email = userData['email'] ?? 'No email';
                       final role = userData['role'] ?? 'patient';
                       final uid = userData['uid'] ?? users[index].id;
@@ -484,9 +517,7 @@ class AdminPanelScreen extends StatelessWidget {
                               role == 'admin'
                                   ? Icons.admin_panel_settings
                                   : Icons.person,
-                              color: role == 'admin'
-                                  ? Colors.red
-                                  : Colors.blue,
+                              color: role == 'admin' ? Colors.red : Colors.blue,
                             ),
                           ),
                           title: Text(
@@ -504,8 +535,8 @@ class AdminPanelScreen extends StatelessWidget {
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                                 color: role == 'admin'
-                                    ? Colors.red
-                                    : Colors.blue,
+                                    ? Colors.red.shade600
+                                    : Colors.blue.shade600,
                               ),
                             ),
                             backgroundColor: role == 'admin'
@@ -521,53 +552,95 @@ class AdminPanelScreen extends StatelessWidget {
                                   _buildInfoRow('📧 Email', email),
                                   _buildInfoRow('🆔 UID', uid),
                                   if (phoneNumber != null)
-                                    _buildInfoRow('📱 Số điện thoại', phoneNumber),
+                                    _buildInfoRow(
+                                      '📱 Số điện thoại',
+                                      phoneNumber,
+                                    ),
                                   if (gender != null)
-                                    _buildInfoRow('👤 Giới tính', 
-                                      gender == 'male' ? 'Nam' : 
-                                      gender == 'female' ? 'Nữ' : 'Khác'),
+                                    _buildInfoRow(
+                                      '👤 Giới tính',
+                                      gender == 'male'
+                                          ? 'Nam'
+                                          : gender == 'female'
+                                          ? 'Nữ'
+                                          : 'Khác',
+                                    ),
                                   if (bloodType != null)
                                     _buildInfoRow('🩸 Nhóm máu', bloodType),
                                   if (userData['dateOfBirth'] != null)
-                                    _buildInfoRow('🎂 Ngày sinh', 
-                                      DateTime.parse(userData['dateOfBirth'])
-                                          .toString()
-                                          .substring(0, 10)),
+                                    _buildInfoRow(
+                                      '🎂 Ngày sinh',
+                                      DateTime.parse(
+                                        userData['dateOfBirth'],
+                                      ).toString().substring(0, 10),
+                                    ),
                                   if (userData['height'] != null)
-                                    _buildInfoRow('📏 Chiều cao', 
-                                      '${userData['height']} cm'),
+                                    _buildInfoRow(
+                                      '📏 Chiều cao',
+                                      '${userData['height']} cm',
+                                    ),
                                   if (userData['weight'] != null)
-                                    _buildInfoRow('⚖️ Cân nặng', 
-                                      '${userData['weight']} kg'),
+                                    _buildInfoRow(
+                                      '⚖️ Cân nặng',
+                                      '${userData['weight']} kg',
+                                    ),
                                   if (userData['address'] != null)
-                                    _buildInfoRow('🏠 Địa chỉ', userData['address']),
+                                    _buildInfoRow(
+                                      '🏠 Địa chỉ',
+                                      userData['address'],
+                                    ),
                                   if (userData['emergencyContact'] != null)
-                                    _buildInfoRow('🆘 Liên hệ khẩn cấp', 
-                                      userData['emergencyContact']),
+                                    _buildInfoRow(
+                                      '🆘 Liên hệ khẩn cấp',
+                                      userData['emergencyContact'],
+                                    ),
                                   if (userData['emergencyPhone'] != null)
-                                    _buildInfoRow('📞 SĐT khẩn cấp', 
-                                      userData['emergencyPhone']),
-                                  if (userData['allergies'] != null && 
-                                      (userData['allergies'] as List).isNotEmpty)
-                                    _buildInfoRow('⚠️ Dị ứng', 
-                                      (userData['allergies'] as List).join(', ')),
+                                    _buildInfoRow(
+                                      '📞 SĐT khẩn cấp',
+                                      userData['emergencyPhone'],
+                                    ),
+                                  if (userData['allergies'] != null &&
+                                      (userData['allergies'] as List)
+                                          .isNotEmpty)
+                                    _buildInfoRow(
+                                      '⚠️ Dị ứng',
+                                      (userData['allergies'] as List).join(
+                                        ', ',
+                                      ),
+                                    ),
                                   if (userData['chronicDiseases'] != null &&
-                                      (userData['chronicDiseases'] as List).isNotEmpty)
-                                    _buildInfoRow('🏥 Bệnh mãn tính', 
-                                      (userData['chronicDiseases'] as List).join(', ')),
+                                      (userData['chronicDiseases'] as List)
+                                          .isNotEmpty)
+                                    _buildInfoRow(
+                                      '🏥 Bệnh mãn tính',
+                                      (userData['chronicDiseases'] as List)
+                                          .join(', '),
+                                    ),
                                   if (userData['medications'] != null &&
-                                      (userData['medications'] as List).isNotEmpty)
-                                    _buildInfoRow('💊 Thuốc đang dùng', 
-                                      (userData['medications'] as List).join(', ')),
+                                      (userData['medications'] as List)
+                                          .isNotEmpty)
+                                    _buildInfoRow(
+                                      '💊 Thuốc đang dùng',
+                                      (userData['medications'] as List).join(
+                                        ', ',
+                                      ),
+                                    ),
                                   const Gap(8),
                                   Row(
                                     children: [
                                       Expanded(
                                         child: OutlinedButton.icon(
                                           onPressed: () {
-                                            _showEditUserDialog(context, users[index].id, userData);
+                                            Usercase().showEditUserDialog(
+                                              context,
+                                              users[index].id,
+                                              userData,
+                                            );
                                           },
-                                          icon: const Icon(Icons.edit, size: 16),
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 16,
+                                          ),
                                           label: const Text('Chỉnh sửa'),
                                         ),
                                       ),
@@ -575,9 +648,16 @@ class AdminPanelScreen extends StatelessWidget {
                                       Expanded(
                                         child: OutlinedButton.icon(
                                           onPressed: () {
-                                            _showDeleteUserDialog(context, users[index].id, email);
+                                            Usercase().showDeleteUserDialog(
+                                              context,
+                                              users[index].id,
+                                              email,
+                                            );
                                           },
-                                          icon: const Icon(Icons.delete, size: 16),
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            size: 16,
+                                          ),
                                           label: const Text('Xóa'),
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: Colors.red,
@@ -602,71 +682,6 @@ class AdminPanelScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _showStatistics(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('📊 Thống kê'),
-        content: const Text('Chức năng thống kê đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showHealthData(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('💊 Dữ liệu sức khỏe'),
-        content: const Text('Chức năng quản lý dữ liệu sức khỏe đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('⚙️ Cấu hình hệ thống'),
-        content: const Text('Chức năng cấu hình đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showBackupDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('💾 Sao lưu & Khôi phục'),
-        content: const Text('Chức năng backup đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ========== HELPER METHODS ==========
 
   Widget _buildInfoRow(String label, String value) {
@@ -690,70 +705,6 @@ class AdminPanelScreen extends StatelessWidget {
               value,
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditUserDialog(BuildContext context, String docId, Map<String, dynamic> userData) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('✏️ Chỉnh sửa thông tin'),
-        content: const Text('Chức năng chỉnh sửa sẽ được phát triển trong phiên bản tiếp theo.\n\nBạn có thể chỉnh sửa trực tiếp trong Firebase Console.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteUserDialog(BuildContext context, String docId, String email) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('⚠️ Xóa người dùng'),
-        content: Text('Bạn có chắc muốn xóa người dùng "$email"?\n\nHành động này không thể hoàn tác!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(docId)
-                    .delete();
-                
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✅ Đã xóa người dùng thành công'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('❌ Lỗi: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Xóa'),
           ),
         ],
       ),
