@@ -57,6 +57,48 @@ import 'package:doctor_care/domain/usecase/meal_analysis/get_all_meal_analyses_u
 import 'package:doctor_care/domain/usecase/meal_analysis/delete_meal_analysis_usecase.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 
+// Blood Sugar Imports
+import 'package:doctor_care/data/datasources/blood_sugar_data_source.dart';
+import 'package:doctor_care/data/repositories/blood_sugar_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/blood_sugar/get_blood_sugar.dart';
+import 'package:doctor_care/domain/usecase/blood_sugar/insert_blood_sugar.dart';
+import 'package:doctor_care/domain/usecase/blood_sugar/update_blood_sugar.dart';
+import 'package:doctor_care/domain/usecase/blood_sugar/delete_blood_sugar.dart';
+
+// Sleep Record Imports
+import 'package:doctor_care/data/datasources/sleep_record_data_source.dart';
+import 'package:doctor_care/data/repositories/sleep_record_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/sleep_record/get_sleep_record.dart';
+import 'package:doctor_care/domain/usecase/sleep_record/insert_sleep_record.dart';
+import 'package:doctor_care/domain/usecase/sleep_record/update_sleep_record.dart';
+import 'package:doctor_care/domain/usecase/sleep_record/delete_sleep_record.dart';
+
+// Step Count Imports
+import 'package:doctor_care/data/datasources/step_count_data_source.dart';
+import 'package:doctor_care/data/repositories/step_count_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/step_count/get_step_count.dart';
+import 'package:doctor_care/domain/usecase/step_count/insert_step_count.dart';
+import 'package:doctor_care/domain/usecase/step_count/update_step_count.dart';
+import 'package:doctor_care/domain/usecase/step_count/delete_step_count.dart';
+
+// Cholesterol Imports
+import 'package:doctor_care/data/datasources/cholesterol_data_source.dart';
+import 'package:doctor_care/data/repositories/cholesterol_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/cholesterol/get_cholesterol.dart';
+import 'package:doctor_care/domain/usecase/cholesterol/insert_cholesterol.dart';
+import 'package:doctor_care/domain/usecase/cholesterol/update_cholesterol.dart';
+import 'package:doctor_care/domain/usecase/cholesterol/delete_cholesterol.dart';
+
+// Family Profile Imports
+import 'package:doctor_care/data/datasources/family_profile_data_source.dart';
+import 'package:doctor_care/data/repositories/family_profile_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/family_profile/get_family_profiles.dart';
+import 'package:doctor_care/domain/usecase/family_profile/insert_family_profile.dart';
+import 'package:doctor_care/domain/usecase/family_profile/update_family_profile.dart';
+import 'package:doctor_care/domain/usecase/family_profile/delete_family_profile.dart';
+import 'package:doctor_care/domain/usecase/family_profile/set_active_family_profile.dart';
+import 'package:doctor_care/domain/usecase/family_profile/get_active_family_profile.dart';
+
 // Database
 import 'package:doctor_care/core/db/db_helper.dart';
 
@@ -100,6 +142,43 @@ class InjectionContainer {
   InsertBmiweight? _insertBmiweight;
   UpdateBmiWeight? _updateBmiWeight;
   DeleteBmiweight? _deleteBmiweight;
+
+  // Blood Sugar fields
+  BloodSugarRepositoryImpl? _bloodSugarRepository;
+  GetBloodSugar? _getBloodSugar;
+  InsertBloodSugar? _insertBloodSugar;
+  UpdateBloodSugar? _updateBloodSugar;
+  DeleteBloodSugar? _deleteBloodSugar;
+
+  // Sleep Record fields
+  SleepRecordRepositoryImpl? _sleepRecordRepository;
+  GetSleepRecord? _getSleepRecord;
+  InsertSleepRecord? _insertSleepRecord;
+  UpdateSleepRecord? _updateSleepRecord;
+  DeleteSleepRecord? _deleteSleepRecord;
+
+  // Step Count fields
+  StepCountRepositoryImpl? _stepCountRepository;
+  GetStepCount? _getStepCount;
+  InsertStepCount? _insertStepCount;
+  UpdateStepCount? _updateStepCount;
+  DeleteStepCount? _deleteStepCount;
+
+  // Cholesterol fields
+  CholesterolRepositoryImpl? _cholesterolRepository;
+  GetCholesterol? _getCholesterol;
+  InsertCholesterol? _insertCholesterol;
+  UpdateCholesterol? _updateCholesterol;
+  DeleteCholesterol? _deleteCholesterol;
+
+  // Family Profile fields
+  FamilyProfileRepositoryImpl? _familyProfileRepository;
+  GetFamilyProfiles? _getFamilyProfiles;
+  InsertFamilyProfile? _insertFamilyProfile;
+  UpdateFamilyProfile? _updateFamilyProfile;
+  DeleteFamilyProfile? _deleteFamilyProfile;
+  SetActiveFamilyProfile? _setActiveFamilyProfile;
+  GetActiveFamilyProfile? _getActiveFamilyProfile;
 
   // Meal Analysis fields
   MealAnalysisRepositoryImpl? _mealAnalysisRepository;
@@ -155,6 +234,38 @@ class InjectionContainer {
   InsertBmiweight get insertBmiweight => _insertBmiweight!;
   UpdateBmiWeight get updateBmiWeight => _updateBmiWeight!;
   DeleteBmiweight get deleteBmiweight => _deleteBmiweight!;
+
+  // Blood Sugar UseCase Getters
+  GetBloodSugar get getBloodSugar => _getBloodSugar!;
+  InsertBloodSugar get insertBloodSugar => _insertBloodSugar!;
+  UpdateBloodSugar get updateBloodSugar => _updateBloodSugar!;
+  DeleteBloodSugar get deleteBloodSugar => _deleteBloodSugar!;
+
+  // Sleep Record UseCase Getters
+  GetSleepRecord get getSleepRecord => _getSleepRecord!;
+  InsertSleepRecord get insertSleepRecord => _insertSleepRecord!;
+  UpdateSleepRecord get updateSleepRecord => _updateSleepRecord!;
+  DeleteSleepRecord get deleteSleepRecord => _deleteSleepRecord!;
+
+  // Step Count UseCase Getters
+  GetStepCount get getStepCount => _getStepCount!;
+  InsertStepCount get insertStepCount => _insertStepCount!;
+  UpdateStepCount get updateStepCount => _updateStepCount!;
+  DeleteStepCount get deleteStepCount => _deleteStepCount!;
+
+  // Cholesterol UseCase Getters
+  GetCholesterol get getCholesterol => _getCholesterol!;
+  InsertCholesterol get insertCholesterol => _insertCholesterol!;
+  UpdateCholesterol get updateCholesterol => _updateCholesterol!;
+  DeleteCholesterol get deleteCholesterol => _deleteCholesterol!;
+
+  // Family Profile UseCase Getters
+  GetFamilyProfiles get getFamilyProfiles => _getFamilyProfiles!;
+  InsertFamilyProfile get insertFamilyProfile => _insertFamilyProfile!;
+  UpdateFamilyProfile get updateFamilyProfile => _updateFamilyProfile!;
+  DeleteFamilyProfile get deleteFamilyProfile => _deleteFamilyProfile!;
+  SetActiveFamilyProfile get setActiveFamilyProfile => _setActiveFamilyProfile!;
+  GetActiveFamilyProfile get getActiveFamilyProfile => _getActiveFamilyProfile!;
 
   // Meal Analysis Getters
   MealAnalysisBloc get mealAnalysisBloc => _mealAnalysisBloc!;
@@ -227,6 +338,48 @@ class InjectionContainer {
     _insertBmiweight = InsertBmiweight(repository: _bmiWeightRepository!);
     _updateBmiWeight = UpdateBmiWeight(repository: _bmiWeightRepository!);
     _deleteBmiweight = DeleteBmiweight(repository: _bmiWeightRepository!);
+
+    // Blood Sugar
+    final bloodSugarDataSource = BloodSugarDataSourceImpl();
+    _bloodSugarRepository = BloodSugarRepositoryImpl(bloodSugarDataSource);
+    _getBloodSugar = GetBloodSugar(_bloodSugarRepository!);
+    _insertBloodSugar = InsertBloodSugar(_bloodSugarRepository!);
+    _updateBloodSugar = UpdateBloodSugar(_bloodSugarRepository!);
+    _deleteBloodSugar = DeleteBloodSugar(_bloodSugarRepository!);
+
+    // Sleep Record
+    final sleepRecordDataSource = SleepRecordDataSourceImpl();
+    _sleepRecordRepository = SleepRecordRepositoryImpl(sleepRecordDataSource);
+    _getSleepRecord = GetSleepRecord(_sleepRecordRepository!);
+    _insertSleepRecord = InsertSleepRecord(_sleepRecordRepository!);
+    _updateSleepRecord = UpdateSleepRecord(_sleepRecordRepository!);
+    _deleteSleepRecord = DeleteSleepRecord(_sleepRecordRepository!);
+
+    // Step Count
+    final stepCountDataSource = StepCountDataSourceImpl();
+    _stepCountRepository = StepCountRepositoryImpl(stepCountDataSource);
+    _getStepCount = GetStepCount(_stepCountRepository!);
+    _insertStepCount = InsertStepCount(_stepCountRepository!);
+    _updateStepCount = UpdateStepCount(_stepCountRepository!);
+    _deleteStepCount = DeleteStepCount(_stepCountRepository!);
+
+    // Cholesterol
+    final cholesterolDataSource = CholesterolDataSourceImpl();
+    _cholesterolRepository = CholesterolRepositoryImpl(cholesterolDataSource);
+    _getCholesterol = GetCholesterol(_cholesterolRepository!);
+    _insertCholesterol = InsertCholesterol(_cholesterolRepository!);
+    _updateCholesterol = UpdateCholesterol(_cholesterolRepository!);
+    _deleteCholesterol = DeleteCholesterol(_cholesterolRepository!);
+
+    // Family Profile
+    final familyProfileDataSource = FamilyProfileDataSourceImpl();
+    _familyProfileRepository = FamilyProfileRepositoryImpl(familyProfileDataSource);
+    _getFamilyProfiles = GetFamilyProfiles(_familyProfileRepository!);
+    _insertFamilyProfile = InsertFamilyProfile(_familyProfileRepository!);
+    _updateFamilyProfile = UpdateFamilyProfile(_familyProfileRepository!);
+    _deleteFamilyProfile = DeleteFamilyProfile(_familyProfileRepository!);
+    _setActiveFamilyProfile = SetActiveFamilyProfile(_familyProfileRepository!);
+    _getActiveFamilyProfile = GetActiveFamilyProfile(_familyProfileRepository!);
 
     // Meal Analysis
     final mealAnalysisLocalDataSource = MealAnalysisLocalDataSource();

@@ -39,7 +39,10 @@ class _NavigationbarState extends State<Navigationbar> {
           gradient: LinearGradient(
             colors: _selectedIndex == 0
                 ? [Colors.blue.shade400, Colors.blue.shade700]
-                : [Colors.white, Colors.white],
+                : [
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surface,
+                  ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -47,7 +50,7 @@ class _NavigationbarState extends State<Navigationbar> {
             BoxShadow(
               color: _selectedIndex == 0
                   ? Colors.blue.withOpacity(0.4)
-                  : Colors.grey.withOpacity(0.3),
+                  : Theme.of(context).shadowColor.withOpacity(0.1),
               blurRadius: 12,
               offset: Offset(0, 4),
             ),
@@ -65,7 +68,9 @@ class _NavigationbarState extends State<Navigationbar> {
           },
           child: Icon(
             Icons.home_outlined,
-            color: _selectedIndex == 0 ? Colors.white : Colors.grey,
+            color: _selectedIndex == 0
+                ? Colors.white
+                : Theme.of(context).unselectedWidgetColor,
             size: 30,
           ),
         ),
@@ -83,10 +88,10 @@ class _NavigationbarState extends State<Navigationbar> {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Theme.of(context).shadowColor.withOpacity(0.1),
                 blurRadius: 10,
                 offset: Offset(0, -3),
                 spreadRadius: 0,
@@ -110,8 +115,8 @@ class _NavigationbarState extends State<Navigationbar> {
                       Icon(
                         Icons.fastfood_outlined,
                         color: _selectedIndex == 1
-                            ? Colors.blue.shade800
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).unselectedWidgetColor,
                         size: 22,
                       ),
                       SizedBox(height: 4),
@@ -120,8 +125,8 @@ class _NavigationbarState extends State<Navigationbar> {
                         style: TextStyle(
                           fontSize: 11,
                           color: _selectedIndex == 1
-                              ? Colors.blue.shade800
-                              : Colors.grey.shade400,
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).unselectedWidgetColor,
                           fontWeight: _selectedIndex == 1
                               ? FontWeight.w600
                               : FontWeight.normal,
@@ -145,8 +150,8 @@ class _NavigationbarState extends State<Navigationbar> {
                       Icon(
                         Icons.favorite_border_outlined,
                         color: _selectedIndex == 2
-                            ? Colors.blue.shade800
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).unselectedWidgetColor,
                         size: 22,
                       ),
                       SizedBox(height: 4),
@@ -155,8 +160,8 @@ class _NavigationbarState extends State<Navigationbar> {
                         style: TextStyle(
                           fontSize: 11,
                           color: _selectedIndex == 2
-                              ? Colors.blue.shade800
-                              : Colors.grey.shade400,
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).unselectedWidgetColor,
                           fontWeight: _selectedIndex == 2
                               ? FontWeight.w600
                               : FontWeight.normal,
@@ -182,8 +187,8 @@ class _NavigationbarState extends State<Navigationbar> {
                       Icon(
                         Icons.notifications_none_outlined,
                         color: _selectedIndex == 3
-                            ? Colors.blue.shade800
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).unselectedWidgetColor,
                         size: 22,
                       ),
                       SizedBox(height: 4),
@@ -192,8 +197,8 @@ class _NavigationbarState extends State<Navigationbar> {
                         style: TextStyle(
                           fontSize: 11,
                           color: _selectedIndex == 3
-                              ? Colors.blue.shade800
-                              : Colors.grey.shade400,
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).unselectedWidgetColor,
                           fontWeight: _selectedIndex == 3
                               ? FontWeight.w600
                               : FontWeight.normal,
@@ -217,8 +222,8 @@ class _NavigationbarState extends State<Navigationbar> {
                       Icon(
                         Icons.person_outlined,
                         color: _selectedIndex == 4
-                            ? Colors.blue.shade800
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).unselectedWidgetColor,
                         size: 22,
                       ),
                       SizedBox(height: 4),
@@ -227,8 +232,8 @@ class _NavigationbarState extends State<Navigationbar> {
                         style: TextStyle(
                           fontSize: 11,
                           color: _selectedIndex == 4
-                              ? Colors.blue.shade800
-                              : Colors.grey.shade400,
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).unselectedWidgetColor,
                           fontWeight: _selectedIndex == 4
                               ? FontWeight.w600
                               : FontWeight.normal,

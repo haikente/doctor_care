@@ -496,7 +496,7 @@ class Profilepage extends StatelessWidget {
               Navigator.pop(context);
               // Clear tất cả dữ liệu đăng nhập khi logout
               await AuthStorageService.clearAll();
-              // Logout
+              // ignore: use_build_context_synchronously
               context.read<AuthBloc>().add(SignOutEvent());
             },
             style: ElevatedButton.styleFrom(

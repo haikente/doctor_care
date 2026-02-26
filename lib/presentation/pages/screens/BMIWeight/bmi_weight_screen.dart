@@ -3,6 +3,7 @@ import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/domain/entities/bmi_weight.dart';
 import 'package:doctor_care/presentation/bloc/BMIWeight/bmi_weight_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/BMIWeight/insert_bmi_weight.dart';
+import 'package:doctor_care/presentation/pages/screens/BMIWeight/widgets/bmi_chart_widget.dart';
 import 'package:doctor_care/presentation/pages/screens/BMIWeight/widgets/filter_bottom_sheet_bmi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,7 +61,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
         onInfo: () {
           Navigator.push(
             context, 
-            MaterialPageRoute(builder: (context) => InsertBmiWeight()),
+            MaterialPageRoute(builder: (_) => InsertBmiWeight()),
           );
         },
       ), 
@@ -82,6 +83,9 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
 
             return Column(
               children: [
+                // Biểu đồ BMI/Cân nặng
+                BmiChartWidget(records: state.records),
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
@@ -203,7 +207,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                                   motion: const ScrollMotion(),
                                   children: [
                                     SlidableAction(
-                                      onPressed: (context) {
+                                      onPressed: (_) {
                                         AppDialog.showDeleteConfirm(
                                           context: context,
                                           content: "Bạn có chắc chắn muốn xoá bản ghi này không?",
@@ -229,7 +233,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => InsertBmiWeight(record: record),
+                                        builder: (_) => InsertBmiWeight(record: record),
                                       ),
                                     );
                                   },
@@ -329,7 +333,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                     decoration: BoxDecoration(
                       color: record.bmiBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: record.bmiColor.withOpacity(0.3)),
+                      border: Border.all(color: record.bmiColor.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       children: [

@@ -1,5 +1,6 @@
 import 'package:doctor_care/presentation/bloc/blood_pressure/blood_pressure_cubit.dart';
 import 'package:doctor_care/presentation/bloc/hba1c/hba1c_cubit.dart';
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/presentation/bloc/temperature/temperature_cubit.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +20,12 @@ class HealthMetricsGrid extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Chỉ số sức khỏe",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColor.textPrimary(context),
                 ),
               ),
               TextButton(
@@ -213,16 +214,18 @@ class HealthMetricsGrid extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.shade200,
+              color: Theme.of(context).shadowColor.withOpacity(0.05),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
           ],
-          border: Border.all(color: Colors.grey.shade50),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withOpacity(0.2),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,14 +236,16 @@ class HealthMetricsGrid extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: bgColor,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? bgColor.withOpacity(0.15)
+                        : bgColor,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: iconColor, size: 22),
                 ),
                 Icon(
                   Icons.arrow_outward_rounded,
-                  color: Colors.grey.shade300,
+                  color: AppColor.divider(context),
                   size: 20,
                 ),
               ],
@@ -250,7 +255,7 @@ class HealthMetricsGrid extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade600,
+                color: AppColor.textSecondary(context),
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
@@ -266,7 +271,7 @@ class HealthMetricsGrid extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
+                      color: AppColor.textPrimary(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -279,7 +284,7 @@ class HealthMetricsGrid extends StatelessWidget {
                     unit,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade500,
+                      color: AppColor.textSecondary(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),

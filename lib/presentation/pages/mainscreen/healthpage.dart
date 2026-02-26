@@ -1,5 +1,8 @@
-import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
+import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
+import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
 class Healthpage extends StatelessWidget {
@@ -7,88 +10,273 @@ class Healthpage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomStackAppBar(
-        title: "Sức khoẻ" , centerTitle: true,),
-        body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 100,
-                  child: HealthFeatureCard(
-                    title: 'Huyết áp',
-                    icon: Icons.bloodtype_outlined,
-                    color: Colors.red.shade400,
-                    route: '/bloodpressure',
-                  ),
+    return SafeArea(
+      child: Scaffold(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade400,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.1),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-                    Gap(15),
-                    SizedBox(
-                    width: double.infinity,
-                    height: 100,
-                    child: HealthFeatureCard(
-                      title: 'Chỉ số HbA1c',
-                      icon: Icons.medical_information_outlined,
-                      color: Colors.orange.shade400,
-                      route: '/hba1c',
+                child: Row(
+                  children: [
+                    Container(
+                      width: 49,
+                      height: 49,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: BlocBuilder<FamilyProfileCubit, FamilyProfileState>(
+                          builder: (context, fpState) {
+                            String initials = "ND";
+                            if (fpState is FamilyProfileLoaded && fpState.activeProfile != null) {
+                              initials = fpState.activeProfile!.initials;
+                            } else {
+                              // Fallback to auth user
+                              final authState = context.watch<AuthBloc>().state;
+                              if (authState is Authenticated) {
+                                final name = authState.user.fullName ?? authState.user.email;
+                                final parts = name.trim().split(RegExp(r'\s+'));
+                                if (parts.length >= 2) {
+                                  initials = "${parts[parts.length - 2][0]}${parts.last[0]}".toUpperCase();
+                                } else if (parts.isNotEmpty) {
+                                  initials = parts.first.substring(0, parts.first.length >= 2 ? 2 : 1).toUpperCase();
+                                }
+                              }
+                            }
+                            return Text(
+                              initials,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                  Gap(15),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 100,
-                    child: HealthFeatureCard(
-                      title: 'Nhiệt độ',
-                      icon: Icons.thermostat_outlined,
-                      color: Colors.green.shade400,
-                      route: '/temperature',
+                    const Gap(14),
+                    Expanded(
+                      child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Đối tượng theo dõi",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.85),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Gap(2),
+                        BlocBuilder<FamilyProfileCubit, FamilyProfileState>(
+                          builder: (context, fpState) {
+                            String displayName = "Người dùng";
+                            String subLabel = "Theo dõi sức khoẻ tổng quát";
+                            if (fpState is FamilyProfileLoaded && fpState.activeProfile != null) {
+                              displayName = fpState.activeProfile!.name;
+                              subLabel = fpState.activeProfile!.relationshipLabel;
+                            } else {
+                              final authState = context.watch<AuthBloc>().state;
+                              if (authState is Authenticated) {
+                                displayName = authState.user.fullName ?? "Người dùng";
+                              }
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  displayName,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const Gap(2),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
+                                    child: Text(
+                                      subLabel,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: Colors.white.withOpacity(0.85),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],              
                     ),
-                  ),
-                  Gap(15),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 100,
-                    child: HealthFeatureCard(
-                      title: 'SPO2 & Nhịp tim',
-                      icon: Icons.water_drop_outlined,
-                      color: Colors.purple.shade400,
-                      route:  '/spo2heart',
                     ),
-                  ),
-                  Gap(15),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 100,
-                    child: HealthFeatureCard(
-                      title: 'BMI & Cân nặng',
-                      icon: Icons.monitor_weight_outlined,
-                      color: Colors.blue.shade400,
-                      route: '/bmiweight',
-                    ),
-                  ),
-                  Gap(15),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 100,
-                    child: HealthFeatureCard(
-                      title: 'Lượng nước uống',
-                      icon: Icons.local_drink,
-                      color: Colors.lightBlue.shade400,
-                      route: '/waterintake',
-                    ),
-                  ),
-                ],
+                  const Gap(8),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FamilyProfileScreen()),
+                      );
+                    },
+                    child: Icon(Icons.repeat_outlined, color: Colors.white.withOpacity(0.9), size: 20,)),
+                  ],
+                ),
               ),
-            ),
+              Gap(20),
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Các chỉ số sức khoẻ",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Gap(20),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Huyết áp',
+                  icon: Icons.bloodtype_outlined,
+                  color: Colors.red.shade400,
+                  route: '/bloodpressure',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Chỉ số HbA1c',
+                  icon: Icons.medical_information_outlined,
+                  color: Colors.orange.shade400,
+                  route: '/hba1c',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Nhiệt độ',
+                  icon: Icons.thermostat_outlined,
+                  color: Colors.green.shade400,
+                  route: '/temperature',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'SPO2 & Nhịp tim',
+                  icon: Icons.water_drop_outlined,
+                  color: Colors.purple.shade400,
+                  route: '/spo2heart',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'BMI & Cân nặng',
+                  icon: Icons.monitor_weight_outlined,
+                  color: Colors.blue.shade400,
+                  route: '/bmiweight',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Lượng nước uống',
+                  icon: Icons.local_drink,
+                  color: Colors.lightBlue.shade400,
+                  route: '/waterintake',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Đường huyết',
+                  icon: Icons.water_drop_outlined,
+                  color: Colors.teal.shade400,
+                  route: '/bloodsugar',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Giấc ngủ',
+                  icon: Icons.bedtime_outlined,
+                  color: Colors.indigo.shade400,
+                  route: '/sleep',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Bước chân',
+                  icon: Icons.directions_walk,
+                  color: Colors.green.shade600,
+                  route: '/stepcounter',
+                ),
+              ),
+              Gap(15),
+              SizedBox(
+                width: double.infinity,
+                height: 100,
+                child: HealthFeatureCard(
+                  title: 'Cholesterol',
+                  icon: Icons.bloodtype,
+                  color: Colors.deepPurple.shade400,
+                  route: '/cholesterol',
+                ),
+              ),
+            ],
           ),
-        );
-      }
-    }
-
+        ),
+      ),
+      )
+    );
+  }
+}
 
 class HealthFeatureCard extends StatelessWidget {
   final String title;
@@ -116,10 +304,7 @@ class HealthFeatureCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              color,
-              color.withOpacity(0.5),
-            ],
+            colors: [color, color.withOpacity(0.5)],
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -171,11 +356,7 @@ class HealthFeatureCard extends StatelessWidget {
                       color: Colors.white.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                    child: Icon(icon, color: Colors.white, size: 28),
                   ),
 
                   Gap(16),

@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _rememberMe = false;
-  String? _errorMessage; // ✅ Thêm state để lưu error message
+  String? _errorMessage;
 
   @override
   void initState() {

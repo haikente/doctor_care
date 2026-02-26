@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,10 +9,11 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
@@ -19,7 +21,7 @@ class HomeHeader extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.03),
+            color: theme.shadowColor.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -72,7 +74,7 @@ class HomeHeader extends StatelessWidget {
                     "Xin chào, 👋",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey.shade600,
+                      color: AppColor.textSecondary(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -85,7 +87,7 @@ class HomeHeader extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade900,
+                            color: AppColor.textPrimary(context),
                             letterSpacing: 0.5,
                           ),
                         );
@@ -95,7 +97,7 @@ class HomeHeader extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade900,
+                            color: AppColor.textPrimary(context),
                             letterSpacing: 0.5,
                           ),
                         );
@@ -110,9 +112,11 @@ class HomeHeader extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: theme.brightness == Brightness.dark
+                    ? theme.colorScheme.surface
+                    : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade100),
+                border: Border.all(color: theme.dividerColor),
               ),
               child: Stack(
                 children: [
@@ -120,7 +124,7 @@ class HomeHeader extends StatelessWidget {
                     child: IconButton(
                       icon: Icon(
                         Icons.notifications_outlined,
-                        color: Colors.grey.shade700,
+                        color: AppColor.textSecondary(context),
                         size: 24,
                       ),
                       onPressed: () {},

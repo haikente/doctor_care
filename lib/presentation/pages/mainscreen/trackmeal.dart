@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/widgets/mealCard.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 import 'package:doctor_care/presentation/pages/screens/meal_analysis/meal_capture_screen.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
-
 
 class TrackMeal extends StatefulWidget {
   const TrackMeal({super.key});
@@ -99,7 +99,7 @@ class _TrackMealState extends State<TrackMeal> {
                 // Filter chips
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -115,12 +115,17 @@ class _TrackMealState extends State<TrackMeal> {
                                 selectedFilter = filter;
                               });
                             },
-                            backgroundColor: Colors.grey.shade100,
-                            selectedColor: Colors.blue.shade50,
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade100,
+                            selectedColor: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.1),
                             labelStyle: TextStyle(
                               color: isSelected
-                                  ? Colors.blue.shade700
-                                  : Colors.grey.shade700,
+                                  ? Theme.of(context).primaryColor
+                                  : AppColor.textSecondary(context),
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.w500,
@@ -128,11 +133,11 @@ class _TrackMealState extends State<TrackMeal> {
                             ),
                             side: BorderSide(
                               color: isSelected
-                                  ? Colors.blue.shade700
-                                  : Colors.grey.shade300,
+                                  ? Theme.of(context).primaryColor
+                                  : AppColor.divider(context),
                               width: 1.5,
                             ),
-                            checkmarkColor: Colors.blue.shade700,
+                            checkmarkColor: Theme.of(context).primaryColor,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 8,
@@ -161,30 +166,29 @@ class _TrackMealState extends State<TrackMeal> {
                             },
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MealCaptureScreen()),
-              ).then((_) {
-                // ignore: use_build_context_synchronously 
-                context.read<MealAnalysisBloc>().add(const LoadMealAnalysesEvent());
-              });
-            },
-          icon: const Icon(Icons.camera),
-          label: const Text('AI phân tích'),
-          heroTag: 'track_meal_fab',
-        ),
-      );
-    }
-
+                ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MealCaptureScreen()),
+          ).then((_) {
+            // ignore: use_build_context_synchronously
+            context.read<MealAnalysisBloc>().add(const LoadMealAnalysesEvent());
+          });
+        },
+        icon: const Icon(Icons.camera),
+        label: const Text('AI phân tích'),
+        heroTag: 'track_meal_fab',
+      ),
+    );
+  }
 
   Widget _buildEmptyState(BuildContext context, {bool isFiltered = false}) {
     return Center(
@@ -194,14 +198,17 @@ class _TrackMealState extends State<TrackMeal> {
           Icon(
             isFiltered ? Icons.filter_list_off : Icons.restaurant_menu,
             size: 64,
-            color: Colors.grey[400],
+            color: AppColor.textSecondary(context).withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
             isFiltered
                 ? 'Không có bữa ăn nào trong khoảng thời gian này'
                 : 'Chưa có bữa ăn nào',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColor.textSecondary(context),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
@@ -209,7 +216,10 @@ class _TrackMealState extends State<TrackMeal> {
             isFiltered
                 ? 'Thử chọn khoảng thời gian khác'
                 : 'Nhấn nút "AI phân tích" để bắt đầu',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColor.textSecondary(context),
+            ),
             textAlign: TextAlign.center,
           ),
         ],

@@ -26,20 +26,20 @@ class _HomepageState extends State<Homepage> {
 
   void _loadAllHealthData() {
     context.read<BloodPressureCubit>().loadBloodPressureRecords();
-    
+
     context.read<Hba1cCubit>().loadHba1cRecords();
-    
+
     context.read<TemperatureCubit>().loadTemperatureRecords();
-    
+
     context.read<Spo2heartrateBloc>().add(LoadSpo2HeartRateRecords());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
-        padding: EdgeInsets.zero, 
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             const HomeHeader(),

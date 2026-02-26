@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -25,7 +26,8 @@ class _NotificationpageState extends State<Notificationpage> {
       id: '2',
       type: NotificationType.warning,
       title: 'Cảnh báo HbA1c cao',
-      message: 'Chỉ số HbA1c của bạn đang ở mức 7.2%. Cần điều chỉnh chế độ ăn uống.',
+      message:
+          'Chỉ số HbA1c của bạn đang ở mức 7.2%. Cần điều chỉnh chế độ ăn uống.',
       timestamp: DateTime.now().subtract(Duration(hours: 2)),
       isRead: false,
     ),
@@ -94,8 +96,9 @@ class _NotificationpageState extends State<Notificationpage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: CustomStackAppBar(
         title: "Thông báo",
         centerTitle: true,
@@ -105,7 +108,7 @@ class _NotificationpageState extends State<Notificationpage> {
         children: [
           // ========== HEADER WITH STATS & ACTION ==========
           Container(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             padding: EdgeInsets.all(15),
             child: Column(
               children: [
@@ -115,7 +118,11 @@ class _NotificationpageState extends State<Notificationpage> {
                     // Unread count
                     Row(
                       children: [
-                        Icon(Icons.notifications_active, color: Colors.blue.shade700, size: 20),
+                        Icon(
+                          Icons.notifications_active,
+                          color: Colors.blue.shade700,
+                          size: 20,
+                        ),
                         Gap(8),
                         Text(
                           '$unreadCount chưa đọc',
@@ -127,7 +134,7 @@ class _NotificationpageState extends State<Notificationpage> {
                         ),
                       ],
                     ),
-                    
+
                     // Mark all as read button
                     if (unreadCount > 0)
                       TextButton.icon(
@@ -136,14 +143,17 @@ class _NotificationpageState extends State<Notificationpage> {
                         label: Text('Đánh dấu tất cả'),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.blue.shade700,
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                       ),
                   ],
                 ),
-                
+
                 Gap(12),
-                
+
                 // Filter chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -160,19 +170,30 @@ class _NotificationpageState extends State<Notificationpage> {
                               selectedFilter = filter;
                             });
                           },
-                          backgroundColor: Colors.grey.shade100,
-                          selectedColor: Colors.blue.shade50,
+                          backgroundColor: theme.brightness == Brightness.dark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade100,
+                          selectedColor: theme.primaryColor.withOpacity(0.1),
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.blue.shade700 : Colors.grey.shade700,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected
+                                ? theme.primaryColor
+                                : AppColor.textSecondary(context),
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                             fontSize: 13,
                           ),
                           side: BorderSide(
-                            color: isSelected ? Colors.blue.shade700 : Colors.grey.shade300,
+                            color: isSelected
+                                ? theme.primaryColor
+                                : AppColor.divider(context),
                             width: 1.5,
                           ),
-                          checkmarkColor: Colors.blue.shade700,
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          checkmarkColor: theme.primaryColor,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                       );
                     }).toList(),
@@ -181,9 +202,9 @@ class _NotificationpageState extends State<Notificationpage> {
               ],
             ),
           ),
-          
-          Divider(height: 1, color: Colors.grey.shade300),
-          
+
+          Divider(height: 1, color: AppColor.divider(context)),
+
           // ========== NOTIFICATION LIST ==========
           Expanded(
             child: filteredNotifications.isEmpty
@@ -236,7 +257,9 @@ class _NotificationpageState extends State<Notificationpage> {
           // TODO: Navigate to detail or related screen
         },
         child: Container(
-          color: notification.isRead ? Colors.white : Colors.blue.shade50.withOpacity(0.3),
+          color: notification.isRead
+              ? Theme.of(context).colorScheme.surface
+              : Theme.of(context).primaryColor.withOpacity(0.05),
           padding: EdgeInsets.all(15),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,9 +277,9 @@ class _NotificationpageState extends State<Notificationpage> {
                   size: 24,
                 ),
               ),
-              
+
               Gap(12),
-              
+
               // Content
               Expanded(
                 child: Column(
@@ -269,8 +292,10 @@ class _NotificationpageState extends State<Notificationpage> {
                             notification.title,
                             style: TextStyle(
                               fontSize: 15,
-                              fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.w600,
-                              color: Colors.black87,
+                              fontWeight: notification.isRead
+                                  ? FontWeight.w500
+                                  : FontWeight.w600,
+                              color: AppColor.textPrimary(context),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -288,31 +313,35 @@ class _NotificationpageState extends State<Notificationpage> {
                           ),
                       ],
                     ),
-                    
+
                     Gap(4),
-                    
+
                     Text(
                       notification.message,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade700,
+                        color: AppColor.textSecondary(context),
                         height: 1.4,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    
+
                     Gap(6),
-                    
+
                     Row(
                       children: [
-                        Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
+                        Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: AppColor.textSecondary(context),
+                        ),
                         Gap(4),
                         Text(
                           _formatTimestamp(notification.timestamp),
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey.shade500,
+                            color: AppColor.textSecondary(context),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -332,7 +361,7 @@ class _NotificationpageState extends State<Notificationpage> {
   Widget _buildEmptyState() {
     String message;
     IconData icon;
-    
+
     if (selectedFilter == 'Chưa đọc') {
       message = 'Không có thông báo chưa đọc';
       icon = Icons.check_circle_outline;
@@ -343,18 +372,22 @@ class _NotificationpageState extends State<Notificationpage> {
       message = 'Chưa có thông báo nào';
       icon = Icons.notifications_off_outlined;
     }
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 80, color: Colors.grey.shade400),
+          Icon(
+            icon,
+            size: 80,
+            color: AppColor.textSecondary(context).withOpacity(0.5),
+          ),
           Gap(16),
           Text(
             message,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: AppColor.textSecondary(context),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -367,7 +400,7 @@ class _NotificationpageState extends State<Notificationpage> {
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inMinutes < 1) {
       return 'Vừa xong';
     } else if (difference.inMinutes < 60) {

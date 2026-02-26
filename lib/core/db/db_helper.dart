@@ -7,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 8;
+  static const _dbVersion = 10;
 
   Database? _database;
 
@@ -96,6 +96,54 @@ class DbHelper {
       )
     ''');
 
+    // ✅ Blood Sugar table
+    await db.execute('''
+      CREATE TABLE blood_sugar (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        value REAL NOT NULL,
+        mealStatus TEXT NOT NULL DEFAULT 'random',
+        timestamp TEXT NOT NULL,
+        note TEXT
+      )
+    ''');
+
+    // ✅ Sleep Record table
+    await db.execute('''
+      CREATE TABLE sleep_record (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bedTime TEXT NOT NULL,
+        wakeTime TEXT NOT NULL,
+        quality INTEGER NOT NULL CHECK(quality >= 1 AND quality <= 5),
+        timestamp TEXT NOT NULL,
+        note TEXT
+      )
+    ''');
+
+    // ✅ Step Count table
+    await db.execute('''
+      CREATE TABLE step_count (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        steps INTEGER NOT NULL,
+        distance REAL,
+        caloriesBurned REAL,
+        timestamp TEXT NOT NULL,
+        note TEXT
+      )
+    ''');
+
+    // ✅ Cholesterol table
+    await db.execute('''
+      CREATE TABLE cholesterol (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        totalCholesterol REAL NOT NULL,
+        hdl REAL NOT NULL,
+        ldl REAL NOT NULL,
+        triglycerides REAL NOT NULL,
+        timestamp TEXT NOT NULL,
+        note TEXT
+      )
+    ''');
+
     // ✅ Meal Analysis table
     await db.execute('''
       CREATE TABLE meal_analysis (
@@ -125,6 +173,23 @@ class DbHelper {
         fiber REAL NOT NULL,
         category TEXT NOT NULL,
         FOREIGN KEY (meal_analysis_id) REFERENCES meal_analysis(id) ON DELETE CASCADE
+      )
+    ''');
+
+    // ✅ Family Profile table
+    await db.execute('''
+      CREATE TABLE family_profile (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        relationship TEXT NOT NULL DEFAULT 'other',
+        dateOfBirth TEXT,
+        gender TEXT,
+        bloodType TEXT,
+        height REAL,
+        weight REAL,
+        avatar TEXT,
+        isActive INTEGER NOT NULL DEFAULT 0,
+        createdAt TEXT NOT NULL
       )
     ''');
 
@@ -367,6 +432,76 @@ class DbHelper {
       } catch (e) {
         print('❌ Error adding dish_name column: $e');
       }
+    }
+
+    // ✅ Upgrade to version 9: Create blood_sugar, sleep_record, step_count, cholesterol tables
+    if (oldVersion < 9) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS blood_sugar (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          value REAL NOT NULL,
+          mealStatus TEXT NOT NULL DEFAULT 'random',
+          timestamp TEXT NOT NULL,
+          note TEXT
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS sleep_record (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          bedTime TEXT NOT NULL,
+          wakeTime TEXT NOT NULL,
+          quality INTEGER NOT NULL CHECK(quality >= 1 AND quality <= 5),
+          timestamp TEXT NOT NULL,
+          note TEXT
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS step_count (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          steps INTEGER NOT NULL,
+          distance REAL,
+          caloriesBurned REAL,
+          timestamp TEXT NOT NULL,
+          note TEXT
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cholesterol (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          totalCholesterol REAL NOT NULL,
+          hdl REAL NOT NULL,
+          ldl REAL NOT NULL,
+          triglycerides REAL NOT NULL,
+          timestamp TEXT NOT NULL,
+          note TEXT
+        )
+      ''');
+      print(
+        '✅ Created blood_sugar, sleep_record, step_count, cholesterol tables (v9)',
+      );
+    }
+
+    // ✅ Upgrade to version 10: Create family_profile table
+    if (oldVersion < 10) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS family_profile (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          relationship TEXT NOT NULL DEFAULT 'other',
+          dateOfBirth TEXT,
+          gender TEXT,
+          bloodType TEXT,
+          height REAL,
+          weight REAL,
+          avatar TEXT,
+          isActive INTEGER NOT NULL DEFAULT 0,
+          createdAt TEXT NOT NULL
+        )
+      ''');
+      print('✅ Created family_profile table (v10)');
     }
 
     print('✅ Database upgrade completed');

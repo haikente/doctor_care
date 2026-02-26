@@ -17,6 +17,16 @@ import 'package:doctor_care/presentation/pages/screens/health_overview/health_ov
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
 import 'package:doctor_care/presentation/bloc/BMIWeight/bmi_weight_bloc.dart';
 import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
+import 'package:doctor_care/presentation/bloc/blood_sugar/blood_sugar_cubit.dart';
+import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.dart';
+import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
+import 'package:doctor_care/presentation/bloc/cholesterol/cholesterol_cubit.dart';
+import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
+import 'package:doctor_care/presentation/pages/screens/BloodSugar/blood_sugar_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/SleepRecord/sleep_record_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/StepCount/step_count_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/Cholesterol/cholesterol_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -118,8 +128,60 @@ class MyApp extends StatelessWidget {
         // Water Intake
         BlocProvider(create: (context) => WaterIntakeBloc(di.dbHelper)),
 
+        // Blood Sugar
+        BlocProvider(
+          create: (context) => BloodSugarCubit(
+            di.getBloodSugar,
+            di.insertBloodSugar,
+            di.updateBloodSugar,
+            di.deleteBloodSugar,
+          ),
+        ),
+
+        // Sleep Record
+        BlocProvider(
+          create: (context) => SleepRecordCubit(
+            di.getSleepRecord,
+            di.insertSleepRecord,
+            di.updateSleepRecord,
+            di.deleteSleepRecord,
+          ),
+        ),
+
+        // Step Count
+        BlocProvider(
+          create: (context) => StepCountCubit(
+            di.getStepCount,
+            di.insertStepCount,
+            di.updateStepCount,
+            di.deleteStepCount,
+          ),
+        ),
+
+        // Cholesterol
+        BlocProvider(
+          create: (context) => CholesterolCubit(
+            di.getCholesterol,
+            di.insertCholesterol,
+            di.updateCholesterol,
+            di.deleteCholesterol,
+          ),
+        ),
+
         // Meal Analysis
         BlocProvider(create: (context) => di.mealAnalysisBloc),
+
+        // Family Profile
+        BlocProvider(
+          create: (context) => FamilyProfileCubit(
+            di.getFamilyProfiles,
+            di.insertFamilyProfile,
+            di.updateFamilyProfile,
+            di.deleteFamilyProfile,
+            di.setActiveFamilyProfile,
+            di.getActiveFamilyProfile,
+          )..loadProfiles(),
+        ),
       ],
 
       child: BlocBuilder<ThemeCubit, ThemeState>(
@@ -164,6 +226,11 @@ class MyApp extends StatelessWidget {
               '/spo2heart': (context) => const Spo2HeartRateScreen(),
               '/bmiweight': (context) => const BmiWeightScreen(),
               '/waterintake': (context) => const WaterIntakeScreen(),
+              '/bloodsugar': (context) => const BloodSugarScreen(),
+              '/sleep': (context) => const SleepRecordScreen(),
+              '/stepcounter': (context) => const StepCountScreen(),
+              '/cholesterol': (context) => const CholesterolScreen(),
+              '/familyprofile': (context) => const FamilyProfileScreen(),
             },
           );
         },
