@@ -70,9 +70,13 @@ class _LoginScreenState extends State<LoginScreen> {
         listener: (context, state) {
           if (state is Authenticated) {
             // Lưu phiên đăng nhập đầy đủ khi login thành công
+            // Dùng email từ state.user (chính xác cho cả Google login)
+            final email = state.user.email.isNotEmpty 
+                ? state.user.email 
+                : _emailController.text.trim();
             AuthStorageService.saveLoginSession(
               odLoginUser: state.user.uid,
-              email: _emailController.text.trim(),
+              email: email,
               role: state.role,
               rememberMe: _rememberMe,
             );
@@ -82,14 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
               _errorMessage = null;
             });
             
-            // Role-based routing
-            if (state.role == 'admin') {
-              print('🔐 Admin login detected, routing to Admin Panel');
-              Navigator.pushReplacementNamed(context, '/admin-panel');
-            } else {
-              print('👤 Patient login detected, routing to Home');
-              Navigator.pushReplacementNamed(context, '/navigation');
-            }
+            // Quay về root — main.dart home: BlocBuilder sẽ tự hiển thị
+            // Navigationbar hoặc AdminPanelScreen dựa vào Authenticated state
+            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
           } else if (state is AuthError) {
             // Set error message vào state
             setState(() {

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -147,7 +148,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     if (_isLoading) {
       return Scaffold(
@@ -243,7 +243,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Icons.favorite,
               [
                 DropdownButtonFormField<String>(
-                  value: _selectedBloodType,
+                  initialValue: _selectedBloodType,
                   decoration: const InputDecoration(
                     labelText: 'Nhóm máu',
                     prefixIcon: Icon(Icons.bloodtype),
@@ -328,42 +328,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             const Gap(32),
 
-            // Save Button
-            SizedBox(
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_isSaving) return;
-                  _saveProfile();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Lưu',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            ),
-
-
-            const Gap(32),
+            CustomButton(text: 'Lưu', onPressed: () {
+              if (_isSaving) return;
+              _saveProfile();
+            }),
+            const Gap(10),
           ],
         ),
       ),

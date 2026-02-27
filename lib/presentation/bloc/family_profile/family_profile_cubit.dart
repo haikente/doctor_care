@@ -27,10 +27,21 @@ class FamilyProfileCubit extends Cubit<FamilyProfileState> {
     this.getActiveFamilyProfile,
   ) : super(FamilyProfileInitial());
 
+  bool _selfEnsured = false;
+
   Future<void> loadProfiles() async {
     emit(FamilyProfileLoading());
     try {
-      final profiles = await getFamilyProfiles();
+      // Dọn dẹp hồ sơ "self" trùng lặp (chỉ giữ bản đầu tiên)
+      var profiles = await getFamilyProfiles();
+      final selfProfiles = profiles.where((p) => p.relationship == 'self').toList();
+      if (selfProfiles.length > 1) {
+        for (int i = 1; i < selfProfiles.length; i++) {
+          await deleteFamilyProfile(selfProfiles[i].id!);
+        }
+        profiles = await getFamilyProfiles();
+      }
+
       final active = await getActiveFamilyProfile();
       emit(FamilyProfileLoaded(profiles, activeProfile: active));
     } catch (e) {
@@ -94,6 +105,57 @@ class FamilyProfileCubit extends Cubit<FamilyProfileState> {
       emit(FamilyProfileLoaded(profiles, activeProfile: active));
     } catch (e) {
       emit(FamilyProfileError('Không thể chuyển hồ sơ'));
+    }
+  }
+
+  /// Tự động tạo hồ sơ "Bản thân" từ thông tin tài khoản nếu chưa có
+  Future<void> ensureSelfProfile({
+    required String name,
+    String? gender,
+    String? bloodType,
+    double? height,
+    double? weight,
+    DateTime? dateOfBirth,
+  }) async {
+    if (_selfEnsured) return; // Chỉ chạy 1 lần
+    _selfEnsured = true;
+
+    try {
+      final profiles = await getFamilyProfiles();
+      final selfProfiles = profiles.where((p) => p.relationship == 'self').toList();
+
+      // Xoá các bản ghi "self" trùng lặp, chỉ giữ 1
+      if (selfProfiles.length > 1) {
+        for (int i = 1; i < selfProfiles.length; i++) {
+          await deleteFamilyProfile(selfProfiles[i].id!);
+        }
+        await loadProfiles();
+        return;
+      }
+
+      if (selfProfiles.isEmpty) {
+        final selfProfile = FamilyProfile(
+          name: name.isNotEmpty ? name : 'Chủ tài khoản',
+          relationship: 'self',
+          gender: gender,
+          bloodType: bloodType,
+          height: height,
+          weight: weight,
+          dateOfBirth: dateOfBirth,
+          isActive: true,
+        );
+        await insertFamilyProfile(selfProfile);
+        // Lấy lại danh sách, tìm profile self vừa tạo và set active
+        final updatedProfiles = await getFamilyProfiles();
+        final selfCreated = updatedProfiles.where((p) => p.relationship == 'self').firstOrNull;
+        if (selfCreated != null && selfCreated.id != null) {
+          await setActiveFamilyProfile(selfCreated.id!);
+        }
+        // Reload để cập nhật UI
+        await loadProfiles();
+      }
+    } catch (e) {
+      // Không emit error — không ảnh hưởng flow chính
     }
   }
 }

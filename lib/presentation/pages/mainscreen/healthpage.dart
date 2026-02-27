@@ -10,14 +10,14 @@ class Healthpage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
+              Gap(25),
               Container(
                 padding: const EdgeInsets.all(16),
                 width: double.infinity,
@@ -162,110 +162,110 @@ class Healthpage extends StatelessWidget {
               Gap(20),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Huyết áp',
                   icon: Icons.bloodtype_outlined,
-                  color: Colors.red.shade400,
+                  color: Colors.red,
                   route: '/bloodpressure',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Chỉ số HbA1c',
                   icon: Icons.medical_information_outlined,
-                  color: Colors.orange.shade400,
+                  color: Colors.orange,
                   route: '/hba1c',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Nhiệt độ',
                   icon: Icons.thermostat_outlined,
-                  color: Colors.green.shade400,
+                  color: Colors.green,
                   route: '/temperature',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'SPO2 & Nhịp tim',
                   icon: Icons.water_drop_outlined,
-                  color: Colors.purple.shade400,
+                  color: Colors.purple,
                   route: '/spo2heart',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'BMI & Cân nặng',
                   icon: Icons.monitor_weight_outlined,
-                  color: Colors.blue.shade400,
+                  color: Colors.blue,
                   route: '/bmiweight',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Lượng nước uống',
                   icon: Icons.local_drink,
-                  color: Colors.lightBlue.shade400,
+                  color: Colors.lightBlue,
                   route: '/waterintake',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Đường huyết',
                   icon: Icons.water_drop_outlined,
-                  color: Colors.teal.shade400,
+                  color: Colors.teal,
                   route: '/bloodsugar',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Giấc ngủ',
                   icon: Icons.bedtime_outlined,
-                  color: Colors.indigo.shade400,
+                  color: Colors.indigo,
                   route: '/sleep',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Bước chân',
                   icon: Icons.directions_walk,
-                  color: Colors.green.shade600,
+                  color: Colors.green,
                   route: '/stepcounter',
                 ),
               ),
               Gap(15),
               SizedBox(
                 width: double.infinity,
-                height: 100,
+                height: 120,
                 child: HealthFeatureCard(
                   title: 'Cholesterol',
                   icon: Icons.bloodtype,
-                  color: Colors.deepPurple.shade400,
+                  color: Colors.deepPurple,
                   route: '/cholesterol',
                 ),
               ),
@@ -273,7 +273,6 @@ class Healthpage extends StatelessWidget {
           ),
         ),
       ),
-      )
     );
   }
 }
@@ -304,14 +303,19 @@ class HealthFeatureCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [color, color.withOpacity(0.5)],
+            colors: [
+            color,
+            color.withOpacity(.5),
+            color.withOpacity(.3),
+            
+            ],
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.3),
               blurRadius: 12,
-              offset: Offset(0, 6),
+              offset: Offset(0, 5),
             ),
           ],
         ),

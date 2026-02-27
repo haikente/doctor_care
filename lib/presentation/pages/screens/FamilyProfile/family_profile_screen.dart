@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/domain/entities/family_profile.dart';
 import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/FamilyProfile/add_edit_family_profile_screen.dart';
@@ -12,27 +13,23 @@ class FamilyProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          'Quản lý hồ sơ gia đình',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+      appBar: CustomStackAppBar(
+        onBack: () => Navigator.pop(context),
+        title: "Quản lý hồ sơ gia đình",
         centerTitle: true,
-        elevation: 0,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        icon: const Icon(
+          Icons.add_circle_outline_outlined,
+          color: Colors.white,
+          size: 20,
+        ),
+        onInfo: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const AddEditFamilyProfileScreen(),
+              builder: (context) => AddEditFamilyProfileScreen(),
             ),
           );
         },
-        icon: const Icon(Icons.person_add),
-        label: const Text('Thêm hồ sơ'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: BlocBuilder<FamilyProfileCubit, FamilyProfileState>(
         builder: (context, state) {
@@ -45,12 +42,20 @@ class FamilyProfileScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Colors.red.shade300,
+                  ),
                   const Gap(12),
-                  Text(state.message, style: const TextStyle(color: Colors.red)),
+                  Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                   const Gap(12),
                   ElevatedButton(
-                    onPressed: () => context.read<FamilyProfileCubit>().loadProfiles(),
+                    onPressed: () =>
+                        context.read<FamilyProfileCubit>().loadProfiles(),
                     child: const Text('Thử lại'),
                   ),
                 ],
@@ -82,16 +87,20 @@ class FamilyProfileScreen extends StatelessWidget {
               color: Colors.blue.shade50,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.family_restroom, size: 64, color: Colors.blue.shade300),
+            child: Icon(
+              Icons.family_restroom,
+              size: 64,
+              color: Colors.blue.shade300,
+            ),
           ),
           const Gap(24),
           const Text(
-            'Chưa có hồ sơ nào',
+            '',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Gap(8),
           Text(
-            'Thêm hồ sơ thành viên gia đình\nđể theo dõi sức khoẻ cho mỗi người',
+            '',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
@@ -106,12 +115,14 @@ class FamilyProfileScreen extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.person_add),
-            label: const Text('Thêm hồ sơ đầu tiên'),
+            label: const Text('Thêm hồ sơ'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],
@@ -121,7 +132,7 @@ class FamilyProfileScreen extends StatelessWidget {
 
   Widget _buildProfileList(BuildContext context, FamilyProfileLoaded state) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
       itemCount: state.profiles.length,
       itemBuilder: (context, index) {
         final profile = state.profiles[index];
@@ -131,9 +142,13 @@ class FamilyProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileCard(BuildContext context, FamilyProfile profile, bool isActive) {
+  Widget _buildProfileCard(
+    BuildContext context,
+    FamilyProfile profile,
+    bool isActive,
+  ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 13),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -156,6 +171,14 @@ class FamilyProfileScreen extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AddEditFamilyProfileScreen(profile: profile),
+              ),
+            );
+          },
+          onLongPress: () {
             if (!isActive) {
               context.read<FamilyProfileCubit>().switchProfile(profile.id!);
             }
@@ -166,8 +189,8 @@ class FamilyProfileScreen extends StatelessWidget {
               children: [
                 // Avatar
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: profile.relationshipColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(16),
@@ -177,7 +200,7 @@ class FamilyProfileScreen extends StatelessWidget {
                       profile.initials,
                       style: TextStyle(
                         color: profile.relationshipColor,
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -211,7 +234,7 @@ class FamilyProfileScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Text(
-                                'Đang chọn',
+                                'Đã chọn',
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontSize: 11,
@@ -267,79 +290,12 @@ class FamilyProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-                // Actions
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AddEditFamilyProfileScreen(profile: profile),
-                        ),
-                      );
-                    } else if (value == 'delete') {
-                      _showDeleteConfirmation(context, profile);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          Gap(8),
-                          Text('Chỉnh sửa'),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          const Gap(8),
-                          const Text('Xóa', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+   }
   }
-
-  void _showDeleteConfirmation(BuildContext context, FamilyProfile profile) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Xóa hồ sơ'),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa hồ sơ "${profile.name}"?\n\nHành động này không thể hoàn tác.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<FamilyProfileCubit>().removeProfile(profile.id!);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Xóa'),
-          ),
-        ],
-      ),
-    );
-  }
-}

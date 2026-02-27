@@ -27,11 +27,12 @@ import 'package:doctor_care/presentation/pages/screens/SleepRecord/sleep_record_
 import 'package:doctor_care/presentation/pages/screens/StepCount/step_count_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/Cholesterol/cholesterol_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/auth/login_screen.dart';
+import 'package:doctor_care/splash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
-import 'package:doctor_care/presentation/pages/screens/auth/login_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/admin_panel_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -211,12 +212,28 @@ class MyApp extends StatelessWidget {
             home: BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
                 if (state is Authenticated) {
+                  // Đảm bảo hồ sơ "Bản thân" tồn tại khi mở app
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.read<FamilyProfileCubit>().ensureSelfProfile(
+                      name: state.user.fullName ?? state.user.email.split('@').first,
+                      gender: state.user.gender,
+                      bloodType: state.user.bloodType,
+                      height: state.user.height,
+                      weight: state.user.weight,
+                      dateOfBirth: state.user.dateOfBirth,
+                    );
+                  });
+                  // Admin → admin panel, Patient → navigation
+                  if (state.role == 'admin') {
+                    return const AdminPanelScreen();
+                  }
                   return const Navigationbar();
                 }
-                return const LoginScreen();
+                return const Splash();
               },
             ),
             routes: {
+              '/login': (context) => const LoginScreen(),
               '/navigation': (context) => const Navigationbar(),
               '/admin-panel': (context) => const AdminPanelScreen(),
               '/health-overview': (context) => const HealthOverviewScreen(),

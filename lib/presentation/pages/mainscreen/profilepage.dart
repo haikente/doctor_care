@@ -2,6 +2,7 @@ import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/core/services/image_upload_service.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
+import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/profile/edit_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,13 +20,7 @@ class Profilepage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        elevation: 0,
-        title: Text('Hồ sơ', style: theme.appBarTheme.titleTextStyle),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
@@ -35,17 +30,18 @@ class Profilepage extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: isDarkMode
-                      ? [Color(0xFF1E1E1E), Color(0xFF121212)]
+                      ? [
+                        Color(0xFF1E1E1E),
+                        Color(0xFF121212)]
                       : [
                           AppColor.background,
-                          AppColor.background.withOpacity(0.8),
+                          AppColor.background.withOpacity(.5),
                         ],
                 ),
               ),
               child: Column(
                 children: [
-                  Gap(20),
-
+                  Gap(60),
                   // Avatar
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
@@ -60,7 +56,7 @@ class Profilepage extends StatelessWidget {
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: theme.colorScheme.surface,
-                                width: 4,
+                                width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
@@ -71,7 +67,7 @@ class Profilepage extends StatelessWidget {
                               ],
                             ),
                             child: CircleAvatar(
-                              radius: 50,
+                              radius: 40,
                               backgroundColor: theme.colorScheme.surface,
                               backgroundImage: photoUrl != null
                                   ? NetworkImage(photoUrl)
@@ -79,7 +75,7 @@ class Profilepage extends StatelessWidget {
                               child: photoUrl == null
                                   ? Icon(
                                       Icons.person,
-                                      size: 50,
+                                      size: 35,
                                       color: theme.primaryColor,
                                     )
                                   : null,
@@ -123,6 +119,14 @@ class Profilepage extends StatelessWidget {
                         return Column(
                           children: [
                             Text(
+                              "Xin chào",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
                               state.user.fullName ?? 'Người dùng',
                               style: TextStyle(
                                 fontSize: 22,
@@ -131,13 +135,7 @@ class Profilepage extends StatelessWidget {
                               ),
                             ),
                             Gap(5),
-                            Text(
-                              state.user.email,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                            ),
+                            
                             if (state.user.phoneNumber != null) ...[
                               Gap(3),
                               Text(
@@ -173,59 +171,11 @@ class Profilepage extends StatelessWidget {
                       );
                     },
                   ),
-
-                  Gap(20),
-
-                  // Stats Row
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 20),
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(isDarkMode ? 0.1 : 0.15),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatItem(
-                          '125',
-                          'Bản ghi',
-                          Icons.assessment_outlined,
-                        ),
-                        Container(
-                          width: 1,
-                          height: 40,
-                          color: Colors.white.withOpacity(0.3),
-                        ),
-                        _buildStatItem(
-                          '45',
-                          'Ngày dùng',
-                          Icons.calendar_today_outlined,
-                        ),
-                        Container(
-                          width: 1,
-                          height: 40,
-                          color: Colors.white.withOpacity(0.3),
-                        ),
-                        _buildStatItem(
-                          '12',
-                          'Thành tích',
-                          Icons.emoji_events_outlined,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Gap(25),
+                Gap(25),
                 ],
               ),
             ),
-
-            // ========== MENU SECTIONS ==========
+            
             Padding(
               padding: EdgeInsets.all(15),
               child: Column(
@@ -233,6 +183,48 @@ class Profilepage extends StatelessWidget {
                 children: [
                   _buildSectionTitle('Cài đặt', theme),
                   Gap(10),
+
+                  _buildMenuCard(theme, [
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.person_outline,
+                      title: 'Thông tin cá nhân',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    Divider(height: 1, indent: 60, color: theme.dividerColor),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.family_restroom_outlined,
+                      title: 'Thành viên gia đình',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FamilyProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    Divider(height: 1, indent: 60, color: theme.dividerColor),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.account_circle_outlined,
+                      title: 'Tài khoản',
+                      onTap: () {
+                       
+                      },
+                    ),
+                  ]),
+                Gap(20),
+                _buildSectionTitle('Khác', theme),
+                Gap(10),
                   _buildMenuCard(theme, [
                     _buildMenuItem(
                       theme: theme,
@@ -246,10 +238,9 @@ class Profilepage extends StatelessWidget {
                       ),
                       onTap: null,
                     ),
-                    Divider(height: 1, indent: 60, color: theme.dividerColor),
+                  Divider(height: 1, indent: 60, color: theme.dividerColor),
 
-                    // ✅ Dark Mode Switch
-                    _buildMenuItem(
+                  _buildMenuItem(
                       theme: theme,
                       icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
                       title: 'Chế độ tối',
@@ -273,30 +264,7 @@ class Profilepage extends StatelessWidget {
                       onTap: () {},
                     ),
                   ]),
-
-                  Gap(20),
-
-                  // Account Section
-                  _buildSectionTitle('Tài khoản', theme),
-                  Gap(10),
-                  _buildMenuCard(theme, [
-                    _buildMenuItem(
-                      theme: theme,
-                      icon: Icons.person_outline,
-                      title: 'Chỉnh sửa thông tin',
-                      subtitle: 'Cập nhật thông tin cá nhân',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditProfileScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ]),
-
-                  Gap(20),
+                Gap(20),
 
                   // Logout Button
                   Container(
@@ -351,30 +319,7 @@ class Profilepage extends StatelessWidget {
       ),
     );
   }
-
-  // ========== UPDATED WIDGETS ==========
-
-  Widget _buildStatItem(String value, String label, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.white, size: 24),
-        Gap(5),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        Gap(2),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)),
-        ),
-      ],
-    );
-  }
+}
 
   Widget _buildSectionTitle(String title, ThemeData theme) {
     return Text(
@@ -408,7 +353,7 @@ class Profilepage extends StatelessWidget {
     required ThemeData theme,
     required IconData icon,
     required String title,
-    required String subtitle,
+    String? subtitle,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
@@ -437,17 +382,9 @@ class Profilepage extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
                         color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    Gap(2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.textTheme.bodyMedium?.color,
                       ),
                     ),
                   ],
@@ -735,4 +672,3 @@ class Profilepage extends StatelessWidget {
       }
     }
   }
-}

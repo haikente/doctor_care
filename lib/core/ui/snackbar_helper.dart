@@ -4,6 +4,48 @@ enum SnackBarType { add, update, delete }
 
 class AppSnackBar {
 
+    static void showFamilyProfile({
+    required BuildContext context,
+    required SnackBarType type,
+  }) {
+    final config = {
+      SnackBarType.add: _SnackBarConfig(
+        color: Colors.green,
+        icon: Icons.check_circle,
+        text: 'Đã thêm hồ sơ thành công',
+      ),
+      SnackBarType.update: _SnackBarConfig(
+        color: Colors.orange,
+        icon: Icons.edit,
+        text: 'Cập nhật hồ sơ thành công',
+      ),
+      SnackBarType.delete: _SnackBarConfig(
+        color: Colors.red,
+        icon: Icons.delete_outline,
+        text: 'Đã xóa hồ sơ thành công',
+      ),
+    };
+
+    final settings = config[type]!;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: settings.color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Row(
+          children: [
+            Icon(settings.icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(settings.text)),
+          ],
+        ),
+      ),
+    );
+  }
+
   static void showBloodPressure({
     required BuildContext context,
     required SnackBarType type,
