@@ -1,4 +1,5 @@
 import 'package:doctor_care/core/pages/custom_button.dart';
+import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -81,7 +82,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
           ),
           Divider(),
 
-          // ========== THỜI GIAN ==========
+          // ========== THá»œI GIAN ==========
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -120,7 +121,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
             ),
           ),
 
-          // ========== TRẠNG THÁI ==========
+          // ========== Trạng thái ==========
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text("Trạng thái", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
@@ -129,7 +130,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             child: Wrap(
-              spacing: 8,
+              spacing: 5,
               runSpacing: 8,
               children: [
                 GestureDetector(
@@ -146,7 +147,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                       tempStatus = "Bình thường";
                     });
                   },
-                  child: _buildStatusChip("Bình thường", tempStatus == "Bình thường", Colors.green),
+                  child: _buildStatusChip("Bình thường", tempStatus == "Bình thường",),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -154,7 +155,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                       tempStatus = "Theo dõi";
                     });
                   },
-                  child: _buildStatusChip("Theo dõi", tempStatus == "Theo dõi", Colors.orange),
+                  child: _buildStatusChip("Theo dõi", tempStatus == "Theo dõi",),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -162,7 +163,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                       tempStatus = "Cần chú ý";
                     });
                   },
-                  child: _buildStatusChip("Cần chú ý", tempStatus == "Cần chú ý", Colors.deepOrange),
+                  child: _buildStatusChip("Cần chú ý", tempStatus == "Cần chú ý", ),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -170,7 +171,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                       tempStatus = "Nguy hiểm";
                     });
                   },
-                  child: _buildStatusChip("Nguy hiểm", tempStatus == "Nguy hiểm", Colors.red),
+                  child: _buildStatusChip("Nguy hiểm", tempStatus == "Nguy hiểm",),
                 ),
               ],
             ),
@@ -185,7 +186,7 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Đặt lại",
+                    text: "Bộ lọc",
                     onPressed: () {
                       setState(() {
                         tempStartDate = null;
@@ -218,233 +219,45 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
     );
   }
 
-  Widget _buildStatusChip(String label, bool isSelected, [Color? color]) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: isSelected 
-          ? (color?.withOpacity(0.15) ?? Colors.purple.shade50)
-          : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected 
-            ? (color ?? Colors.purple.shade900)
-            : Colors.grey.shade300,
-          width: isSelected ? 1.5 : 1,
+  Widget _buildStatusChip(String label, bool isSelected) {
+    return SizedBox(
+      height: 40,
+      width: 115,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? Colors.blue.shade600 : Colors.grey.shade400,
+            width: 1.5,
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected 
-            ? (color ?? Colors.purple.shade900)
-            : Colors.grey.shade700,
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              color: isSelected ? Colors.blue : Colors.black87,
+            ),
+          ),
         ),
       ),
     );
   }
 
   void _openCustomDatePicker(BuildContext context) {
-    showModalBottomSheet(
+    CustomDateRangePickerDialog.show(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => _CustomDateRangePicker(
-        firstDate: widget.firstAvailableDate,
-        lastDate: widget.lastAvailableDate,
-        initialStartDate: tempStartDate ?? widget.firstAvailableDate,
-        initialEndDate: tempEndDate ?? widget.lastAvailableDate,
-        onConfirm: (startDate, endDate) {
-          setState(() {
-            tempStartDate = startDate;
-            tempEndDate = endDate;
-          });
-        },
-      ),
-    );
-  }
-}
-
-// Custom Date Range Picker
-class _CustomDateRangePicker extends StatefulWidget {
-  final DateTime firstDate;
-  final DateTime lastDate;
-  final DateTime initialStartDate;
-  final DateTime initialEndDate;
-  final Function(DateTime, DateTime) onConfirm;
-
-  const _CustomDateRangePicker({
-    required this.firstDate,
-    required this.lastDate,
-    required this.initialStartDate,
-    required this.initialEndDate,
-    required this.onConfirm,
-  });
-
-  @override
-  State<_CustomDateRangePicker> createState() => _CustomDateRangePickerState();
-}
-
-class _CustomDateRangePickerState extends State<_CustomDateRangePicker> {
-  late DateTime selectedStartDate;
-  late DateTime selectedEndDate;
-  bool isSelectingStart = true;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedStartDate = widget.initialStartDate;
-    selectedEndDate = widget.initialEndDate;
-  }
-
-  String formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 500,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Chọn khoảng thời gian",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.clear),
-                ),
-              ],
-            ),
-          ),
-          Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isSelectingStart = true;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isSelectingStart ? Colors.purple.shade50 : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelectingStart ? Colors.blue.shade900 : Colors.grey.shade300,
-                          width: isSelectingStart ? 2 : 1,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Text("Từ ngày", style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                          Gap(4),
-                          Text(
-                            formatDate(selectedStartDate),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: isSelectingStart ? Colors.blue.shade900 : Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Gap(12),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isSelectingStart = false;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: !isSelectingStart ? Colors.purple.shade50 : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: !isSelectingStart ? Colors.blue.shade900 : Colors.blue.shade300,
-                          width: !isSelectingStart ? 2 : 1,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Text("Đến ngày", style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                          Gap(4),
-                          Text(
-                            formatDate(selectedEndDate),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: !isSelectingStart ? Colors.blue.shade900 : Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: CalendarDatePicker(
-              initialDate: isSelectingStart ? selectedStartDate : selectedEndDate,
-              firstDate: widget.firstDate,
-              lastDate: widget.lastDate,
-              onDateChanged: (date) {
-                setState(() {
-                  if (isSelectingStart) {
-                    selectedStartDate = date;
-                    if (selectedEndDate.isBefore(date)) {
-                      selectedEndDate = date;
-                    }
-                  } else {
-                    selectedEndDate = date;
-                    if (selectedStartDate.isAfter(date)) {
-                      selectedStartDate = date;
-                    }
-                  }
-                });
-              },
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                widget.onConfirm(selectedStartDate, selectedEndDate);
-                Navigator.pop(context);
-              }, child: Text("Xác nhận"),
-            )
-          ),
-        ],
-      ),
+      initialStartDate: tempStartDate,
+      initialEndDate: tempEndDate,
+      onConfirm: (start, end) {
+        setState(() {
+          tempStartDate = start;
+          tempEndDate = end;
+        });
+      },
     );
   }
 }

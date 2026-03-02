@@ -3,10 +3,12 @@ import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/domain/entities/sleep_record.dart';
 import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/SleepRecord/insert_sleep_record.dart';
+import 'package:doctor_care/presentation/pages/screens/SleepRecord/widgets/filter_bottom_sheet_sleep.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 
 class SleepRecordScreen extends StatefulWidget {
   const SleepRecordScreen({super.key});
@@ -16,10 +18,54 @@ class SleepRecordScreen extends StatefulWidget {
 }
 
 class _SleepRecordScreenState extends State<SleepRecordScreen> {
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String? _selectedDurationStatus;
+  int? _selectedQuality;
+
   @override
   void initState() {
     super.initState();
     context.read<SleepRecordCubit>().loadSleepRecords();
+  }
+
+  List<SleepRecord> _filterRecords(List<SleepRecord> records) {
+    var filtered = records;
+
+    // Lọc theo khoảng thời gian
+    if (_startDate != null && _endDate != null) {
+      filtered = filtered.where((r) {
+        return r.timestamp.isAfter(_startDate!.subtract(const Duration(days: 1))) &&
+            r.timestamp.isBefore(_endDate!.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    // Lọc theo phân loại thời lượng ngủ
+    if (_selectedDurationStatus != null) {
+      filtered = filtered.where((r) {
+        return r.durationStatus == _selectedDurationStatus;
+      }).toList();
+    }
+
+    // Lọc theo chất lượng
+    if (_selectedQuality != null) {
+      filtered = filtered.where((r) {
+        return r.quality == _selectedQuality;
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  String _getQualityLabel(int quality) {
+    switch (quality) {
+      case 1: return 'Rất tệ';
+      case 2: return 'Tệ';
+      case 3: return 'Bình thường';
+      case 4: return 'Tốt';
+      case 5: return 'Rất tốt';
+      default: return '';
+    }
   }
 
   @override
@@ -73,26 +119,125 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
               );
             }
 
+            final filteredRecords = _filterRecords(records);
+
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "${records.length} bản ghi",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "${filteredRecords.length} bản ghi",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            FilterBottomSheetSleep.show(
+                              context: context,
+                              initialStartDate: _startDate,
+                              initialEndDate: _endDate,
+                              initialDurationStatus: _selectedDurationStatus,
+                              initialQuality: _selectedQuality,
+                              onApply: (startDate, endDate, durationStatus, quality) {
+                                setState(() {
+                                  _startDate = startDate;
+                                  _endDate = endDate;
+                                  _selectedDurationStatus = durationStatus;
+                                  _selectedQuality = quality;
+                                });
+                              },
+                              onReset: () {
+                                setState(() {
+                                  _startDate = null;
+                                  _endDate = null;
+                                  _selectedDurationStatus = null;
+                                  _selectedQuality = null;
+                                });
+                              },
+                            );
+                          },
+                          child: const Icon(Icons.science_outlined, color: Colors.black54),
+                        ),
+                      ],
                     ),
+
+                    // Filter chips
+                    if (_startDate != null || _endDate != null || _selectedDurationStatus != null || _selectedQuality != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            if (_startDate != null && _endDate != null)
+                              Chip(
+                                label: Text(
+                                  "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
+                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                ),
+                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                onDeleted: () {
+                                  setState(() {
+                                    _startDate = null;
+                                    _endDate = null;
+                                  });
+                                },
+                                backgroundColor: Colors.blue.shade50,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: Colors.blue.shade800),
+                                ),
+                              ),
+                            if (_selectedDurationStatus != null)
+                              Chip(
+                                label: Text(
+                                  _selectedDurationStatus!,
+                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                ),
+                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                onDeleted: () {
+                                  setState(() => _selectedDurationStatus = null);
+                                },
+                                backgroundColor: Colors.blue.shade50,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: Colors.blue.shade800),
+                                ),
+                              ),
+                            if (_selectedQuality != null)
+                              Chip(
+                                label: Text(
+                                  _getQualityLabel(_selectedQuality!),
+                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                ),
+                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                onDeleted: () {
+                                  setState(() => _selectedQuality = null);
+                                },
+                                backgroundColor: Colors.blue.shade50,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: Colors.blue.shade800),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
                     const Gap(15),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: records.length,
+                      itemCount: filteredRecords.length,
                       itemBuilder: (context, index) {
-                        final data = records[records.length - 1 - index];
+                        final data = filteredRecords[filteredRecords.length - 1 - index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 13),
                           child: Slidable(

@@ -239,11 +239,20 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                     ),
                     const Gap(8),
                     Wrap(
-                      spacing: 8,
+                      spacing: 12,
                       runSpacing: 8,
                       children: _mealOptions.map((option) {
                         final isSelected = _selectedMealStatus == option['key'];
                         return ChoiceChip(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Colors.blue.shade600
+                                  : Colors.grey.shade400,
+                              width: 1.2,
+                            ),
+                          ),
                           label: Text(option['label']!),
                           selected: isSelected,
                           onSelected: (selected) {
@@ -252,11 +261,11 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                             });
                             _validate();
                           },
-                          selectedColor: Colors.teal.shade100,
+                          selectedColor: Colors.blue.shade100,
                           labelStyle: TextStyle(
                             color: isSelected
-                                ? Colors.teal.shade800
-                                : Colors.grey.shade700,
+                                ? Colors.blue.shade600
+                                : Colors.black87,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.w400,

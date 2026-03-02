@@ -3,10 +3,12 @@ import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/domain/entities/cholesterol.dart';
 import 'package:doctor_care/presentation/bloc/cholesterol/cholesterol_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/Cholesterol/insert_cholesterol.dart';
+import 'package:doctor_care/presentation/pages/screens/Cholesterol/widgets/filter_bottom_sheet_cholesterol.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 
 class CholesterolScreen extends StatefulWidget {
   const CholesterolScreen({super.key});
@@ -16,6 +18,28 @@ class CholesterolScreen extends StatefulWidget {
 }
 
 class _CholesterolScreenState extends State<CholesterolScreen> {
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String? _selectedStatus;
+
+  List<Cholesterol> _filterRecords(List<Cholesterol> records) {
+    return records.where((record) {
+      // Lọc theo thời gian
+      if (_startDate != null && _endDate != null) {
+        final date = DateTime(
+            record.timestamp.year, record.timestamp.month, record.timestamp.day);
+        final start = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+        final end = DateTime(_endDate!.year, _endDate!.month, _endDate!.day);
+        if (date.isBefore(start) || date.isAfter(end)) return false;
+      }
+      // Lọc theo đánh giá tổng thể
+      if (_selectedStatus != null && record.overallStatus != _selectedStatus) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,8 +65,9 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
       ),
       body: BlocBuilder<CholesterolCubit, CholesterolState>(
         builder: (context, state) {
-          if (state is CholesterolLoading)
+          if (state is CholesterolLoading) {
             return const Center(child: CircularProgressIndicator());
+          }
           if (state is CholesterolLoaded) {
             final records = state.records;
             if (records.isEmpty) {
@@ -69,26 +94,105 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                 ),
               );
             }
+            final filteredRecords = _filterRecords(records);
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "${records.length} bản ghi",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "${filteredRecords.length} bản ghi",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            FilterBottomSheetCholesterol.show(
+                              context: context,
+                              initialStartDate: _startDate,
+                              initialEndDate: _endDate,
+                              initialStatus: _selectedStatus,
+                              onApply: (startDate, endDate, status) {
+                                setState(() {
+                                  _startDate = startDate;
+                                  _endDate = endDate;
+                                  _selectedStatus = status;
+                                });
+                              },
+                              onReset: () {
+                                setState(() {
+                                  _startDate = null;
+                                  _endDate = null;
+                                  _selectedStatus = null;
+                                });
+                              },
+                            );
+                          },
+                          child: const Icon(Icons.science_outlined, color: Colors.black54),
+                        ),
+                      ],
                     ),
+
+                    // Filter chips
+                    if (_startDate != null || _endDate != null || _selectedStatus != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            if (_startDate != null && _endDate != null)
+                              Chip(
+                                label: Text(
+                                  "${DateFormat('dd/MM').format(_startDate!)} - ${DateFormat('dd/MM').format(_endDate!)}",
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                deleteIcon: const Icon(Icons.close, size: 16),
+                                onDeleted: () {
+                                  setState(() {
+                                    _startDate = null;
+                                    _endDate = null;
+                                  });
+                                },
+                                backgroundColor: Colors.blue.shade50,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(color: Colors.blue.shade200),
+                                ),
+                              ),
+                            if (_selectedStatus != null)
+                              Chip(
+                                label: Text(
+                                  _selectedStatus!,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                deleteIcon: const Icon(Icons.close, size: 16),
+                                onDeleted: () {
+                                  setState(() => _selectedStatus = null);
+                                },
+                                backgroundColor: Colors.blue.shade50,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(color: Colors.blue.shade200),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
                     const Gap(15),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: records.length,
+                      itemCount: filteredRecords.length,
                       itemBuilder: (context, index) {
-                        final data = records[records.length - 1 - index];
+                        final data = filteredRecords[filteredRecords.length - 1 - index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 13),
                           child: Slidable(
@@ -102,12 +206,13 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                                     AppDialog.showDeleteConfirm(
                                       context: context,
                                       onConfirm: () {
-                                        if (data.id != null)
+                                        if (data.id != null) {
                                           context
                                               .read<CholesterolCubit>()
                                               .deleteCholesterolRecord(
                                                 data.id.toString(),
                                               );
+                                        }
                                       },
                                     );
                                   },

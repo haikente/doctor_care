@@ -3,10 +3,13 @@ import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/domain/entities/step_count.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/StepCount/insert_step_count.dart';
+import 'package:doctor_care/presentation/pages/screens/StepCount/widgets/filter_bottom_sheet_step_count.dart';
+import 'package:doctor_care/presentation/pages/screens/StepCount/widgets/step_count_pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 
 class StepCountScreen extends StatefulWidget {
   const StepCountScreen({super.key});
@@ -16,10 +19,31 @@ class StepCountScreen extends StatefulWidget {
 }
 
 class _StepCountScreenState extends State<StepCountScreen> {
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String? _selectedStatus;
+
   @override
   void initState() {
     super.initState();
     context.read<StepCountCubit>().loadStepCounts();
+  }
+
+  List<StepCount> _filterRecords(List<StepCount> records) {
+    var filtered = records;
+
+    if (_startDate != null && _endDate != null) {
+      filtered = filtered.where((r) {
+        return r.timestamp.isAfter(_startDate!.subtract(const Duration(days: 1))) &&
+            r.timestamp.isBefore(_endDate!.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    if (_selectedStatus != null) {
+      filtered = filtered.where((r) => r.status == _selectedStatus).toList();
+    }
+
+    return filtered;
   }
 
   @override
@@ -72,26 +96,111 @@ class _StepCountScreenState extends State<StepCountScreen> {
                 ),
               );
             }
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${records.length} bản ghi",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Gap(15),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: records.length,
-                      itemBuilder: (context, index) {
-                        final data = records[records.length - 1 - index];
+            final filteredRecords = _filterRecords(records);
+            return Column(
+              children: [
+                // Biểu đồ tròn phân bố mức vận động
+                StepCountPieChart(records: records),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "${filteredRecords.length} bản ghi",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  FilterBottomSheetStepCount.show(
+                                    context: context,
+                                    initialStartDate: _startDate,
+                                    initialEndDate: _endDate,
+                                    initialStatus: _selectedStatus,
+                                    onApply: (startDate, endDate, status) {
+                                      setState(() {
+                                        _startDate = startDate;
+                                        _endDate = endDate;
+                                        _selectedStatus = status;
+                                      });
+                                    },
+                                    onReset: () {
+                                      setState(() {
+                                        _startDate = null;
+                                        _endDate = null;
+                                        _selectedStatus = null;
+                                      });
+                                    },
+                                  );
+                                },
+                                child: const Icon(Icons.science_outlined, color: Colors.black54),
+                              ),
+                            ],
+                          ),
+
+                          // Filter chips
+                          if (_startDate != null || _endDate != null || _selectedStatus != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                children: [
+                                  if (_startDate != null && _endDate != null)
+                                    Chip(
+                                      label: Text(
+                                        "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
+                                        style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                      ),
+                                      deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                      onDeleted: () {
+                                        setState(() {
+                                          _startDate = null;
+                                          _endDate = null;
+                                        });
+                                      },
+                                      backgroundColor: Colors.blue.shade50,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        side: BorderSide(color: Colors.blue.shade800),
+                                      ),
+                                    ),
+                                  if (_selectedStatus != null)
+                                    Chip(
+                                      label: Text(
+                                        _selectedStatus!,
+                                        style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                      ),
+                                      deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                      onDeleted: () {
+                                        setState(() => _selectedStatus = null);
+                                      },
+                                      backgroundColor: Colors.blue.shade50,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        side: BorderSide(color: Colors.blue.shade800),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+
+                          const Gap(15),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: filteredRecords.length,
+                            itemBuilder: (context, index) {
+                              final data = filteredRecords[filteredRecords.length - 1 - index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 13),
                           child: Slidable(
@@ -159,7 +268,10 @@ class _StepCountScreenState extends State<StepCountScreen> {
                   ],
                 ),
               ),
-            );
+            ),
+          ),
+        ],
+      );
           }
           if (state is StepCountError) {
             return Center(child: Text(state.message));

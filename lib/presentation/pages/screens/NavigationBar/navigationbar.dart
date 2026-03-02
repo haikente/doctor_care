@@ -121,7 +121,7 @@ class _NavigationbarState extends State<Navigationbar> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Bữa ăn',
+                        'Dinh dưỡng',
                         style: TextStyle(
                           fontSize: 11,
                           color: _selectedIndex == 1

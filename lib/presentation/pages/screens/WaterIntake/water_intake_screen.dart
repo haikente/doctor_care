@@ -3,6 +3,7 @@ import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/domain/entities/water_intake.dart';
 import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/WaterIntake/insert_water_intake.dart';
+import 'package:doctor_care/presentation/pages/screens/WaterIntake/widgets/filter_bottom_sheet_water_intake.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -18,6 +19,7 @@ class WaterIntakeScreen extends StatefulWidget {
 
 class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
   DateTime _selectedDate = DateTime.now();
+  String? _selectedAmountFilter;
 
   @override
   void initState() {
@@ -37,6 +39,46 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
     return records.fold(0, (sum, record) => sum + record.amount);
   }
 
+  List<WaterIntake> _filterByAmount(List<WaterIntake> records) {
+    if (_selectedAmountFilter == null) return records;
+    return records.where((record) {
+      switch (_selectedAmountFilter) {
+        case 'Nhỏ':
+          return record.amount <= 200;
+        case 'Vừa':
+          return record.amount > 200 && record.amount <= 500;
+        case 'Lớn':
+          return record.amount > 500 && record.amount <= 1000;
+        case 'Rất lớn':
+          return record.amount > 1000;
+        default:
+          return true;
+      }
+    }).toList();
+  }
+
+  String _getAmountFilterLabel(String filter) {
+    switch (filter) {
+      case 'Nhỏ':
+        return '≤ 200ml';
+      case 'Vừa':
+        return '201-500ml';
+      case 'Lớn':
+        return '501-1000ml';
+      case 'Rất lớn':
+        return '> 1000ml';
+      default:
+        return filter;
+    }
+  }
+
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,31 +86,11 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
         onBack: () => Navigator.pop(context),
         title: "Lượng nước uống",
         centerTitle: true,
-        icon: const Icon(Icons.calendar_today, color: Colors.white, size: 22),
-        onInfo: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: _selectedDate,
-            firstDate: DateTime(2000),
-            lastDate: DateTime.now(),
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: ColorScheme.light(
-                    primary: Colors.lightBlue,
-                    onPrimary: Colors.white,
-                  ),
-                ),
-                child: child!,
-              );
-            },
-          );
-          if (picked != null && picked != _selectedDate) {
-            setState(() {
-              _selectedDate = picked;
-            });
-          }
-        },
+        icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 20),
+        onInfo: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const InsertWaterIntake()),
+        ),
       ),
       body: BlocConsumer<WaterIntakeBloc, WaterIntakeState>(
         listener: (context, state) {
@@ -85,6 +107,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
 
           if (state is WaterIntakeLoaded) {
             final dailyRecords = _filterByDate(state.records);
+            final filteredRecords = _filterByAmount(dailyRecords);
             final totalAmount = _getTotalAmount(dailyRecords);
             final progress = WaterIntake.getProgressPercent(totalAmount);
             final status = WaterIntake.getDailyStatus(totalAmount);
@@ -92,50 +115,92 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
 
             return Column(
               children: [
-                // Date selector
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.lightBlue.shade50,
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                    ),
-                  ),
+                // ========== BẢN GHI + ICON BỘ LỌC ==========
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.chevron_left, color: Colors.lightBlue.shade700),
-                        onPressed: () {
-                          setState(() {
-                            _selectedDate = _selectedDate.subtract(const Duration(days: 1));
-                          });
-                        },
-                      ),
                       Text(
-                        DateFormat('dd/MM/yyyy').format(_selectedDate),
-                        style: TextStyle(
+                        "${filteredRecords.length} bản ghi",
+                        style: const TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.lightBlue.shade900,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.chevron_right, color: Colors.lightBlue.shade700),
-                        onPressed: _selectedDate.isBefore(DateTime.now().subtract(const Duration(days: 1)))
-                            ? () {
-                                setState(() {
-                                  _selectedDate = _selectedDate.add(const Duration(days: 1));
-                                });
-                              }
-                            : null,
+                      GestureDetector(
+                        onTap: () {
+                          FilterBottomSheetWaterIntake.show(
+                            context: context,
+                            initialDate: _selectedDate,
+                            initialAmountFilter: _selectedAmountFilter,
+                            onApply: (date, amountFilter) {
+                              setState(() {
+                                _selectedDate = date;
+                                _selectedAmountFilter = amountFilter;
+                              });
+                            },
+                            onReset: () {
+                              setState(() {
+                                _selectedDate = DateTime.now();
+                                _selectedAmountFilter = null;
+                              });
+                            },
+                          );
+                        },
+                        child: const Icon(Icons.science_outlined, color: Colors.black54),
                       ),
                     ],
                   ),
                 ),
 
-                // Progress card
+                // Filter chips
+                if (!_isToday(_selectedDate) || _selectedAmountFilter != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          if (!_isToday(_selectedDate))
+                            Chip(
+                              label: Text(
+                                DateFormat('dd/MM/yyyy').format(_selectedDate),
+                                style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                              ),
+                              deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                              onDeleted: () {
+                                setState(() => _selectedDate = DateTime.now());
+                              },
+                              backgroundColor: Colors.blue.shade50,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color: Colors.blue.shade800),
+                              ),
+                            ),
+                          if (_selectedAmountFilter != null)
+                            Chip(
+                              label: Text(
+                                _getAmountFilterLabel(_selectedAmountFilter!),
+                                style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                              ),
+                              deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                              onDeleted: () {
+                                setState(() => _selectedAmountFilter = null);
+                              },
+                              backgroundColor: Colors.blue.shade50,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color: Colors.blue.shade800),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 Container(
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(20),
@@ -234,7 +299,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
 
                 // Records list
                 Expanded(
-                  child: dailyRecords.isEmpty
+                  child: filteredRecords.isEmpty
                       ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -250,9 +315,9 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: dailyRecords.length,
+                          itemCount: filteredRecords.length,
                           itemBuilder: (context, index) {
-                            final record = dailyRecords[index];
+                            final record = filteredRecords[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Slidable(
@@ -262,24 +327,8 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                                   children: [
                                     SlidableAction(
                                       onPressed: (context) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => InsertWaterIntake(record: record),
-                                          ),
-                                        );
-                                      },
-                                      backgroundColor: Colors.blue,
-                                      foregroundColor: Colors.white,
-                                      icon: Icons.edit,
-                                      label: 'Sửa',
-                                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                                    ),
-                                    SlidableAction(
-                                      onPressed: (context) {
                                         AppDialog.showDeleteConfirm(
                                           context: context,
-                                          content: "Bạn có chắc chắn muốn xoá bản ghi này không?",
                                           onConfirm: () {
                                             if (record.id != null) {
                                               context.read<WaterIntakeBloc>().add(
@@ -289,11 +338,12 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                                           },
                                         );
                                       },
-                                      backgroundColor: Colors.red,
+                                      backgroundColor: Colors.redAccent,
                                       foregroundColor: Colors.white,
-                                      icon: Icons.delete,
+                                      icon: Icons.delete_forever_outlined,
+                                      borderRadius: BorderRadius.circular(16),
+                                      padding: EdgeInsets.zero,
                                       label: 'Xóa',
-                                      borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
                                     ),
                                   ],
                                 ),
@@ -319,16 +369,6 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
 
           return const Center(child: Text("Không có dữ liệu"));
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const InsertWaterIntake()),
-          );
-        },
-        backgroundColor: Colors.lightBlue,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

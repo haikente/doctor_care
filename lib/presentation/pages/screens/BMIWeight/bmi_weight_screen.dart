@@ -130,10 +130,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                      ),
+                      color: Colors.white,
                     ),
                     child: Wrap(
                       spacing: 8,
@@ -143,17 +140,17 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                           Chip(
                             label: Text(
                               "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
-                              style: const TextStyle(fontSize: 12),
+                              style: TextStyle(fontSize: 11, color: Colors.blue.shade900),
                             ),
-                            deleteIcon: const Icon(Icons.close, size: 16),
+                            deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade900),
                             onDeleted: () {
                               setState(() {
                                 _startDate = null;
                                 _endDate = null;
                               });
                             },
-                            backgroundColor: Colors.white,
-                            side: BorderSide(color: Colors.blue.shade200),
+                            backgroundColor: Colors.blue.shade100,
+                            side: BorderSide(color: Colors.blue.shade900),
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                           ),
                         if (_selectedStatus != null && _selectedStatus != "Tất cả")

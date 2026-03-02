@@ -141,33 +141,46 @@ class _Hba1cChartState extends State<Hba1cChart> {
                       ],
                     ),
                   )
-                 : Stack(
-                      children: [
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: Hba1cAxesPainter(widget.data),
-                          ),
-                        ),
-                        Positioned.fill(
-                          child: Padding(
-                            padding: EdgeInsets.only(left: leftMargin, right: 10),
-                            child: InteractiveViewer(
-                              transformationController: _transformationController,
-                              minScale: 1.0,
-                              maxScale: 3.0,
-                              constrained: true,
-                              scaleEnabled: true, // Giữ chart không vượt quá boundary
-                              panEnabled: true,
-                              child: SizedBox(
-                                width: widget.data.length * pointSpacing + 60,
-                                child: CustomPaint(
-                                  painter: Hba1cDataPainter(widget.data),
+                 : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final double chartWidth = widget.data.length * pointSpacing + 60;
+                        // Đảm bảo width tối thiểu bằng vùng hiển thị
+                        final double effectiveWidth = chartWidth < (constraints.maxWidth - leftMargin - 10) 
+                            ? constraints.maxWidth - leftMargin - 10 
+                            : chartWidth;
+
+                        return Stack(
+                          children: [
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: Hba1cAxesPainter(widget.data),
+                              ),
+                            ),
+                            Positioned.fill(
+                              child: Padding(
+                                padding: EdgeInsets.only(left: leftMargin, right: 10),
+                                child: ClipRect(
+                                  child: InteractiveViewer(
+                                    transformationController: _transformationController,
+                                    minScale: 1.0,
+                                    maxScale: 3.0,
+                                    constrained: false,
+                                    scaleEnabled: true,
+                                    panEnabled: true,
+                                    child: SizedBox(
+                                      width: effectiveWidth,
+                                      height: constraints.maxHeight,
+                                      child: CustomPaint(
+                                        painter: Hba1cDataPainter(widget.data),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ),
         ],
