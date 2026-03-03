@@ -28,16 +28,6 @@ class HealthMetricsGrid extends StatelessWidget {
                   color: AppColor.textPrimary(context),
                 ),
               ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  "Xem tất cả",
-                  style: TextStyle(
-                    color: Colors.blue.shade600,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
             ],
           ),
           const Gap(10),
@@ -47,23 +37,10 @@ class HealthMetricsGrid extends StatelessWidget {
 
               if (bpState is BloodPressureLoaded &&
                   bpState.records.isNotEmpty) {
-                final today = DateTime.now();
-                final todayRecords = bpState.records
-                    .where(
-                      (r) =>
-                          r.timestamp.year == today.year &&
-                          r.timestamp.month == today.month &&
-                          r.timestamp.day == today.day,
-                    )
-                    .toList();
-
-                if (todayRecords.isNotEmpty) {
-                  todayRecords.sort(
-                    (a, b) => b.timestamp.compareTo(a.timestamp),
-                  );
-                  final latest = todayRecords.first;
-                  bpValue = "${latest.systolic}/${latest.diastolic}";
-                }
+                final sortedRecords = List.of(bpState.records)
+                  ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                final latest = sortedRecords.first;
+                bpValue = "${latest.systolic}/${latest.diastolic}";
               }
 
               return BlocBuilder<Hba1cCubit, Hba1cState>(
@@ -72,20 +49,10 @@ class HealthMetricsGrid extends StatelessWidget {
 
                   if (hba1cState is Hba1cLoaded &&
                       hba1cState.hba1cRecords.isNotEmpty) {
-                    final today = DateTime.now();
-                    final todayRecords = hba1cState.hba1cRecords
-                        .where(
-                          (r) =>
-                              r.date.year == today.year &&
-                              r.date.month == today.month &&
-                              r.date.day == today.day,
-                        )
-                        .toList();
-                    if (todayRecords.isNotEmpty) {
-                      todayRecords.sort((a, b) => b.date.compareTo(a.date));
-                      hba1cValue =
-                          "${todayRecords.first.value.toStringAsFixed(1)}%";
-                    }
+                    final sortedRecords = List.of(hba1cState.hba1cRecords)
+                      ..sort((a, b) => b.date.compareTo(a.date));
+                    hba1cValue =
+                        "${sortedRecords.first.value.toStringAsFixed(1)}%";
                   }
 
                   return BlocBuilder<TemperatureCubit, TemperatureState>(
@@ -93,23 +60,10 @@ class HealthMetricsGrid extends StatelessWidget {
                       String tempValue = "--°C";
                       if (tempState is TemperatureLoaded &&
                           tempState.temperatures.isNotEmpty) {
-                        final today = DateTime.now();
-                        final todayRecords = tempState.temperatures
-                            .where(
-                              (r) =>
-                                  r.timestamp.year == today.year &&
-                                  r.timestamp.month == today.month &&
-                                  r.timestamp.day == today.day,
-                            )
-                            .toList();
-
-                        if (todayRecords.isNotEmpty) {
-                          todayRecords.sort(
-                            (a, b) => b.timestamp.compareTo(a.timestamp),
-                          );
-                          tempValue =
-                              "${todayRecords.first.value.toStringAsFixed(1)}°C";
-                        }
+                        final sortedRecords = List.of(tempState.temperatures)
+                          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                        tempValue =
+                            "${sortedRecords.first.value.toStringAsFixed(1)}°C";
                       }
 
                       return BlocBuilder<Spo2heartrateBloc, Spo2heartrateState>(
@@ -133,7 +87,7 @@ class HealthMetricsGrid extends StatelessWidget {
                             crossAxisCount: 2,
                             mainAxisSpacing: 16,
                             crossAxisSpacing: 16,
-                            childAspectRatio: 0.9, // Taller cards
+                            childAspectRatio: 1, // Taller cards
                             padding: EdgeInsets.zero,
                             children: [
                               _buildMetricCard(
@@ -245,7 +199,7 @@ class HealthMetricsGrid extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_outward_rounded,
-                  color: AppColor.divider(context),
+                  color: AppColor.onSurface(context),
                   size: 20,
                 ),
               ],

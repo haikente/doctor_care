@@ -32,10 +32,10 @@ class HealthStatusCard extends StatelessWidget {
         children: [
           Positioned(
             right: -20,
-            top: -20,
+            top: -30,
             child: Container(
-              width: 150,
-              height: 150,
+              width: 130,
+              height: 130,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 shape: BoxShape.circle,

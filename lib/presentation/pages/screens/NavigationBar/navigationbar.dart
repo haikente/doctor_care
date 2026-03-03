@@ -1,8 +1,8 @@
 import 'package:doctor_care/presentation/pages/mainscreen/healthpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/homepage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/notificationpage.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/nutritionpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/profilepage.dart';
-import 'package:doctor_care/presentation/pages/mainscreen/trackmeal.dart';
 import 'package:flutter/material.dart';
 
 class Navigationbar extends StatefulWidget {
@@ -22,7 +22,7 @@ class _NavigationbarState extends State<Navigationbar> {
 
   final List<Widget> _pages = [
     Homepage(),
-    TrackMeal(),
+    NutritionPage(),
     Healthpage(),
     Notificationpage(),
     Profilepage(),
@@ -110,8 +110,7 @@ class _NavigationbarState extends State<Navigationbar> {
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      //icon AI phân tích bữa ăn
+                      children: [
                       Icon(
                         Icons.fastfood_outlined,
                         color: _selectedIndex == 1

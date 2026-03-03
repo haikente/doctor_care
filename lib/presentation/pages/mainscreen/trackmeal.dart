@@ -29,9 +29,12 @@ class _TrackMealState extends State<TrackMeal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomStackAppBar(
+      appBar: CustomStackAppBar(
+        onBack: () => Navigator.pop(context),
         title: "Lịch sử bữa ăn",
         centerTitle: true,
+        icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 20,),
+        onInfo: (){},
       ),
       body: BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
         builder: (context, state) {
