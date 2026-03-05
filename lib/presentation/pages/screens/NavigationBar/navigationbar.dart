@@ -1,7 +1,7 @@
 import 'package:doctor_care/presentation/pages/mainscreen/healthpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/homepage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/notificationpage.dart';
-import 'package:doctor_care/presentation/pages/mainscreen/nutritionpage.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/nutritionpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/profilepage.dart';
 import 'package:flutter/material.dart';
 

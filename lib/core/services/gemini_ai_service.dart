@@ -2,12 +2,12 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:doctor_care/domain/entities/food_item.dart';
-import 'package:doctor_care/core/database_food/food_database_generated.dart';
+import 'package:doctor_care/core/database_food/food_database_helper.dart';
 
 /// Service for analyzing meal images using Gemini AI
 class GeminiAIService {
   static const String _defaultApiKey =
-      'AIzaSyDOiFC8J8VsEz0IIc2HhBCnH3_Lucfzf5I';
+      'AIzaSyAUlhPdpFdPGq02jZ_pBVbXvpAJ5JiE0zs';
   late final GenerativeModel _model;
 
   GeminiAIService({String? apiKey}) {
@@ -30,7 +30,7 @@ class GeminiAIService {
       final responseText = response.text ?? '';
 
 
-      return _parseAIResponse(responseText);
+      return await _parseAIResponse(responseText);
     } catch (e) {
       throw Exception('Failed to analyze meal image: $e');
     }
@@ -63,7 +63,7 @@ Lưu ý:
 ''';
   }
 
-  Map<String, dynamic> _parseAIResponse(String responseText) {
+  Future<Map<String, dynamic>> _parseAIResponse(String responseText) async {
     try {
       String cleanedText = responseText.trim();
       if (cleanedText.startsWith('```json')) {
@@ -93,7 +93,7 @@ Lưu ý:
         final category = foodData['category'] as String;
 
         // Try to find matching food in database
-        final nutritionData = _findFoodInDatabase(name, nameEn);
+        final nutritionData = await _findFoodInDatabase(name, nameEn);
 
         if (nutritionData != null) {
           // Calculate nutrition for the portion
@@ -152,25 +152,8 @@ Lưu ý:
   }
 
   /// Find food in database by name
-  dynamic _findFoodInDatabase(String name, String nameEn) {
-    // Search by Vietnamese name first
-    for (var entry in FoodDatabaseGenerated.foods.entries) {
-      final food = entry.value;
-      if (food.name.toLowerCase().contains(name.toLowerCase()) ||
-          name.toLowerCase().contains(food.name.toLowerCase())) {
-        return food;
-      }
-    }
-
-    // Search by English name
-    for (var entry in FoodDatabaseGenerated.foods.entries) {
-      final food = entry.value;
-      if (food.nameEn.toLowerCase().contains(nameEn.toLowerCase()) ||
-          nameEn.toLowerCase().contains(food.nameEn.toLowerCase())) {
-        return food;
-      }
-    }
-
-    return null;
+  Future<dynamic> _findFoodInDatabase(String name, String nameEn) async {
+    final dbHelper = FoodDatabaseHelper.instance;
+    return await dbHelper.findFood(name, nameEn);
   }
 }

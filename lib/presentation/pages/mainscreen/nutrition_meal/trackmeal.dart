@@ -1,6 +1,6 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
-import 'package:doctor_care/presentation/pages/mainscreen/widgets/mealCard.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/widgets/mealCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
