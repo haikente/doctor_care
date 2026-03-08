@@ -23,7 +23,7 @@ class HealthMetricsGrid extends StatelessWidget {
               Text(
                 "Chỉ số sức khỏe",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColor.textPrimary(context),
                 ),
@@ -199,7 +199,7 @@ class HealthMetricsGrid extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_outward_rounded,
-                  color: AppColor.onSurface(context),
+                  color: Colors.grey,
                   size: 20,
                 ),
               ],
@@ -225,7 +225,7 @@ class HealthMetricsGrid extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColor.textPrimary(context),
+                      color: Colors.black54,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -238,7 +238,7 @@ class HealthMetricsGrid extends StatelessWidget {
                     unit,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColor.textSecondary(context),
+                      color: Colors.black54,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

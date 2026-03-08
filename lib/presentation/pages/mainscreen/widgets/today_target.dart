@@ -38,7 +38,7 @@ class _TodayTargetState extends State<TodayTarget> {
           Text(
             "Mục tiêu hôm nay",
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColor.textPrimary(context),
             ),

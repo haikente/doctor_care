@@ -2,6 +2,7 @@ import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/insert_dish.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/trackmeal.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/widgets/calorie_chart.dart';
 import 'package:flutter/material.dart';
@@ -167,7 +168,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     Spacer(),  
                     GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => TrackMeal(),));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => InsertDish(),));
                       },
                       child: Text("Thêm món",
                         style: TextStyle(color: Colors.blue.shade600, fontSize: 14),),

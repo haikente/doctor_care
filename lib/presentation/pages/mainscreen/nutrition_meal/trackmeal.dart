@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/insert_dish.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/widgets/mealCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +35,9 @@ class _TrackMealState extends State<TrackMeal> {
         title: "Lịch sử bữa ăn",
         centerTitle: true,
         icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 20,),
-        onInfo: (){},
+        onInfo: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const InsertDish()));
+        },
       ),
       body: BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
         builder: (context, state) {
