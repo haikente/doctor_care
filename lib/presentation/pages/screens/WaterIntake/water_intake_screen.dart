@@ -326,12 +326,14 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                                   motion: const ScrollMotion(),
                                   children: [
                                     SlidableAction(
-                                      onPressed: (context) {
+                                      onPressed: (_) {
+                                        final bloc = context.read<WaterIntakeBloc>();
                                         AppDialog.showDeleteConfirm(
                                           context: context,
                                           onConfirm: () {
+                                            if (!mounted) return;
                                             if (record.id != null) {
-                                              context.read<WaterIntakeBloc>().add(
+                                              bloc.add(
                                                     DeleteWaterIntakeRecord(record.id!.toString()),
                                                   );
                                             }

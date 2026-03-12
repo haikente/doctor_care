@@ -1,5 +1,8 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/domain/entities/water_intake.dart';
+import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
+import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
 import 'package:flutter/material.dart';
@@ -35,13 +38,26 @@ class _TodayTargetState extends State<TodayTarget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Mục tiêu hôm nay",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColor.textPrimary(context),
-            ),
+          Row(
+            children: [
+              Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Gap(10),
+              Text(
+               context.tr('today_target'),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColor.textPrimary(context),
+                ),
+              ),
+            ],
           ),
           const Gap(16),
 
@@ -60,9 +76,9 @@ class _TodayTargetState extends State<TodayTarget> {
                 icon: Icons.water_drop_rounded,
                 iconColor: Colors.blue,
                 iconBgColor: Colors.blue.shade50,
-                title: "Uống nước",
-                current: "$totalWater ml",
-                goal: "2000 ml",
+                title: context.tr('drink_water'),
+                current: "$totalWater",
+                goal: context.tr('water_goal'),
                 progress: waterProgress / 100,
                 progressColor: Colors.blue,
                 progressBgColor: Colors.blue.shade100,
@@ -86,15 +102,43 @@ class _TodayTargetState extends State<TodayTarget> {
                 icon: Icons.directions_walk_rounded,
                 iconColor: Colors.green,
                 iconBgColor: Colors.green.shade50,
-                title: "Bước chân",
+                title: context.tr('step_count'),
                 current: "$totalSteps",
-                goal: "10.000 bước",
+                goal: context.tr('step_goal'),
                 progress: stepProgress,
                 progressColor: Colors.green,
                 progressBgColor: Colors.green.shade100,
               );
             },
           ),
+
+        const Gap(12),
+
+        // ========== MEAL CALORIES TARGET ==========
+        BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
+          builder: (context, state) {
+            double totalCalories = 0;
+            if (state is MealAnalysesLoaded) {
+              final todayMeals = state.mealAnalyses
+                  .where((r) => _isToday(r.timestamp))
+                  .toList();
+              totalCalories = todayMeals.fold(
+                  0.0, (sum, meal) => sum + meal.totalCalories);
+            }
+            final calorieProgress = (totalCalories / 2000).clamp(0.0, 1.0);
+            return _buildTargetCard(
+              icon: Icons.restaurant_menu_rounded,
+              iconColor: Colors.orange,
+              iconBgColor: Colors.orange.shade50,
+              title: context.tr('meal_calories'),
+              current: "${totalCalories.toStringAsFixed(0)} ",
+              goal: context.tr('calorie_goal'),
+              progress: calorieProgress,
+              progressColor: Colors.orange,
+              progressBgColor: Colors.orange.shade100,
+            );
+          },
+        ),  
         ],
       ),
     );
@@ -133,7 +177,7 @@ class _TodayTargetState extends State<TodayTarget> {
               color: iconBgColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 28),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
           const Gap(16),
           // Content
@@ -147,9 +191,9 @@ class _TodayTargetState extends State<TodayTarget> {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColor.textPrimary(context),
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade700,
                       ),
                     ),
                     Text(
@@ -168,28 +212,29 @@ class _TodayTargetState extends State<TodayTarget> {
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
                     value: progress,
-                    minHeight: 8,
+                    minHeight: 6,
                     backgroundColor: progressBgColor,
                     valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                   ),
                 ),
                 const Gap(8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Spacer(),
                     Text(
                       current,
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColor.textPrimary(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade700,
                       ),
                     ),
                     Text(
-                      "/ $goal",
+                      " / $goal",
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade700,
                       ),
                     ),
                   ],

@@ -88,9 +88,18 @@ class _NutritionPageState extends State<NutritionPage> {
               const Gap(20),
               const CalorieChart(),
               //phân bổ dinh dưỡng
-              Gap(10),
+              Gap(20),
               Row(
                 children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Gap(10),
                   Text("Phân bổ dinh dưỡng", style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -99,7 +108,7 @@ class _NutritionPageState extends State<NutritionPage> {
                   ),
                 ],
               ),
-              Gap(10),
+              Gap(20),
               
               BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
                 builder: (context, state){
@@ -161,7 +170,16 @@ class _NutritionPageState extends State<NutritionPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Bữa ăn hôm nay", style: TextStyle(
+                    Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Gap(10)
+,                    Text("Bữa ăn hôm nay", style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColor.textPrimary(context))),
@@ -202,6 +220,7 @@ class _NutritionPageState extends State<NutritionPage> {
                   return _buildEmptyMealState();
                 },
               ),
+            Gap(100),
             ],
           ),
         ),

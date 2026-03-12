@@ -18,8 +18,16 @@ class HealthMetricsGrid extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+              Gap(10),
               Text(
                 "Chỉ số sức khỏe",
                 style: TextStyle(
@@ -224,8 +232,8 @@ class HealthMetricsGrid extends StatelessWidget {
                     value,
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -238,7 +246,7 @@ class HealthMetricsGrid extends StatelessWidget {
                     unit,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.black54,
+                      color: Colors.grey,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

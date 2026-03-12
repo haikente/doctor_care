@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/notificationpage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -38,12 +39,12 @@ class HomeHeader extends StatelessWidget {
                 border: Border.all(color: Colors.blue.shade100, width: 2),
               ),
               child: Container(
-                width: 48,
-                height: 48,
+                width: 45,
+                height: 45,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade700],
+                    colors: [Colors.blue.shade400, Colors.blue.shade500],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -59,7 +60,7 @@ class HomeHeader extends StatelessWidget {
                 child: const Icon(
                   Icons.person_rounded,
                   color: Colors.white,
-                  size: 28,
+                  size: 24,
                 ),
               ),
             ),
@@ -73,7 +74,7 @@ class HomeHeader extends StatelessWidget {
                   Text(
                     "Xin chào, 👋",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       color: AppColor.textSecondary(context),
                       fontWeight: FontWeight.w500,
                     ),
@@ -108,45 +109,20 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
 
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? theme.colorScheme.surface
-                    : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.dividerColor),
+            GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Notificationpage())),
+              child: Container(
+                width: 45,
+                height: 45,
+                 decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.white12),
+                  shape: BoxShape.circle 
+                ),
+                child: Icon(
+                  Icons.notifications_active_outlined, color: Colors.black, size: 22,),
               ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.notifications_outlined,
-                        color: AppColor.textSecondary(context),
-                        size: 24,
-                      ),
-                      onPressed: () {},
-                      splashRadius: 24,
-                    ),
-                  ),
-                  Positioned(
-                    right: 12,
-                    top: 12,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade500,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            )
           ],
         ),
       ),

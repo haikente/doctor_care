@@ -27,7 +27,7 @@ class _InsertWaterIntakeState extends State<InsertWaterIntake> {
 
   DateTime? _selectedDateTime;
 
-  // Quick add buttons
+
   final List<int> _quickAmounts = [200, 300, 500, 750, 1000];
 
   @override

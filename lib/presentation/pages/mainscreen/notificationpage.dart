@@ -102,7 +102,7 @@ class _NotificationpageState extends State<Notificationpage> {
       appBar: CustomStackAppBar(
         title: "Thông báo",
         centerTitle: true,
-        //onBack: () => Navigator.pop(context),
+        onBack: () => Navigator.pop(context),
       ),
       body: Column(
         children: [

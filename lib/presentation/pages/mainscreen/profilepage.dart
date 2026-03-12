@@ -1,6 +1,8 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/core/services/image_upload_service.dart';
+import 'package:doctor_care/presentation/bloc/locale/locale_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/profile/edit_profile_screen.dart';
@@ -20,298 +22,150 @@ class Profilepage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-       body: SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: isDarkMode
-                      ? [
-                        Color(0xFF1E1E1E),
-                        Color(0xFF121212)]
-                      : [
-                          AppColor.background,
-                          AppColor.background.withOpacity(.5),
-                        ],
-                ),
-              ),
-              child: Column(
-                children: [
-                  Gap(60),
-                  // Avatar
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      final String? photoUrl = state is Authenticated
-                          ? state.user.profilePhotoUrl
-                          : null;
+            // ═══════════ HEADER ═══════════
+            _buildHeader(context, theme, isDarkMode),
 
-                      return Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: theme.colorScheme.surface,
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundColor: theme.colorScheme.surface,
-                              backgroundImage: photoUrl != null
-                                  ? NetworkImage(photoUrl)
-                                  : null,
-                              child: photoUrl == null
-                                  ? Icon(
-                                      Icons.person,
-                                      size: 35,
-                                      color: theme.primaryColor,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () => _showPhotoOptions(context, state),
-                              child: Container(
-                                padding: EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surface,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  size: 18,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+            // ═══════════ CONTENT ═══════════
+            Transform.translate(
+              offset: const Offset(0, -30),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Quick Stats Card ──
+                    _buildQuickStatsCard(context, theme),
+                    const Gap(24),
 
-                  Gap(15),
-
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      if (state is Authenticated) {
-                        return Column(
-                          children: [
-                            Text(
-                              "Xin chào",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    // ── Cài đặt Section ──
+                    _buildSectionTitle(context.tr('settings'), theme),
+                    const Gap(10),
+                    _buildMenuCard(theme, [
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.person_outline_rounded,
+                        iconColor: Colors.blue,
+                        title: context.tr('personal_info'),
+                        subtitle: context.tr('personal_info_sub'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileScreen(),
                             ),
-                            Text(
-                              state.user.fullName ?? 'Người dùng',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Gap(5),
-                            
-                            if (state.user.phoneNumber != null) ...[
-                              Gap(3),
-                              Text(
-                                state.user.phoneNumber!,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                              ),
-                            ],
-                          ],
-                        );
-                      }
-                      return Column(
-                        children: [
-                          Text(
-                            'Người dùng',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Gap(5),
-                          Text(
-                            'Loading...',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                Gap(25),
-                ],
-              ),
-            ),
-            
-            Padding(
-              padding: EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionTitle('Cài đặt', theme),
-                  Gap(10),
-
-                  _buildMenuCard(theme, [
-                    _buildMenuItem(
-                      theme: theme,
-                      icon: Icons.person_outline,
-                      title: 'Thông tin cá nhân',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditProfileScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    Divider(height: 1, indent: 60, color: theme.dividerColor),
-                    _buildMenuItem(
-                      theme: theme,
-                      icon: Icons.family_restroom_outlined,
-                      title: 'Thành viên gia đình',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FamilyProfileScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    Divider(height: 1, indent: 60, color: theme.dividerColor),
-                    _buildMenuItem(
-                      theme: theme,
-                      icon: Icons.account_circle_outlined,
-                      title: 'Tài khoản',
-                      onTap: () {
-                       
-                      },
-                    ),
-                  ]),
-                Gap(20),
-                _buildSectionTitle('Khác', theme),
-                Gap(10),
-                  _buildMenuCard(theme, [
-                    _buildMenuItem(
-                      theme: theme,
-                      icon: Icons.notifications_outlined,
-                      title: 'Thông báo',
-                      subtitle: 'Quản lý thông báo nhắc nhở',
-                      trailing: Switch(
-                        value: true,
-                        onChanged: (value) {},
-                        activeColor: theme.primaryColor,
-                      ),
-                      onTap: null,
-                    ),
-                  Divider(height: 1, indent: 60, color: theme.dividerColor),
-
-                  _buildMenuItem(
-                      theme: theme,
-                      icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                      title: 'Chế độ tối',
-                      subtitle: isDarkMode ? 'Đang bật' : 'Đang tắt',
-                      trailing: Switch(
-                        value: isDarkMode,
-                        onChanged: (value) {
-                          context.read<ThemeCubit>().toggleTheme();
+                          );
                         },
-                        activeColor: theme.primaryColor,
                       ),
-                      onTap: null,
-                    ),
-
-                    Divider(height: 1, indent: 60, color: theme.dividerColor),
-                    _buildMenuItem(
-                      theme: theme,
-                      icon: Icons.language_outlined,
-                      title: 'Ngôn ngữ',
-                      subtitle: 'Tiếng Việt',
-                      onTap: () {},
-                    ),
-                  ]),
-                Gap(20),
-
-                  // Logout Button
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
-                        onTap: () => _showLogoutDialog(context, theme),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 15,
-                            horizontal: 20,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.logout, color: Colors.red, size: 20),
-                              Gap(10),
-                              Text(
-                                'Đăng xuất',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      _buildDivider(theme),
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.family_restroom_rounded,
+                        iconColor: Colors.purple,
+                        title: context.tr('family_members'),
+                        subtitle: context.tr('family_members_sub'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FamilyProfileScreen(),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  ),
+                      _buildDivider(theme),
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.shield_outlined,
+                        iconColor: Colors.teal,
+                        title: context.tr('account_security'),
+                        subtitle: context.tr('account_security_sub'),
+                        onTap: () {},
+                      ),
+                    ]),
 
-                  Gap(30),
-                ],
+                    const Gap(24),
+
+                    // ── Tùy chọn Section ──
+                    _buildSectionTitle(context.tr('preferences'), theme),
+                    const Gap(10),
+                    _buildMenuCard(theme, [
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.notifications_outlined,
+                        iconColor: Colors.orange,
+                        title: context.tr('notifications'),
+                        subtitle: context.tr('notifications_sub'),
+                        trailing: Switch(
+                          value: true,
+                          onChanged: (value) {},
+                          activeColor: theme.primaryColor,
+                        ),
+                        onTap: null,
+                      ),
+                      _buildDivider(theme),
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: isDarkMode
+                            ? Icons.dark_mode_rounded
+                            : Icons.light_mode_rounded,
+                        iconColor: isDarkMode ? Colors.indigo : Colors.amber,
+                        title: context.tr('dark_mode'),
+                        subtitle: isDarkMode ? context.tr('dark_mode_on') : context.tr('dark_mode_off'),
+                        trailing: Switch(
+                          value: isDarkMode,
+                          onChanged: (value) {
+                            context.read<ThemeCubit>().toggleTheme();
+                          },
+                          activeThumbColor: theme.primaryColor,
+                        ),
+                        onTap: null,
+                      ),
+                      _buildDivider(theme),
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.translate_rounded,
+                        iconColor: Colors.green,
+                        title: context.tr('language'),
+                        subtitle: context.read<LocaleCubit>().currentLanguageName,
+                        onTap: () => _showLanguageDialog(context, theme),
+                      ),
+                    ]),
+
+                    const Gap(24),
+
+                    // ── Hỗ trợ Section ──
+                    _buildSectionTitle(context.tr('support'), theme),
+                    const Gap(10),
+                    _buildMenuCard(theme, [
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.help_outline_rounded,
+                        iconColor: Colors.cyan,
+                        title: context.tr('help_faq'),
+                        onTap: () {},
+                      ),
+                      _buildDivider(theme),
+                      _buildMenuItem(
+                        theme: theme,
+                        icon: Icons.info_outline_rounded,
+                        iconColor: Colors.grey,
+                        title: context.tr('about_app'),
+                        subtitle: '${context.tr('version')} 1.0.0',
+                        onTap: () {},
+                      ),
+                    ]),
+
+                    const Gap(24),
+
+                    // ── Logout Button ──
+                    _buildLogoutButton(context, theme),
+
+                    const Gap(100),
+                  ],
+                ),
               ),
             ),
           ],
@@ -319,39 +173,326 @@ class Profilepage extends StatelessWidget {
       ),
     );
   }
-}
 
-  Widget _buildSectionTitle(String title, ThemeData theme) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onSurface,
+  // ═══════════════════════════════════════════
+  // HEADER WITH AVATAR + INFO
+  // ═══════════════════════════════════════════
+  Widget _buildHeader(BuildContext context, ThemeData theme, bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 50),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDarkMode
+              ? [const Color(0xFF1E1E2E), const Color(0xFF121218)]
+              : [AppColor.background, AppColor.background.withOpacity(0.7)],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            const Gap(20),
+
+            // ── Row: Settings icon right ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    context.tr('profile'),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.settings_outlined,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Gap(24),
+
+            // ── Avatar ──
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                final String? photoUrl =
+                    state is Authenticated ? state.user.profilePhotoUrl : null;
+
+                return GestureDetector(
+                  onTap: () => _showPhotoOptions(context, state),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 48,
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundImage: photoUrl != null
+                              ? NetworkImage(photoUrl)
+                              : null,
+                          child: photoUrl == null
+                              ? const Icon(Icons.person_rounded,
+                                  size: 44, color: Colors.white70)
+                              : null,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.camera_alt_rounded,
+                              size: 16,
+                              color: theme.primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            const Gap(16),
+
+            // ── Name + Info ──
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is Authenticated) {
+                  return Column(
+                    children: [
+                      Text(
+                        state.user.fullName ?? context.tr('user'),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Column(
+                  children: [
+                    Text(
+                      context.tr('user'),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Gap(6),
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMenuCard(ThemeData theme, List<Widget> children) {
+  // ═══════════════════════════════════════════
+  // QUICK STATS CARD
+  // ═══════════════════════════════════════════
+  Widget _buildQuickStatsCard(BuildContext context, ThemeData theme) {
     return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(15),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: Offset(0, 2),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(children: children),
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          return Row(
+            children: [
+              _buildStatItem(
+                icon: Icons.favorite_rounded,
+                color: Colors.red,
+                label: context.tr('health_status'),
+                value: context.tr('good'),
+              ),
+              _buildStatDivider(theme),
+              _buildStatItem(
+                icon: Icons.restaurant_rounded,
+                color: Colors.orange,
+                label: context.tr('meals'),
+                value: context.tr('today'),
+              ),
+              _buildStatDivider(theme),
+              _buildStatItem(
+                icon: Icons.directions_walk_rounded,
+                color: Colors.green,
+                label: context.tr('steps'),
+                value: context.tr('tracking'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
+  Widget _buildStatItem({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const Gap(8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Gap(2),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatDivider(ThemeData theme) {
+    return Container(
+      height: 40,
+      width: 1,
+      color: theme.dividerColor.withOpacity(0.3),
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // SECTION TITLE
+  // ═══════════════════════════════════════════
+  Widget _buildSectionTitle(String title, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // MENU CARD
+  // ═══════════════════════════════════════════
+  Widget _buildMenuCard(ThemeData theme, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Column(children: children),
+      ),
+    );
+  }
+
+  Widget _buildDivider(ThemeData theme) {
+    return Divider(
+      height: 1,
+      indent: 64,
+      endIndent: 16,
+      color: theme.dividerColor.withOpacity(0.3),
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // MENU ITEM
+  // ═══════════════════════════════════════════
   Widget _buildMenuItem({
     required ThemeData theme,
     required IconData icon,
+    required Color iconColor,
     required String title,
     String? subtitle,
     Widget? trailing,
@@ -361,20 +502,19 @@ class Profilepage extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: theme.primaryColor, size: 22),
+                child: Icon(icon, color: iconColor, size: 22),
               ),
-              Gap(15),
+              const Gap(14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,18 +523,28 @@ class Profilepage extends StatelessWidget {
                       title,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
+                    if (subtitle != null) ...[
+                      const Gap(2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
               trailing ??
                   Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: theme.iconTheme.color?.withOpacity(0.5),
+                    Icons.arrow_forward_ios_rounded,
+                    size: 15,
+                    color: theme.colorScheme.onSurface.withOpacity(0.25),
                   ),
             ],
           ),
@@ -403,35 +553,94 @@ class Profilepage extends StatelessWidget {
     );
   }
 
+  // ═══════════════════════════════════════════
+  // LOGOUT BUTTON
+  // ═══════════════════════════════════════════
+  Widget _buildLogoutButton(BuildContext context, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.red.withOpacity(0.15)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => _showLogoutDialog(context, theme),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                const Gap(10),
+                Text(
+                  context.tr('logout'),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // DIALOGS
+  // ═══════════════════════════════════════════
   void _showLogoutDialog(BuildContext context, ThemeData theme) {
+    final tr = AppLocalizations.of(context).translate;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            Icon(Icons.logout, color: Colors.red),
-            Gap(10),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+            ),
+            const Gap(12),
             Text(
-              'Đăng xuất',
-              style: TextStyle(color: theme.colorScheme.onSurface),
+              tr('logout'),
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
         content: Text(
-          'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?',
-          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          tr('logout_confirm'),
+          style: TextStyle(
+            color: theme.textTheme.bodyMedium?.color,
+            fontSize: 14,
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Hủy', style: TextStyle(color: Colors.grey)),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              tr('cancel'),
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
-              // Clear tất cả dữ liệu đăng nhập khi logout
+              Navigator.pop(ctx);
               await AuthStorageService.clearAll();
               // ignore: use_build_context_synchronously
               context.read<AuthBloc>().add(SignOutEvent());
@@ -439,32 +648,35 @@ class Profilepage extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: Text('Đăng xuất', style: TextStyle(color: Colors.white)),
+            child: Text(
+              tr('logout'),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showPhotoOptions(BuildContext context, AuthState state) {
-    if (state is! Authenticated) return;
-
-    final theme = Theme.of(context);
+  void _showLanguageDialog(BuildContext context, ThemeData theme) {
+    final tr = AppLocalizations.of(context).translate;
+    final localeCubit = context.read<LocaleCubit>();
 
     showModalBottomSheet(
       context: context,
       backgroundColor: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => SafeArea(
+      builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Gap(10),
+            const Gap(10),
             Container(
               width: 40,
               height: 4,
@@ -473,42 +685,122 @@ class Profilepage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            Gap(20),
+            const Gap(16),
+            Text(
+              tr('choose_language'),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const Gap(16),
+            ListTile(
+              leading: const Text('🇻🇳', style: TextStyle(fontSize: 28)),
+              title: Text(
+                'Tiếng Việt',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: localeCubit.isVietnamese
+                      ? FontWeight.w600
+                      : FontWeight.normal,
+                ),
+              ),
+              trailing: localeCubit.isVietnamese
+                  ? Icon(Icons.check_circle, color: theme.primaryColor)
+                  : null,
+              onTap: () {
+                localeCubit.changeLocale(const Locale('vi'));
+                Navigator.pop(ctx);
+              },
+            ),
+            ListTile(
+              leading: const Text('🇬🇧', style: TextStyle(fontSize: 28)),
+              title: Text(
+                'English',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: localeCubit.isEnglish
+                      ? FontWeight.w600
+                      : FontWeight.normal,
+                ),
+              ),
+              trailing: localeCubit.isEnglish
+                  ? Icon(Icons.check_circle, color: theme.primaryColor)
+                  : null,
+              onTap: () {
+                localeCubit.changeLocale(const Locale('en'));
+                Navigator.pop(ctx);
+              },
+            ),
+            const Gap(16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPhotoOptions(BuildContext context, AuthState state) {
+    if (state is! Authenticated) return;
+
+    final theme = Theme.of(context);
+    final tr = AppLocalizations.of(context).translate;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Gap(10),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Gap(20),
             ListTile(
               leading: Icon(Icons.photo_library, color: theme.primaryColor),
               title: Text(
-                'Chọn từ thư viện',
+                tr('choose_from_gallery'),
                 style: TextStyle(color: theme.colorScheme.onSurface),
               ),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(ctx);
                 _uploadPhoto(context, state.user.uid, ImageSource.gallery);
               },
             ),
             ListTile(
               leading: Icon(Icons.camera_alt, color: theme.primaryColor),
               title: Text(
-                'Chụp ảnh mới',
+                tr('take_photo'),
                 style: TextStyle(color: theme.colorScheme.onSurface),
               ),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(ctx);
                 _uploadPhoto(context, state.user.uid, ImageSource.camera);
               },
             ),
             if (state.user.profilePhotoUrl != null)
               ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
+                leading: const Icon(Icons.delete, color: Colors.red),
                 title: Text(
-                  'Xóa ảnh đại diện',
-                  style: TextStyle(color: Colors.red),
+                  tr('delete_avatar'),
+                  style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(ctx);
                   _deletePhoto(context, state.user.uid);
                 },
               ),
-            Gap(10),
+            const Gap(10),
           ],
         ),
       ),
@@ -520,13 +812,14 @@ class Profilepage extends StatelessWidget {
     String userId,
     ImageSource source,
   ) async {
+    final tr = AppLocalizations.of(context).translate;
     // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => Center(
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
@@ -534,9 +827,9 @@ class Profilepage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              Gap(15),
-              Text('Đang tải ảnh lên...'),
+              const CircularProgressIndicator(),
+              const Gap(15),
+              Text(tr('uploading_photo')),
             ],
           ),
         ),
@@ -566,7 +859,7 @@ class Profilepage extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Cập nhật ảnh đại diện thành công!'),
+              content: Text(tr('update_avatar_success')),
               backgroundColor: Colors.green,
             ),
           );
@@ -576,7 +869,7 @@ class Profilepage extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Không thể tải ảnh lên. Vui lòng thử lại!'),
+              content: Text(tr('upload_failed')),
               backgroundColor: Colors.red,
             ),
           );
@@ -590,7 +883,7 @@ class Profilepage extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi: ${e.toString()}'),
+            content: Text('${tr('error')}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -599,21 +892,22 @@ class Profilepage extends StatelessWidget {
   }
 
   Future<void> _deletePhoto(BuildContext context, String userId) async {
+    final tr = AppLocalizations.of(context).translate;
     // Show confirmation dialog
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Xác nhận'),
-        content: Text('Bạn có chắc chắn muốn xóa ảnh đại diện?'),
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('confirm')),
+        content: Text(tr('confirm_delete_avatar')),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Hủy'),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('cancel')),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Xóa'),
+            child: Text(tr('delete')),
           ),
         ],
       ),
@@ -652,7 +946,7 @@ class Profilepage extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xóa ảnh đại diện'),
+            content: Text(tr('deleted_avatar')),
             backgroundColor: Colors.green,
           ),
         );
@@ -665,10 +959,11 @@ class Profilepage extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi: ${e.toString()}'),
+            content: Text('${tr('error')}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
   }
+}

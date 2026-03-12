@@ -1,6 +1,6 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/healthpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/homepage.dart';
-import 'package:doctor_care/presentation/pages/mainscreen/notificationpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/nutritionpage.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/profilepage.dart';
 import 'package:flutter/material.dart';
@@ -20,226 +20,109 @@ class _NavigationbarState extends State<Navigationbar> {
     super.initState();
   }
 
-  final List<Widget> _pages = [
-    Homepage(),
-    NutritionPage(),
-    Healthpage(),
-    Notificationpage(),
-    Profilepage(),
-  ];
+   final List<Widget> _pages = [
+      Homepage(),
+      NutritionPage(),
+      Healthpage(),
+      Profilepage(),
+   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
-      floatingActionButton: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: _selectedIndex == 0
-                ? [Colors.blue.shade400, Colors.blue.shade700]
-                : [
-                    Theme.of(context).colorScheme.surface,
-                    Theme.of(context).colorScheme.surface,
+      extendBody: true,
+      body: Stack(
+        children: [
+          // Page content
+          _pages[_selectedIndex],
+
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 16,
+            child: Container(
+              height: 66,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                    spreadRadius: 10,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, context.tr('home')),
+                    _buildNavItem(1, Icons.restaurant_rounded, Icons.restaurant_outlined, context.tr('nutrition')),
+                    _buildNavItem(2, Icons.favorite_rounded, Icons.favorite_border_rounded, context.tr('health')),
+                    _buildNavItem(3, Icons.person_rounded, Icons.person_outline_rounded, context.tr('profile')),
                   ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _selectedIndex == 0
-                  ? Colors.blue.withOpacity(0.4)
-                  : Theme.of(context).shadowColor.withOpacity(0.1),
-              blurRadius: 12,
-              offset: Offset(0, 4),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: FloatingActionButton(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          highlightElevation: 0,
-          onPressed: () {
-            setState(() {
-              _selectedIndex = 0;
-            });
-          },
-          child: Icon(
-            Icons.home_outlined,
-            color: _selectedIndex == 0
-                ? Colors.white
-                : Theme.of(context).unselectedWidgetColor,
-            size: 30,
           ),
-        ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        elevation: 4,
-        color: Colors.transparent,
-        padding: EdgeInsets.zero,
-        height: 65,
-        child: Container(
-          height: 65,
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withOpacity(0.1),
-                blurRadius: 10,
-                offset: Offset(0, -3),
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon, String label) {
+    final isSelected = _selectedIndex == index;
+    final color = isSelected
+        ? Theme.of(context).primaryColor
+        : Colors.grey.shade400;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                      Icon(
-                        Icons.fastfood_outlined,
-                        color: _selectedIndex == 1
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).unselectedWidgetColor,
-                        size: 22,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Dinh dưỡng',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _selectedIndex == 1
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).unselectedWidgetColor,
-                          fontWeight: _selectedIndex == 1
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  isSelected ? activeIcon : inactiveIcon,
+                  key: ValueKey(isSelected),
+                  color: color,
+                  size: isSelected ? 26 : 21,
                 ),
               ),
-
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 2;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.favorite_border_outlined,
-                        color: _selectedIndex == 2
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).unselectedWidgetColor,
-                        size: 22,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Sức khoẻ',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _selectedIndex == 2
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).unselectedWidgetColor,
-                          fontWeight: _selectedIndex == 2
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: color,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 ),
               ),
-              // Spacer for FloatingActionButton
-              Spacer(),
-              // Right item - Cá nhân
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 3;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.notifications_none_outlined,
-                        color: _selectedIndex == 3
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).unselectedWidgetColor,
-                        size: 22,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Thông báo',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _selectedIndex == 3
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).unselectedWidgetColor,
-                          fontWeight: _selectedIndex == 3
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 4;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.person_outlined,
-                        color: _selectedIndex == 4
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).unselectedWidgetColor,
-                        size: 22,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Cá nhân',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _selectedIndex == 4
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).unselectedWidgetColor,
-                          fontWeight: _selectedIndex == 4
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
+              const SizedBox(height: 3),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: 3,
+                width: isSelected ? 20 : 0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ],

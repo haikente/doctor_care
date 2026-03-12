@@ -1,11 +1,15 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/apptheme.dart';
 import 'package:doctor_care/firebase_options.dart';
 import 'package:doctor_care/injection_container.dart';
 import 'package:doctor_care/presentation/bloc/blood_pressure/blood_pressure_cubit.dart';
 import 'package:doctor_care/presentation/bloc/hba1c/hba1c_cubit.dart';
+import 'package:doctor_care/presentation/bloc/locale/locale_cubit.dart';
+import 'package:doctor_care/presentation/bloc/locale/locale_state.dart';
 import 'package:doctor_care/presentation/bloc/temperature/temperature_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_state.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:doctor_care/presentation/pages/screens/HbA1c/hba1c_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/NavigationBar/navigationbar.dart';
 import 'package:doctor_care/presentation/pages/screens/Spo2HeartRate/spo2_heartrate_screen.dart';
@@ -63,6 +67,9 @@ class MyApp extends StatelessWidget {
       providers: [
         // ✅ Theme Cubit
         BlocProvider(create: (context) => ThemeCubit()),
+
+        // ✅ Locale Cubit
+        BlocProvider(create: (context) => LocaleCubit()),
 
         // Auth
         BlocProvider(
@@ -187,21 +194,38 @@ class MyApp extends StatelessWidget {
 
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: "Doctor Care",
+          return BlocBuilder<LocaleCubit, LocaleState>(
+            builder: (context, localeState) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: "Doctor Care",
 
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeState.themeMode,
-            navigatorKey: navigatorKey,
-            builder: (context, child) {
-              return BlocListener<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is Unauthenticated) {
-                    navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                      '/',
-                      (route) => false,
+                // Theme
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                themeMode: themeState.themeMode,
+
+                // Locale
+                locale: localeState.locale,
+                supportedLocales: const [
+                  Locale('vi'),
+                  Locale('en'),
+                ],
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+
+                navigatorKey: navigatorKey,
+                builder: (context, child) {
+                  return BlocListener<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                      if (state is Unauthenticated) {
+                        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                          '/',
+                          (route) => false,
                     );
                   }
                 },
@@ -248,6 +272,8 @@ class MyApp extends StatelessWidget {
               '/stepcounter': (context) => const StepCountScreen(),
               '/cholesterol': (context) => const CholesterolScreen(),
               '/familyprofile': (context) => const FamilyProfileScreen(),
+            },
+          );
             },
           );
         },

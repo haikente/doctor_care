@@ -189,7 +189,7 @@ class _TrackMealState extends State<TrackMeal> {
             context.read<MealAnalysisBloc>().add(const LoadMealAnalysesEvent());
           });
         },
-        icon: const Icon(Icons.camera),
+        icon: const Icon(Icons.auto_awesome),
         label: const Text('AI phân tích'),
         heroTag: 'track_meal_fab',
       ),

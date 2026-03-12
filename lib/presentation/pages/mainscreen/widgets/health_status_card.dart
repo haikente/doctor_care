@@ -13,18 +13,20 @@ class HealthStatusCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF4A90E2),
+        color: Colors.blue.shade50,
         gradient: LinearGradient(
-          colors: [const Color(0xFF4A90E2), const Color(0xFF357ABD)],
+          colors: [
+          Colors.blue.shade500,
+          Colors.blue.shade400],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4A90E2).withOpacity(0.4),
+            color: Colors.blue.withOpacity(0.5),
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 5),
           ),
         ],
       ),

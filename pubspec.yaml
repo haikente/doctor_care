@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   gap: ^3.0.1
   sqflite: ^2.4.2
   path: ^1.9.1

@@ -7,7 +7,7 @@ import 'package:doctor_care/core/database_food/food_database_helper.dart';
 /// Service for analyzing meal images using Gemini AI
 class GeminiAIService {
   static const String _defaultApiKey =
-      'AIzaSyBO2PEC8QENgyZiWS5aScZo34b3pvjIa6c';
+      'AIzaSyDDJoB-b_Jb3BNnjDiwGvRroGLUkHGcIyk';
   late final GenerativeModel _model;
 
   GeminiAIService({String? apiKey}) {

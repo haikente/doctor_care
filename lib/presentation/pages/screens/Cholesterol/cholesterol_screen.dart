@@ -150,10 +150,10 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                             if (_startDate != null && _endDate != null)
                               Chip(
                                 label: Text(
-                                  "${DateFormat('dd/MM').format(_startDate!)} - ${DateFormat('dd/MM').format(_endDate!)}",
-                                  style: const TextStyle(fontSize: 12),
+                                  "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
+                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
                                 ),
-                                deleteIcon: const Icon(Icons.close, size: 16),
+                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade900,),
                                 onDeleted: () {
                                   setState(() {
                                     _startDate = null;
@@ -162,24 +162,24 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: BorderSide(color: Colors.blue.shade200),
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),
                             if (_selectedStatus != null)
                               Chip(
                                 label: Text(
                                   _selectedStatus!,
-                                  style: const TextStyle(fontSize: 12),
+                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
                                 ),
-                                deleteIcon: const Icon(Icons.close, size: 16),
+                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade900,),
                                 onDeleted: () {
                                   setState(() => _selectedStatus = null);
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: BorderSide(color: Colors.blue.shade200),
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),
                           ],

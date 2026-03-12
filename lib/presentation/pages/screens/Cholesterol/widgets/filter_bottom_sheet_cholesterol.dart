@@ -135,13 +135,13 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      _startDate != null && _endDate != null
+                     Text(
+                       _startDate != null && _endDate != null
                           ? "${formatDate(_startDate!)} - ${formatDate(_endDate!)}"
-                          : "${formatDate(DateTime.now())} - ${formatDate(DateTime.now())}",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.black87,
+                          : "${formatDate(widget.initialStartDate ?? DateTime.now())} - ${formatDate(widget.initialEndDate ?? DateTime.now())}",
+                       style: TextStyle(
+                         fontSize: 13,
+                         color: _startDate != null ? Colors.black : Colors.black87,
                       ),
                     ),
                     const Icon(Icons.calendar_today,
@@ -277,11 +277,11 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
 
   Widget _buildChip(String label, bool isSelected) {
     return Container(
-      height: 38,
+      height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: isSelected ? Colors.blue.shade50 : Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isSelected ? Colors.blue.shade600 : Colors.grey.shade400,
           width: 1.5,
