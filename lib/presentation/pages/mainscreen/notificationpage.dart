@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -57,13 +58,13 @@ class _NotificationpageState extends State<Notificationpage> {
     ),
   ];
 
-  String selectedFilter = 'Tất cả';
-  final List<String> filterOptions = ['Tất cả', 'Chưa đọc', 'Đã đọc'];
+  String selectedFilter = 'all';
+  final List<String> filterOptions = ['all', 'unread', 'read'];
 
   List<NotificationModel> get filteredNotifications {
-    if (selectedFilter == 'Chưa đọc') {
+    if (selectedFilter == 'unread') {
       return notifications.where((n) => !n.isRead).toList();
-    } else if (selectedFilter == 'Đã đọc') {
+    } else if (selectedFilter == 'read') {
       return notifications.where((n) => n.isRead).toList();
     }
     return notifications;
@@ -100,7 +101,7 @@ class _NotificationpageState extends State<Notificationpage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: CustomStackAppBar(
-        title: "Thông báo",
+        title: context.tr('notifications_title'),
         centerTitle: true,
         onBack: () => Navigator.pop(context),
       ),
@@ -125,7 +126,10 @@ class _NotificationpageState extends State<Notificationpage> {
                         ),
                         Gap(8),
                         Text(
-                          '$unreadCount chưa đọc',
+                          context.tr(
+                            'unread_count',
+                            params: {'count': unreadCount.toString()},
+                          ),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -140,7 +144,7 @@ class _NotificationpageState extends State<Notificationpage> {
                       TextButton.icon(
                         onPressed: markAllAsRead,
                         icon: Icon(Icons.done_all, size: 18),
-                        label: Text('Đánh dấu tất cả'),
+                        label: Text(context.tr('mark_all')),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.blue.shade700,
                           padding: EdgeInsets.symmetric(
@@ -160,10 +164,16 @@ class _NotificationpageState extends State<Notificationpage> {
                   child: Row(
                     children: filterOptions.map((filter) {
                       final isSelected = selectedFilter == filter;
+                      final label = switch (filter) {
+                        'all' => context.tr('all'),
+                        'unread' => context.tr('filter_unread'),
+                        'read' => context.tr('filter_read'),
+                        _ => filter,
+                      };
                       return Padding(
                         padding: EdgeInsets.only(right: 8),
                         child: FilterChip(
-                          label: Text(filter),
+                          label: Text(label),
                           selected: isSelected,
                           onSelected: (selected) {
                             setState(() {
@@ -243,7 +253,7 @@ class _NotificationpageState extends State<Notificationpage> {
         deleteNotification(notification.id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xóa thông báo'),
+            content: Text(context.tr('deleted_notification')),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
@@ -363,7 +373,7 @@ class _NotificationpageState extends State<Notificationpage> {
     IconData icon;
 
     if (selectedFilter == 'Chưa đọc') {
-      message = 'Không có thông báo chưa đọc';
+      message = context.tr('no_unread_notifications');
       icon = Icons.check_circle_outline;
     } else if (selectedFilter == 'Đã đọc') {
       message = 'Không có thông báo đã đọc';

@@ -1,4 +1,5 @@
 import 'package:doctor_care/core/pages/app_color.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
@@ -19,10 +20,17 @@ class NutritionPage extends StatefulWidget {
 
 class _NutritionPageState extends State<NutritionPage> {
 
-  String formatDate(DateTime date){
-    return "Thứ ${["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Chủ nhật"][date.weekday - 1]}, "
-          "${date.day.toString().padLeft(2, '0')} Tháng "
-          "${date.month.toString().padLeft(2, '0')}";
+  String formatDate(BuildContext context, DateTime date) {
+    final isVi = context.l10n.languageCode == 'vi';
+    final weekdaysVi = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Chủ nhật"];
+    final weekdaysEn = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    final weekday = (isVi ? weekdaysVi : weekdaysEn)[date.weekday - 1];
+
+    if (isVi) {
+      return "Thứ $weekday, ${date.day.toString().padLeft(2, '0')} Tháng ${date.month.toString().padLeft(2, '0')}";
+    }
+
+    return "$weekday, ${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}";
   }
   
   bool _isToday(DateTime date) {
@@ -60,14 +68,14 @@ class _NutritionPageState extends State<NutritionPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(formatDate(DateTime.now()), style: TextStyle(
+                        Text(formatDate(context, DateTime.now()), style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           // ignore: deprecated_member_use
                           color: Colors.black.withOpacity(0.5),
                         )),
                         Gap(2),
-                        Text("Dinh dưỡng",
+                        Text(context.tr('nutrition'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -100,7 +108,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     ),
                   ),
                   Gap(10),
-                  Text("Phân bổ dinh dưỡng", style: TextStyle(
+                  Text(context.tr('nutrition_distribution'), style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColor.textPrimary(context)
@@ -135,7 +143,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     return Column(
                       children: [
                         _buildMealCard(
-                          title: "Protein",
+                          title: context.tr('protein'),
                           current: "${totalProtein.toStringAsFixed(0)}g",
                           goal: "100g",
                           progress: (totalProtein / 100).clamp(0, 1),
@@ -145,7 +153,7 @@ class _NutritionPageState extends State<NutritionPage> {
                       
                       Gap(10),
                         _buildMealCard(
-                          title: "Carbs",
+                          title: context.tr('carbs'),
                           current: "${totalCarbs.toStringAsFixed(0)}g",
                           goal: "250g",
                           progress: (totalCarbs / 250).clamp(0, 1),
@@ -155,7 +163,7 @@ class _NutritionPageState extends State<NutritionPage> {
 
                       Gap(10),
                         _buildMealCard(
-                          title: "Chất béo",
+                          title: context.tr('fat'),
                           current: "${totalFat.toStringAsFixed(0)}g",
                           goal: "60g",
                           progress: (totalFat / 60).clamp(0, 1),
@@ -179,7 +187,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     ),
                   ),
                   Gap(10)
-,                    Text("Bữa ăn hôm nay", style: TextStyle(
+,                    Text(context.tr('today_meals'), style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColor.textPrimary(context))),
@@ -188,7 +196,7 @@ class _NutritionPageState extends State<NutritionPage> {
                       onTap: (){
                         Navigator.push(context, MaterialPageRoute(builder: (context) => InsertDish(),));
                       },
-                      child: Text("Thêm món",
+                      child: Text(context.tr('add_new_dish'),
                         style: TextStyle(color: Colors.blue.shade600, fontSize: 14),),
                     ),
                     Icon(Icons.arrow_forward_outlined, size: 13, color: Colors.blue.shade600,)  

@@ -1,6 +1,7 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/ui/snackbar_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/hba1c.dart';
 import 'package:doctor_care/presentation/bloc/hba1c/hba1c_cubit.dart';
 import 'package:doctor_care/presentation/pages/healthmonitoring/hba1c_chart.dart';
@@ -359,7 +360,14 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
                                   children: [
                                     Icon(Icons.delete_forever_outlined, color: Colors.white, size: 20),
                                     Gap(2),
-                                    Text('Xóa',style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500)),
+                                    Text(
+                                      context.tr('delete'),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -383,7 +391,7 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
         } else if (state is Hba1cError) {
           return Center(child: Text(state.message));
         } else {
-          return const Center(child: Text('Không có dữ liệu HbA1c'));
+          return Center(child: Text(context.tr('no_hba1c_data')));
         }
       },
     ),

@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/step_count.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/StepCount/insert_step_count.dart';
@@ -231,16 +232,16 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                   autoClose: true,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Icon(
+                                    children: [
+                                      const Icon(
                                         Icons.delete_forever_outlined,
                                         color: Colors.white,
                                         size: 20,
                                       ),
-                                      Gap(2),
+                                      const Gap(2),
                                       Text(
-                                        'Xóa',
-                                        style: TextStyle(
+                                        context.tr('delete'),
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 10,
                                           fontWeight: FontWeight.w500,
@@ -276,7 +277,7 @@ class _StepCountScreenState extends State<StepCountScreen> {
           if (state is StepCountError) {
             return Center(child: Text(state.message));
           }
-          return const Center(child: Text('Không có dữ liệu bước chân'));
+          return Center(child: Text(context.tr('no_step_data')));
         },
       ),
     );
@@ -320,9 +321,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
                       ),
                     ),
                     const Gap(5),
-                    const Text(
-                      'bước',
-                      style: TextStyle(color: Colors.black, fontSize: 13),
+                    Text(
+                      context.tr('steps_unit'),
+                      style: const TextStyle(color: Colors.black, fontSize: 13),
                     ),
                   ],
                 ),

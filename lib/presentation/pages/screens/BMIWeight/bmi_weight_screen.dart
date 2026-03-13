@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/bmi_weight.dart';
 import 'package:doctor_care/presentation/bloc/BMIWeight/bmi_weight_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/BMIWeight/insert_bmi_weight.dart';
@@ -184,8 +185,8 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                               const Gap(16),
                               Text(
                                 _startDate != null || _selectedStatus != null
-                                    ? "Không có dữ liệu phù hợp với bộ lọc"
-                                    : "Chưa có dữ liệu",
+                                    ? context.tr('no_data_matching_filter')
+                                    : context.tr('no_data'),
                                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                               ),
                             ],
@@ -245,7 +246,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
             );
           }
 
-          return const Center(child: Text("Không có dữ liệu"));
+          return Center(child: Text(context.tr('no_data')));
         },
       ),
       // floatingActionButton: FloatingActionButton(

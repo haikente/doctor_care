@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/water_intake.dart';
 import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/WaterIntake/insert_water_intake.dart';
@@ -345,7 +346,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                                       icon: Icons.delete_forever_outlined,
                                       borderRadius: BorderRadius.circular(16),
                                       padding: EdgeInsets.zero,
-                                      label: 'Xóa',
+                                      label: context.tr('delete'),
                                     ),
                                   ],
                                 ),
@@ -369,7 +370,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                   );
                 }
 
-          return const Center(child: Text("Không có dữ liệu"));
+          return Center(child: Text(context.tr('no_data')));
         },
       ),
     );

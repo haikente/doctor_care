@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
@@ -60,8 +61,8 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   void _saveMealAnalysis() {
     if (_foodItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cần có ít nhất 1 món ăn để lưu!'),
+        SnackBar(
+          content: Text(context.tr('meal_analysis_need_food_item_to_save')),
           backgroundColor: Colors.orange,
         ),
       );
@@ -85,7 +86,12 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lỗi khi lưu: $e'),
+          content: Text(
+            context.tr(
+              'meal_analysis_save_error',
+              params: {'error': e.toString()},
+            ),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -114,13 +120,16 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Kết quả phân tích'), centerTitle: true),
+      appBar: AppBar(
+        title: Text(context.tr('meal_analysis_result_title')),
+        centerTitle: true,
+      ),
       body: BlocListener<MealAnalysisBloc, MealAnalysisState>(
         listener: (context, state) {
           if (state is MealAnalysisSaved) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Đã lưu bữa ăn thành công!'),
+              SnackBar(
+                content: Text(context.tr('meal_analysis_saved_success')),
                 backgroundColor: Colors.green,
               ),
             );
@@ -128,7 +137,12 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
           } else if (state is MealAnalysisError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Lỗi: ${state.message}'),
+                content: Text(
+                  context.tr(
+                    'error_with_message',
+                    params: {'message': state.message},
+                  ),
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -160,8 +174,8 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                   color: Colors.black87,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Tên món ăn',
-                  hintText: 'Nhập tên món ăn',
+                  labelText: context.tr('dish_name_label'),
+                  hintText: context.tr('dish_name_hint'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -178,9 +192,9 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Tổng quan',
-                        style: TextStyle(
+                      Text(
+                        context.tr('overview'),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -190,19 +204,19 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _buildSummaryItem(
-                            'Tổng calo',
+                            context.tr('total_calories'),
                             '${_totalCalories.toStringAsFixed(0)} kcal',
                             Icons.local_fire_department,
                             Colors.orange,
                           ),
                           _buildSummaryItem(
-                            'Chỉ số GI',
+                            context.tr('glycemic_index'),
                             _averageGI.toStringAsFixed(0),
                             Icons.analytics,
                             _getGIColor(_averageGI),
                           ),
                           _buildSummaryItem(
-                            'Món ăn',
+                            context.tr('meals'),
                             '${_foodItems.length}',
                             Icons.restaurant,
                             Colors.blue,
@@ -219,12 +233,12 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Danh sách thực phẩm',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    context.tr('food_items'),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Chạm để chỉnh sửa',
+                    context.tr('tap_to_edit'),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
@@ -267,7 +281,7 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Lời khuyên sức khỏe',
+                            context.tr('health_recommendations'),
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -293,16 +307,16 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
               const SizedBox(height: 24),
 
               // Notes section
-              const Text(
-                'Ghi chú',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                context.tr('notes'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _notesController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Thêm ghi chú về bữa ăn...',
+                  hintText: context.tr('notes'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -318,9 +332,9 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _saveMealAnalysis,
                   icon: const Icon(Icons.save_outlined, size: 24),
-                  label: const Text(
-                    'Lưu bữa ăn',
-                    style: TextStyle(fontSize: 18),
+                  label: Text(
+                    context.tr('save_meal'),
+                    style: const TextStyle(fontSize: 18),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade50,
@@ -522,7 +536,12 @@ class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Chỉnh sửa: ${widget.foodItem.foodName}'),
+      title: Text(
+        context.tr(
+          'edit_food_item',
+          params: {'name': widget.foodItem.foodName},
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -530,15 +549,15 @@ class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
             controller: _portionController,
             keyboardType: TextInputType.number,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Khối lượng (gram)',
+            decoration: InputDecoration(
+              labelText: context.tr('portion_grams_label'),
               border: OutlineInputBorder(),
               suffixText: 'g',
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Giá trị dinh dưỡng sẽ được tính lại theo tỷ lệ',
+            context.tr('nutrition_recalc_note'),
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey.shade600,
@@ -550,11 +569,11 @@ class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy'),
+          child: Text(context.tr('cancel')),
         ),
         ElevatedButton(
           onPressed: _handleSave,
-          child: const Text('Lưu'),
+          child: Text(context.tr('save')),
         ),
       ],
     );

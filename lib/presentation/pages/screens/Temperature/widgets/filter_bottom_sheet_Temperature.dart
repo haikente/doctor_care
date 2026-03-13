@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -70,7 +71,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Lọc kết quả",
+                      context.tr('filter_results'),
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -89,7 +90,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(context.tr('time'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -126,7 +127,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
           // ========== Phân loại ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Phân loại", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(context.tr('classification'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           ),
 
           Padding(
@@ -141,7 +142,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempClassify = "";
                       });
                     },
-                    child: _buildClassifyChip("Tất cả", tempClassify == ""),
+                    child: _buildClassifyChip(context.tr('all'), tempClassify == ""),
                   ),
                 ),
                 Gap(8),
@@ -152,7 +153,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempClassify = "Nhập tay";
                       });
                     },
-                    child: _buildClassifyChip("Nhập tay", tempClassify == "Nhập tay"),
+                    child: _buildClassifyChip(context.tr('manual_entry'), tempClassify == "Nhập tay"),
                   ),
                 ),
                 Gap(8),
@@ -163,7 +164,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempClassify = "Thiết bị";
                       });
                     },
-                    child: _buildClassifyChip("Thiết bị", tempClassify == "Thiết bị"),
+                    child: _buildClassifyChip(context.tr('device'), tempClassify == "Thiết bị"),
                   ),
                 ),
               ],
@@ -173,7 +174,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
           // ========== TRáº NG THÃI (dÃ¹ng tempStatus) ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Trạng thái", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(context.tr('status'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           ),
 
           Padding(
@@ -187,7 +188,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = ""; 
                       });
                     },
-                    child: _buildStatusChip("Tất cả", tempStatus == ""),
+                    child: _buildStatusChip(context.tr('all'), tempStatus == ""),
                   ),
                 ),
                 Gap(8),
@@ -198,7 +199,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = "Hạ nhiệt";
                       });
                     },
-                    child: _buildStatusChip("Hạ nhiệt", tempStatus == "Hạ nhiệt"),
+                    child: _buildStatusChip(context.tr('temp_low'), tempStatus == "Hạ nhiệt"),
                   ),
                 ),
               ],
@@ -216,7 +217,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = "Bình thường";
                       });
                     },
-                    child: _buildStatusChip("Bình thường", tempStatus == "Bình thường"),
+                    child: _buildStatusChip(context.tr('status_normal'), tempStatus == "Bình thường"),
                   ),
                 ),
                 Gap(8),
@@ -227,7 +228,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = "Sốt nhẹ";
                       });
                     },
-                    child: _buildStatusChip("Sốt nhẹ", tempStatus == "Sốt nhẹ"),
+                    child: _buildStatusChip(context.tr('temp_mild_fever'), tempStatus == "Sốt nhẹ"),
                   ),
                 ),
               ],
@@ -245,7 +246,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = "Sốt vừa";
                       });
                     },
-                    child: _buildStatusChip("Sốt vừa", tempStatus == "Sốt vừa"),
+                    child: _buildStatusChip(context.tr('temp_moderate_fever'), tempStatus == "Sốt vừa"),
                   ),
                 ),
                 Gap(8),
@@ -256,7 +257,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = "Sốt cao";
                       });
                     },
-                    child: _buildStatusChip("Sốt cao", tempStatus == "Sốt cao"),
+                    child: _buildStatusChip(context.tr('temp_high_fever'), tempStatus == "Sốt cao"),
                   ),
                 ),
               ],
@@ -272,7 +273,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                 
                 Expanded(
                   child: CustomButton(
-                    text: "Bộ lọc",
+                    text: context.tr('filter'),
                     onPressed: () {
                       setState(() {
                         tempStartDate = widget.firstAvailableDate;
@@ -291,13 +292,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                
                 Expanded(
                   child: CustomButton(
-                    text: "Áp dụng",
+                    text: context.tr('apply'),
                     onPressed: () {
                       if (tempStartDate != null && tempEndDate != null) {
                         if (tempStartDate!.isAfter(tempEndDate!)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Ngày bắt đầu phải trước ngày kết thúc'),
+                              content: Text(context.tr('date_range_invalid')),
                               backgroundColor: Colors.red,
                             ),
                           );

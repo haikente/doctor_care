@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -90,7 +91,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Lọc kết quả",
+                      context.tr('filter_results'),
                       style: TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -110,7 +111,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Text("Thời gian",
+                Text(context.tr('time'),
                     style:
                         TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 const Gap(4),
@@ -153,9 +154,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           ),
 
           // ========== TRẠNG THÁI ==========
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 16),
-            child: Text("Mức vận động",
+            child: Text(context.tr('activity_level'),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           ),
           const Gap(8),
@@ -167,7 +168,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedStatus = null),
-                    child: _buildChip("Tất cả", _selectedStatus == null),
+                    child: _buildChip(context.tr('all'), _selectedStatus == null),
                   ),
                 ),
                 const Gap(8),
@@ -176,7 +177,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Ít vận động"),
                     child: _buildChip(
-                        "Ít vận động", _selectedStatus == "Ít vận động"),
+                        context.tr('activity_low'), _selectedStatus == "Ít vận động"),
                   ),
                 ),
               ],
@@ -256,14 +257,13 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 const Gap(10),
                 Expanded(
                   child: CustomButton(
-                    text: "Áp dụng",
+                    text: context.tr('apply'),
                     onPressed: () {
                       if (_startDate != null && _endDate != null) {
                         if (_startDate!.isAfter(_endDate!)) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Ngày bắt đầu phải trước ngày kết thúc'),
+                            SnackBar(
+                              content: Text(context.tr('date_range_invalid')),
                               backgroundColor: Colors.red,
                             ),
                           );

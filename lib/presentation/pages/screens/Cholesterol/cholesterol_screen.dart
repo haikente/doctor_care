@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/cholesterol.dart';
 import 'package:doctor_care/presentation/bloc/cholesterol/cholesterol_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/Cholesterol/insert_cholesterol.dart';
@@ -265,7 +266,7 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
           if (state is CholesterolError) {
             return Center(child: Text(state.message));
           }
-          return const Center(child: Text('Không có dữ liệu cholesterol'));
+          return Center(child: Text(context.tr('no_cholesterol_data')));
         },
       ),
     );

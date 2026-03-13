@@ -1,4 +1,5 @@
 import 'package:doctor_care/domain/entities/blood_sugar.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -97,7 +98,7 @@ class _BloodSugarChartWidgetState extends State<BloodSugarChartWidget> {
               height: 120,
               child: Center(
                 child: Text(
-                  "Không có dữ liệu cho bộ lọc này",
+                  context.tr('no_data_for_filter'),
                   style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:doctor_care/core/database_food/food_database_helper.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/food_item.dart';
 import 'package:doctor_care/domain/entities/food_nutrition.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
@@ -94,14 +95,17 @@ class _InsertDishState extends State<InsertDish> {
               ),
             ),
             const Gap(6),
-            Text("Trên 100g", style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+            Text(
+              context.tr('per_100g'),
+              style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+            ),
             const Gap(16),
             TextField(
               controller: portionController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: "Khối lượng (gram)",
-                hintText: "Nhập khối lượng",
+                labelText: context.tr('portion_grams_label'),
+                hintText: context.tr('portion_grams_label'),
                 suffixText: "g",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -115,7 +119,10 @@ class _InsertDishState extends State<InsertDish> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Hủy", style: TextStyle(color: Colors.grey.shade600)),
+            child: Text(
+              context.tr('cancel'),
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
           ),
           FilledButton(
             onPressed: () {
@@ -145,7 +152,7 @@ class _InsertDishState extends State<InsertDish> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text("Thêm"),
+            child: Text(context.tr('add')),
           ),
         ],
       ),
@@ -166,7 +173,7 @@ class _InsertDishState extends State<InsertDish> {
   void _saveMeal() {
     if (_foodItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vui lòng thêm ít nhất 1 thực phẩm")),
+        SnackBar(content: Text(context.tr('please_add_at_least_one_food'))),
       );
       return;
     }
@@ -176,7 +183,7 @@ class _InsertDishState extends State<InsertDish> {
       imagePath: '',
       dishName: _dishNameController.text.trim().isNotEmpty
           ? _dishNameController.text.trim()
-          : "Bữa ăn",
+          : context.tr('default_meal_name'),
       foodItems: _foodItems,
       notes: _notesController.text.trim().isNotEmpty
           ? _notesController.text.trim()
@@ -186,8 +193,8 @@ class _InsertDishState extends State<InsertDish> {
     context.read<MealAnalysisBloc>().add(SaveMealAnalysisEvent(meal));
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Đã lưu bữa ăn thành công! 🎉"),
+      SnackBar(
+        content: Text(context.tr('meal_analysis_saved_success')),
         backgroundColor: Colors.green,
       ),
     );
@@ -199,7 +206,7 @@ class _InsertDishState extends State<InsertDish> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Thêm mới món ăn",
+        title: context.tr('add_new_meal_title'),
         centerTitle: true,
       ),
       body: Column(
@@ -211,12 +218,12 @@ class _InsertDishState extends State<InsertDish> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // --- Tên món ăn ---
-                  _buildSectionTitle("Tên món ăn"),
+                  _buildSectionTitle(context.tr('dish_name_section')),
                   const Gap(8),
                   TextField(
                     controller: _dishNameController,
                     decoration: InputDecoration(
-                      hintText: "VD: Phở Bò, Cơm Tấm...",
+                      hintText: context.tr('dish_name_example_hint'),
                       hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
                       prefixIcon: const Icon(Icons.restaurant_rounded,
                           color: Colors.blue),
@@ -243,13 +250,13 @@ class _InsertDishState extends State<InsertDish> {
                   const Gap(24),
 
                   // --- Tìm kiếm thực phẩm ---
-                  _buildSectionTitle("Thêm thực phẩm"),
+                  _buildSectionTitle(context.tr('add_new_dish')),
                   const Gap(8),
                   TextField(
                     controller: _searchController,
                     onChanged: _searchFood,
                     decoration: InputDecoration(
-                      hintText: "Tìm kiếm thực phẩm...",
+                      hintText: context.tr('search_food_hint'),
                       hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
                       prefixIcon:
                           const Icon(Icons.search_rounded, color: Colors.blue),
@@ -374,13 +381,13 @@ class _InsertDishState extends State<InsertDish> {
                   const Gap(24),
 
                   // --- Ghi chú ---
-                  _buildSectionTitle("Ghi chú"),
+                  _buildSectionTitle(context.tr('notes')),
                   const Gap(8),
                   TextField(
                     controller: _notesController,
                     maxLines: 2,
                     decoration: InputDecoration(
-                      hintText: "Ghi chú về bữa ăn (tùy chọn)...",
+                      hintText: context.tr('meal_notes_hint_optional'),
                       hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -403,7 +410,7 @@ class _InsertDishState extends State<InsertDish> {
                   const Gap(24),
                   CustomButton(
                     expanded: true,
-                    text: "Lưu", 
+                    text: context.tr('save'), 
                     onPressed: _saveMeal),
                 ],
               ),

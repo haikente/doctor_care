@@ -1,6 +1,7 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/ui/snackbar_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/temperature.dart';
 import 'package:doctor_care/presentation/bloc/temperature/temperature_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/Temperature/insert_temperature.dart';
@@ -228,7 +229,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                             Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
                             Gap(16),
                             Text(
-                              'Không tìm thấy kết quả',
+                              context.tr('no_results_found'),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey.shade600,
@@ -237,7 +238,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                             ),
                             Gap(8),
                             Text(
-                              'Thử thay đổi bộ lọc của bạn',
+                              context.tr('try_change_filters'),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade500,
@@ -253,7 +254,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                                 });
                               },
                               icon: Icon(Icons.refresh),
-                              label: Text('Xóa bộ lọc'),
+                              label: Text(context.tr('clear_filter')),
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.blue.shade700,
                               ),
@@ -307,7 +308,14 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                                   children: [
                                     Icon(Icons.delete_forever_outlined, color: Colors.white, size: 20),
                                     Gap(2),
-                                    Text('Xóa',style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500)),
+                                    Text(
+                                      context.tr('delete'),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -333,7 +341,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
         } else if (state is TemperatureError) {
           return Center(child: Text(state.message));
         } else {
-          return Center(child: Text("Không có dữ liệu"));
+          return Center(child: Text(context.tr('no_data')));
         }
       },
         ),

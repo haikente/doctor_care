@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/sleep_record.dart';
 import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/SleepRecord/insert_sleep_record.dart';
@@ -313,7 +314,7 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
           } else if (state is SleepRecordError) {
             return Center(child: Text(state.message));
           }
-          return const Center(child: Text('Không có dữ liệu giấc ngủ'));
+          return Center(child: Text(context.tr('no_sleep_data')));
         },
       ),
     );

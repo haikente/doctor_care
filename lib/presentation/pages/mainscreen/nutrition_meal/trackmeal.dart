@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/insert_dish.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/widgets/mealCard.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,8 @@ class TrackMeal extends StatefulWidget {
 }
 
 class _TrackMealState extends State<TrackMeal> {
-  String selectedFilter = "Tất cả";
-  final List<String> filterOptions = ["Tất cả", "Hôm nay", "Tuần", "Tháng"];
+  String selectedFilter = "all";
+  final List<String> filterOptions = ["all", "today", "week", "month"];
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _TrackMealState extends State<TrackMeal> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Lịch sử bữa ăn",
+        title: context.tr('meal_history_title'),
         centerTitle: true,
         icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 20,),
         onInfo: (){
@@ -53,7 +54,10 @@ class _TrackMealState extends State<TrackMeal> {
                   Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
                   const SizedBox(height: 16),
                   Text(
-                    'Lỗi: ${state.message}',
+                    context.tr(
+                      'error_with_message',
+                      params: {'message': state.message},
+                    ),
                     style: const TextStyle(fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
@@ -65,7 +69,7 @@ class _TrackMealState extends State<TrackMeal> {
                       );
                     },
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Thử lại'),
+                    label: Text(context.tr('retry')),
                   ),
                 ],
               ),
@@ -76,13 +80,13 @@ class _TrackMealState extends State<TrackMeal> {
             List<MealAnalysis> filteredMeals = state.mealAnalyses;
             final now = DateTime.now();
 
-            if (selectedFilter == "Hôm nay") {
+            if (selectedFilter == "today") {
               filteredMeals = state.mealAnalyses.where((m) {
                 return m.timestamp.year == now.year &&
                     m.timestamp.month == now.month &&
                     m.timestamp.day == now.day;
               }).toList();
-            } else if (selectedFilter == "Tuần") {
+            } else if (selectedFilter == "week") {
               final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
               final endOfWeek = startOfWeek.add(
                 const Duration(days: 6, hours: 23, minutes: 59),
@@ -93,7 +97,7 @@ class _TrackMealState extends State<TrackMeal> {
                     ) &&
                     m.timestamp.isBefore(endOfWeek);
               }).toList();
-            } else if (selectedFilter == "Tháng") {
+            } else if (selectedFilter == "month") {
               filteredMeals = state.mealAnalyses.where((m) {
                 return m.timestamp.year == now.year &&
                     m.timestamp.month == now.month;
@@ -111,10 +115,17 @@ class _TrackMealState extends State<TrackMeal> {
                     child: Row(
                       children: filterOptions.map((filter) {
                         final isSelected = selectedFilter == filter;
+                        final label = switch (filter) {
+                          'all' => context.tr('all'),
+                          'today' => context.tr('today'),
+                          'week' => context.tr('week'),
+                          'month' => context.tr('month'),
+                          _ => filter,
+                        };
                         return Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: FilterChip(
-                            label: Text(filter),
+                            label: Text(label),
                             selected: isSelected,
                             onSelected: (selected) {
                               setState(() {
@@ -190,7 +201,7 @@ class _TrackMealState extends State<TrackMeal> {
           });
         },
         icon: const Icon(Icons.auto_awesome),
-        label: const Text('AI phân tích'),
+        label: Text(context.tr('ai_analyze')),
         heroTag: 'track_meal_fab',
       ),
     );
@@ -209,8 +220,8 @@ class _TrackMealState extends State<TrackMeal> {
           const SizedBox(height: 16),
           Text(
             isFiltered
-                ? 'Không có bữa ăn nào trong khoảng thời gian này'
-                : 'Chưa có bữa ăn nào',
+                ? context.tr('no_meals_in_range')
+                : context.tr('no_meals_today'),
             style: TextStyle(
               fontSize: 16,
               color: AppColor.textSecondary(context),
@@ -220,8 +231,8 @@ class _TrackMealState extends State<TrackMeal> {
           const SizedBox(height: 8),
           Text(
             isFiltered
-                ? 'Thử chọn khoảng thời gian khác'
-                : 'Nhấn nút "AI phân tích" để bắt đầu',
+                ? context.tr('try_another_range')
+                : context.tr('tap_ai_to_start'),
             style: TextStyle(
               fontSize: 14,
               color: AppColor.textSecondary(context),

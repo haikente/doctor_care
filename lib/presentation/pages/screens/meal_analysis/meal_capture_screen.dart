@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -56,7 +57,7 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomStackAppBar(
-        title: "Phân tích bữa ăn", 
+        title: context.tr('meal_capture_title'), 
         centerTitle: true,
         onBack: () => Navigator.pop(context),
         ),
@@ -75,7 +76,12 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
           } else if (state is MealAnalysisError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Lỗi: ${state.message}'),
+                content: Text(
+                  context.tr(
+                    'error_with_message',
+                    params: {'message': state.message},
+                  ),
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -117,16 +123,16 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Đang phân tích bữa ăn...',
-                    style: TextStyle(
+                  Text(
+                    context.tr('analyzing_meal'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'AI đang nhận diện thành phần dinh dưỡng',
+                    context.tr('ai_analyzing'),
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade500,

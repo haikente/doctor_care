@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/blood_pressure.dart';
 import 'package:doctor_care/presentation/bloc/blood_pressure/blood_pressure_cubit.dart';
 import 'package:doctor_care/presentation/bloc/blood_pressure/widgets/filterbottomsheet_blood.dart';
@@ -470,7 +471,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
           } else if (state is BloodPressureError) {
             return Center(child: Text(state.message));
           } else {
-            return Center(child: Text('Không có dữ liệu huyết áp'));
+            return Center(child: Text(context.tr('no_blood_pressure_data')));
           }
         },
       ),

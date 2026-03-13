@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/blood_sugar.dart';
 import 'package:doctor_care/presentation/bloc/blood_sugar/blood_sugar_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/BloodSugar/insert_blood_sugar.dart';
@@ -313,7 +314,7 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
           } else if (state is BloodSugarError) {
             return Center(child: Text(state.message));
           } else {
-            return const Center(child: Text('Không có dữ liệu đường huyết'));
+            return Center(child: Text(context.tr('no_blood_sugar_data')));
           }
         },
       ),
@@ -323,13 +324,13 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
   String _getMealStatusLabel(String mealStatus) {
     switch (mealStatus) {
       case 'fasting':
-        return 'Lúc đói';
+        return context.tr('meal_status_fasting');
       case 'before_meal':
-        return 'Trước ăn';
+        return context.tr('meal_status_before_meal');
       case 'after_meal':
-        return 'Sau ăn 2h';
+        return context.tr('meal_status_after_meal');
       case 'random':
-        return 'Ngẫu nhiên';
+        return context.tr('meal_status_random');
       default:
         return mealStatus;
     }

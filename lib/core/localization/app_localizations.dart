@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppLocalizations {
@@ -13,7 +14,10 @@ class AppLocalizations {
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
 
-  String get languageCode => locale.languageCode;
+  static const List<String> supportedLanguageCodes = ['vi', 'en'];
+  static const List<Locale> supportedLocales = [Locale('vi'), Locale('en')];
+
+  String get languageCode => locale.languageCode.toLowerCase();
 
   // ══════════════════════════════════════
   // All translations
@@ -119,11 +123,136 @@ class AppLocalizations {
       'calories': 'Calo',
       'glycemic_index': 'Chỉ số GI',
 
+      // ── Meal Analysis ──
+      'meal_analysis_result_title': 'Kết quả phân tích',
+      'meal_analysis_need_food_item_to_save': 'Cần có ít nhất 1 món ăn để lưu!',
+      'meal_analysis_save_error': 'Lỗi khi lưu: {error}',
+      'meal_analysis_saved_success': 'Đã lưu bữa ăn thành công!',
+      'meal_capture_title': 'Phân tích bữa ăn',
+      'analyzing_meal': 'Đang phân tích bữa ăn...',
+      'dish_name_label': 'Tên món ăn',
+      'dish_name_hint': 'Nhập tên món ăn',
+      'overview': 'Tổng quan',
+      'total_calories': 'Tổng calo',
+      'tap_to_edit': 'Chạm để chỉnh sửa',
+      'save_meal': 'Lưu bữa ăn',
+      'edit_food_item': 'Chỉnh sửa: {name}',
+      'portion_grams_label': 'Khối lượng (gram)',
+      'nutrition_recalc_note': 'Giá trị dinh dưỡng sẽ được tính lại theo tỷ lệ',
+
+      // ── Auth ──
+      'forgot_password_title': 'Quên mật khẩu',
+      'reset_password_title': 'Đặt lại mật khẩu',
+      'reset_password_desc':
+          'Nhập email của bạn để nhận liên kết đặt lại mật khẩu. Chúng tôi sẽ gửi hướng dẫn đến địa chỉ email này.',
+      'email': 'Email',
+      'your_email_hint': 'Email của bạn',
+      'please_enter_email': 'Vui lòng nhập email',
+      'invalid_email_format': 'Email không đúng định dạng',
+      'send_reset_link': 'Gửi liên kết đặt lại',
+      'back_to_login': 'Quay lại đăng nhập',
+      'reset_email_sent':
+          'Email khôi phục mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư.',
+      'note': 'Lưu ý:',
+      'reset_password_note_bullets':
+          '• Kiểm tra cả hộp thư spam/junk\n• Liên kết có hiệu lực trong 1 giờ\n• Nếu không nhận được email, thử lại sau 5 phút',
+
       // ── Common ──
       'save': 'Lưu',
       'search': 'Tìm kiếm',
       'loading': 'Đang tải...',
       'no_data': 'Không có dữ liệu',
+      'error_with_message': 'Lỗi: {message}',
+
+      'time': 'Thời gian',
+      'status': 'Trạng thái',
+      'classification': 'Phân loại',
+      'clear_filter': 'Xóa bộ lọc',
+      'record_count': '{count} bản ghi',
+      'retry': 'Thử lại',
+      'add': 'Thêm',
+      'close': 'Đóng',
+      'not_selected': 'Chưa chọn',
+      'no_results_found': 'Không tìm thấy kết quả',
+      'try_change_filters': 'Thử thay đổi bộ lọc của bạn',
+      'no_data_for_filter': 'Không có dữ liệu cho bộ lọc này',
+      'no_data_matching_filter': 'Không có dữ liệu phù hợp với bộ lọc',
+      'activity_level': 'Mức vận động',
+      'activity_low': 'Ít vận động',
+      'activity_moderate': 'Vừa phải',
+      'activity_active': 'Năng động',
+      'bmi_underweight': 'Thiếu cân',
+      'bmi_overweight': 'Thừa cân',
+      'bmi_obese': 'Béo phì',
+      'blood_sugar_status': 'Trạng thái đường huyết',
+      'blood_sugar_low': 'Hạ đường huyết',
+      'blood_sugar_prediabetes_short': 'Tiền ĐTĐ',
+      'blood_sugar_prediabetes': 'Tiền đái tháo đường',
+      'blood_sugar_diabetes': 'Đái tháo đường',
+      'measurement_time': 'Thời điểm đo',
+      'before_sleep': 'Trước ngủ',
+      'after_wake': 'Sau ngủ dậy',
+      'sleep_duration': 'Thời lượng ngủ',
+      'sleep_quality': 'Chất lượng',
+      'sleep_duration_severe_shortage': 'Thiếu ngủ N.trọng',
+      'sleep_duration_severe_shortage_full': 'Thiếu ngủ nghiêm trọng',
+      'sleep_duration_shortage': 'Thiếu ngủ',
+      'sleep_duration_ok': 'Tạm đủ',
+      'sleep_duration_good': 'Tốt',
+      'filter_results': 'Lọc kết quả',
+      'filter': 'Bộ lọc',
+      'all': 'Tất cả',
+      'manual_entry': 'Nhập tay',
+      'device': 'Thiết bị',
+      'status_normal': 'Bình thường',
+      'status_monitoring': 'Theo dõi',
+      'status_attention': 'Cần chú ý',
+      'status_danger': 'Nguy hiểm',
+      'apply': 'Áp dụng',
+      'date_range_invalid': 'Ngày bắt đầu phải trước ngày kết thúc',
+      'temp_low': 'Hạ nhiệt',
+      'temp_mild_fever': 'Sốt nhẹ',
+      'temp_moderate_fever': 'Sốt vừa',
+      'temp_high_fever': 'Sốt cao',
+      'no_step_data': 'Không có dữ liệu bước chân',
+      'no_sleep_data': 'Không có dữ liệu giấc ngủ',
+      'no_blood_sugar_data': 'Không có dữ liệu đường huyết',
+      'no_cholesterol_data': 'Không có dữ liệu cholesterol',
+      'no_blood_pressure_data': 'Không có dữ liệu huyết áp',
+      'no_hba1c_data': 'Không có dữ liệu HbA1c',
+      'steps_unit': 'bước',
+      'meal_status_fasting': 'Lúc đói',
+      'meal_status_before_meal': 'Trước ăn',
+      'meal_status_after_meal': 'Sau ăn 2h',
+      'meal_status_random': 'Ngẫu nhiên',
+
+      // ── Notifications ──
+      'notifications_title': 'Thông báo',
+      'unread_count': '{count} chưa đọc',
+      'mark_all': 'Đánh dấu tất cả',
+      'deleted_notification': 'Đã xóa thông báo',
+      'filter_unread': 'Chưa đọc',
+      'filter_read': 'Đã đọc',
+      'no_unread_notifications': 'Không có thông báo chưa đọc',
+
+      // ── Meal history ──
+      'meal_history_title': 'Lịch sử bữa ăn',
+      'ai_analyze': 'AI phân tích',
+      'no_meals_in_range': 'Không có bữa ăn nào trong khoảng thời gian này',
+      'try_another_range': 'Thử chọn khoảng thời gian khác',
+      'tap_ai_to_start': 'Nhấn nút "AI phân tích" để bắt đầu',
+      'week': 'Tuần',
+      'month': 'Tháng',
+
+      // ── Insert dish (manual meal) ──
+      'add_new_meal_title': 'Thêm mới món ăn',
+      'dish_name_section': 'Tên món ăn',
+      'dish_name_example_hint': 'VD: Phở Bò, Cơm Tấm...',
+      'search_food_hint': 'Tìm kiếm thực phẩm...',
+      'meal_notes_hint_optional': 'Ghi chú về bữa ăn (tùy chọn)...',
+      'per_100g': 'Trên 100g',
+      'please_add_at_least_one_food': 'Vui lòng thêm ít nhất 1 thực phẩm',
+      'default_meal_name': 'Bữa ăn',
     },
     'en': {
       // ── Navigation ──
@@ -225,18 +354,153 @@ class AppLocalizations {
       'calories': 'Calories',
       'glycemic_index': 'GI Index',
 
+      // ── Meal Analysis ──
+      'meal_analysis_result_title': 'Analysis Result',
+      'meal_analysis_need_food_item_to_save':
+          'Add at least 1 food item to save!',
+      'meal_analysis_save_error': 'Save failed: {error}',
+      'meal_analysis_saved_success': 'Meal saved successfully!',
+      'meal_capture_title': 'Meal analysis',
+      'analyzing_meal': 'Analyzing meal...',
+      'dish_name_label': 'Dish name',
+      'dish_name_hint': 'Enter dish name',
+      'overview': 'Overview',
+      'total_calories': 'Total calories',
+      'tap_to_edit': 'Tap to edit',
+      'save_meal': 'Save meal',
+      'edit_food_item': 'Edit: {name}',
+      'portion_grams_label': 'Portion (grams)',
+      'nutrition_recalc_note': 'Nutrition values will be recalculated by ratio',
+
+      // ── Auth ──
+      'forgot_password_title': 'Forgot password',
+      'reset_password_title': 'Reset password',
+      'reset_password_desc':
+          'Enter your email to receive a password reset link. We will send instructions to this email address.',
+      'email': 'Email',
+      'your_email_hint': 'Your email',
+      'please_enter_email': 'Please enter your email',
+      'invalid_email_format': 'Invalid email format',
+      'send_reset_link': 'Send reset link',
+      'back_to_login': 'Back to login',
+      'reset_email_sent':
+          'Password reset email sent. Please check your inbox.',
+      'note': 'Note:',
+      'reset_password_note_bullets':
+          '• Also check spam/junk folder\n• Link is valid for 1 hour\n• If you don\'t receive the email, try again after 5 minutes',
+
       // ── Common ──
       'save': 'Save',
       'search': 'Search',
       'loading': 'Loading...',
       'no_data': 'No data',
+      'error_with_message': 'Error: {message}',
+
+      'time': 'Time',
+      'status': 'Status',
+      'classification': 'Classification',
+      'clear_filter': 'Clear filters',
+      'record_count': '{count} records',
+      'retry': 'Try again',
+      'add': 'Add',
+      'close': 'Close',
+      'not_selected': 'Not selected',
+      'no_results_found': 'No results found',
+      'try_change_filters': 'Try changing your filters',
+      'no_data_for_filter': 'No data for this filter',
+      'no_data_matching_filter': 'No data matching the filter',
+      'activity_level': 'Activity level',
+      'activity_low': 'Low',
+      'activity_moderate': 'Moderate',
+      'activity_active': 'Active',
+      'bmi_underweight': 'Underweight',
+      'bmi_overweight': 'Overweight',
+      'bmi_obese': 'Obese',
+      'blood_sugar_status': 'Blood sugar status',
+      'blood_sugar_low': 'Low blood sugar',
+      'blood_sugar_prediabetes_short': 'Pre-DM',
+      'blood_sugar_prediabetes': 'Prediabetes',
+      'blood_sugar_diabetes': 'Diabetes',
+      'measurement_time': 'Measurement time',
+      'before_sleep': 'Before sleep',
+      'after_wake': 'After waking',
+      'sleep_duration': 'Sleep duration',
+      'sleep_quality': 'Quality',
+      'sleep_duration_severe_shortage': 'Severe shortage',
+      'sleep_duration_severe_shortage_full': 'Severe sleep shortage',
+      'sleep_duration_shortage': 'Shortage',
+      'sleep_duration_ok': 'Okay',
+      'sleep_duration_good': 'Good',
+      'filter_results': 'Filter results',
+      'filter': 'Filter',
+      'all': 'All',
+      'manual_entry': 'Manual',
+      'device': 'Device',
+      'status_normal': 'Normal',
+      'status_monitoring': 'Monitoring',
+      'status_attention': 'Needs attention',
+      'status_danger': 'Danger',
+      'apply': 'Apply',
+      'date_range_invalid': 'Start date must be before end date',
+      'temp_low': 'Low temperature',
+      'temp_mild_fever': 'Mild fever',
+      'temp_moderate_fever': 'Moderate fever',
+      'temp_high_fever': 'High fever',
+      'no_step_data': 'No step data',
+      'no_sleep_data': 'No sleep data',
+      'no_blood_sugar_data': 'No blood sugar data',
+      'no_cholesterol_data': 'No cholesterol data',
+      'no_blood_pressure_data': 'No blood pressure data',
+      'no_hba1c_data': 'No HbA1c data',
+      'steps_unit': 'steps',
+      'meal_status_fasting': 'Fasting',
+      'meal_status_before_meal': 'Before meal',
+      'meal_status_after_meal': '2h after meal',
+      'meal_status_random': 'Random',
+
+      // ── Notifications ──
+      'notifications_title': 'Notifications',
+      'unread_count': '{count} unread',
+      'mark_all': 'Mark all',
+      'deleted_notification': 'Notification deleted',
+      'filter_unread': 'Unread',
+      'filter_read': 'Read',
+      'no_unread_notifications': 'No unread notifications',
+
+      // ── Meal history ──
+      'meal_history_title': 'Meal history',
+      'ai_analyze': 'AI analyze',
+      'no_meals_in_range': 'No meals in this time range',
+      'try_another_range': 'Try a different time range',
+      'tap_ai_to_start': 'Tap "AI analyze" to get started',
+      'week': 'Week',
+      'month': 'Month',
+
+      // ── Insert dish (manual meal) ──
+      'add_new_meal_title': 'Add new meal',
+      'dish_name_section': 'Dish name',
+      'dish_name_example_hint': 'e.g., Pho, Rice plate...',
+      'search_food_hint': 'Search foods...',
+      'meal_notes_hint_optional': 'Meal notes (optional)...',
+      'per_100g': 'Per 100g',
+      'please_add_at_least_one_food': 'Please add at least 1 food item',
+      'default_meal_name': 'Meal',
     },
   };
 
-  String translate(String key) {
-    return _localizedValues[locale.languageCode]?[key] ??
+  String translate(String key, {Map<String, String>? params}) {
+    final normalizedCode = languageCode;
+    final raw = _localizedValues[normalizedCode]?[key] ??
         _localizedValues['vi']?[key] ??
         key;
+
+    if (params == null || params.isEmpty) return raw;
+
+    var out = raw;
+    for (final entry in params.entries) {
+      out = out.replaceAll('{${entry.key}}', entry.value);
+    }
+    return out;
   }
 }
 
@@ -246,11 +510,13 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      ['vi', 'en'].contains(locale.languageCode);
+      AppLocalizations.supportedLanguageCodes
+          .contains(locale.languageCode.toLowerCase());
 
   @override
-  Future<AppLocalizations> load(Locale locale) async {
-    return AppLocalizations(locale);
+  Future<AppLocalizations> load(Locale locale) {
+    // No async work needed; keep localization load synchronous.
+    return SynchronousFuture<AppLocalizations>(AppLocalizations(locale));
   }
 
   @override
@@ -260,5 +526,6 @@ class _AppLocalizationsDelegate
 // Extension for easy access
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
-  String tr(String key) => AppLocalizations.of(this).translate(key);
+  String tr(String key, {Map<String, String>? params}) =>
+      AppLocalizations.of(this).translate(key, params: params);
 }

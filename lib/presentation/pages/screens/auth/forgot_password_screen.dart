@@ -1,4 +1,5 @@
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -38,7 +39,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quên mật khẩu'),
+        title: Text(context.tr('forgot_password_title')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -49,9 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           if (state is PasswordResetSent) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text(
-                  'Email khôi phục mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư.',
-                ),
+                content: Text(context.tr('reset_email_sent')),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 4),
               ),
@@ -104,7 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   
                   // Title
                   Text(
-                    'Đặt lại mật khẩu',
+                    context.tr('reset_password_title'),
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -114,7 +113,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   
                   // Description
                   Text(
-                    'Nhập email của bạn để nhận liên kết đặt lại mật khẩu. Chúng tôi sẽ gửi hướng dẫn đến địa chỉ email này.',
+                    context.tr('reset_password_desc'),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
@@ -124,7 +123,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   
                   // Email Label
                   Text(
-                    'Email',
+                    context.tr('email'),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -137,7 +136,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: 'Email của bạn',
+                      hintText: context.tr('your_email_hint'),
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
                       prefixIcon: const Icon(Icons.email_outlined, size: 20),
                       border: OutlineInputBorder(
@@ -148,13 +147,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Vui lòng nhập email';
+                        return context.tr('please_enter_email');
                       }
                       final emailRegex = RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value)) {
-                        return 'Email không đúng định dạng';
+                        return context.tr('invalid_email_format');
                       }
                       return null;
                     },
@@ -198,8 +197,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              'Gửi liên kết đặt lại',
+                          : Text(
+                              context.tr('send_reset_link'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -217,7 +216,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ? null
                           : () => Navigator.pop(context),
                       icon: const Icon(Icons.arrow_back, size: 18),
-                      label: const Text('Quay lại đăng nhập'),
+                      label: Text(context.tr('back_to_login')),
                       style: TextButton.styleFrom(
                         foregroundColor: theme.colorScheme.primary,
                       ),
@@ -250,7 +249,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Lưu ý:',
+                                context.tr('note'),
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.bold,
@@ -258,9 +257,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               const Gap(4),
                               Text(
-                                '• Kiểm tra cả hộp thư spam/junk\n'
-                                '• Liên kết có hiệu lực trong 1 giờ\n'
-                                '• Nếu không nhận được email, thử lại sau 5 phút',
+                                context.tr('reset_password_note_bullets'),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface
                                       .withOpacity(0.7),
