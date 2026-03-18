@@ -41,27 +41,19 @@ class _NutritionPageState extends State<NutritionPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
+    return SafeArea(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Gap(25),
               Container(
                 padding: const EdgeInsets.all(16),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.white10,
                     borderRadius: BorderRadius.circular(20),
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     // ignore: deprecated_member_use
-                      //     color: Colors.blue.withOpacity(0.15),
-                      //     blurRadius: 12,
-                      //     offset: Offset(0, 5),
-                      //   ),
-                      // ],
                 ),
                 child: Row(
                   children: [
@@ -71,15 +63,14 @@ class _NutritionPageState extends State<NutritionPage> {
                         Text(formatDate(context, DateTime.now()), style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          // ignore: deprecated_member_use
-                          color: Colors.black.withOpacity(0.5),
+                          color: AppColor.textSecondary(context),
                         )),
                         Gap(2),
                         Text(context.tr('nutrition'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black)),
+                          color: AppColor.textPrimary(context))),
                       ],
                     ),
                     Spacer(),
@@ -87,8 +78,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     onTap: () =>  Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const TrackMeal())),
-                      // ignore: deprecated_member_use
-                      child: Icon(Icons.history, color: Colors.black.withOpacity(0.8), size: 22,)),
+                      child: Icon(Icons.history, color: AppColor.textPrimary(context), size: 22,)),
                   ],
                  ),
               ),  
@@ -186,8 +176,8 @@ class _NutritionPageState extends State<NutritionPage> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  Gap(10)
-,                    Text(context.tr('today_meals'), style: TextStyle(
+                  Gap(10),
+                    Text(context.tr('today_meals'), style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColor.textPrimary(context))),
@@ -251,6 +241,7 @@ class _NutritionPageState extends State<NutritionPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.grey.withOpacity(0.5),
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -306,7 +297,7 @@ class _NutritionPageState extends State<NutritionPage> {
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
                     value: progress,
-                    minHeight: 8,
+                    minHeight: 6,
                     backgroundColor: progressBgColor,
                     valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                   ),
@@ -329,6 +320,7 @@ class _NutritionPageState extends State<NutritionPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.grey.withOpacity(0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -373,6 +365,7 @@ class _NutritionPageState extends State<NutritionPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.grey.withOpacity(0.5),
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -455,6 +448,7 @@ class _NutritionPageState extends State<NutritionPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
       ),

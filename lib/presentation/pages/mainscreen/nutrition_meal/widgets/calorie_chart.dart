@@ -90,13 +90,13 @@ class _CalorieChartState extends State<CalorieChart> {
           child: Container(
             padding: const EdgeInsets.all(20),
            decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.5),
-                      blurRadius: 12,
-                      offset: Offset(0, 5),
+                      color: Theme.of(context).shadowColor.withOpacity(0.06),
+                      blurRadius: 16,
+                      offset: Offset(0, 6),
                     ),
                   ],
                 ),

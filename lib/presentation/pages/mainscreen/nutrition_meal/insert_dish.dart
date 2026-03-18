@@ -3,11 +3,13 @@ import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
+import 'package:doctor_care/core/services/barcode_food_service.dart';
 import 'package:doctor_care/domain/entities/food_item.dart';
 import 'package:doctor_care/domain/entities/food_nutrition.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.dart';
+import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/barcode_scanner_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -42,6 +44,63 @@ class _InsertDishState extends State<InsertDish> {
     _notesController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _scanBarcode() async {
+    final barcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+    if (barcode == null || !mounted) return;
+
+    // Hiển thị loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final result = await BarcodeFoodService.lookupBarcode(barcode);
+
+    if (!mounted) return;
+    Navigator.of(context).pop(); // đóng loading
+
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không tìm thấy thông tin sản phẩm cho mã vạch này'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Dữ liệu dinh dưỡng từ API đã là per 100g/100ml — thêm thẳng không cần nhập
+    final food = result.food;
+    final grams = result.servingGrams;
+    final item = FoodItem(
+      foodName: food.name,
+      foodNameEn: food.nameEn,
+      portionGrams: grams,
+      calories: food.calculateCalories(grams),
+      glycemicIndex: food.glycemicIndex,
+      protein: food.calculateProtein(grams),
+      carbs: food.calculateCarbs(grams),
+      fat: food.calculateFat(grams),
+      fiber: food.calculateFiber(grams),
+      category: food.category,
+    );
+    setState(() => _foodItems.add(item));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Đã thêm ${food.name} (${grams.toStringAsFixed(0)}g/ml · ${item.calories.toStringAsFixed(0)} kcal)',
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _searchFood(String query) async {
@@ -208,6 +267,9 @@ class _InsertDishState extends State<InsertDish> {
         onBack: () => Navigator.pop(context),
         title: context.tr('add_new_meal_title'),
         centerTitle: true,
+        // quét mã vạch
+        onInfo: _scanBarcode,
+        icon: const Icon(Icons.qr_code_scanner_outlined, color: Colors.white, size: 20),
       ),
       body: Column(
         children: [
@@ -257,7 +319,7 @@ class _InsertDishState extends State<InsertDish> {
                     onChanged: _searchFood,
                     decoration: InputDecoration(
                       hintText: context.tr('search_food_hint'),
-                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                      hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
                       prefixIcon:
                           const Icon(Icons.search_rounded, color: Colors.blue),
                       suffixIcon: _searchController.text.isNotEmpty
@@ -388,7 +450,7 @@ class _InsertDishState extends State<InsertDish> {
                     maxLines: 2,
                     decoration: InputDecoration(
                       hintText: context.tr('meal_notes_hint_optional'),
-                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                      hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -554,13 +616,13 @@ class _InsertDishState extends State<InsertDish> {
           Row(
             children: [
               _buildSummaryItem(
-                  "Calo", "${_totalCalories.toStringAsFixed(0)}", "kcal"),
+                  "Calo", _totalCalories.toStringAsFixed(0), "kcal"),
               _buildSummaryItem(
-                  "Protein", "${_totalProtein.toStringAsFixed(1)}", "g"),
+                  "Protein", _totalProtein.toStringAsFixed(1), "g"),
               _buildSummaryItem(
-                  "Carbs", "${_totalCarbs.toStringAsFixed(1)}", "g"),
+                  "Carbs", _totalCarbs.toStringAsFixed(1), "g"),
               _buildSummaryItem(
-                  "Chất béo", "${_totalFat.toStringAsFixed(1)}", "g"),
+                  "Chất béo", _totalFat.toStringAsFixed(1), "g"),
             ],
           ),
         ],

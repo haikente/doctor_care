@@ -101,7 +101,7 @@ class Profilepage extends StatelessWidget {
                         trailing: Switch(
                           value: true,
                           onChanged: (value) {},
-                          activeColor: theme.primaryColor,
+                          activeThumbColor: theme.primaryColor,
                         ),
                         onTap: null,
                       ),
@@ -174,9 +174,7 @@ class Profilepage extends StatelessWidget {
     );
   }
 
-  // ═══════════════════════════════════════════
-  // HEADER WITH AVATAR + INFO
-  // ═══════════════════════════════════════════
+
   Widget _buildHeader(BuildContext context, ThemeData theme, bool isDarkMode) {
     return Container(
       width: double.infinity,

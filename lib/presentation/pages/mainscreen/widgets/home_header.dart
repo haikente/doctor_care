@@ -20,11 +20,10 @@ class HomeHeader extends StatelessWidget {
           bottomRight: Radius.circular(30),
         ),
         boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: theme.shadowColor.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+         BoxShadow(
+           color: theme.shadowColor.withOpacity(0.05),
+           blurRadius: 20,
+           offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -44,13 +43,12 @@ class HomeHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade500],
+                    colors: [Colors.blue.shade500, Colors.orange.shade100],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      // ignore: deprecated_member_use
                       color: Colors.blue.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
@@ -74,9 +72,9 @@ class HomeHeader extends StatelessWidget {
                   Text(
                     "Xin chào, 👋",
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: AppColor.textSecondary(context),
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                   const Gap(2),

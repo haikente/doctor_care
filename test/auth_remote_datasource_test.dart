@@ -96,6 +96,7 @@ void main() {
         // And the main method `signInWithGoogle` calls `firestore.collection('users').doc(user.uid).get()` later.
         // So we expect 2 calls to `get()`.
 
+        // ignore: unnecessary_set_literal
         when(userDoc.set(any)).thenAnswer((_) async => <void>{});
 
         // Act

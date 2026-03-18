@@ -237,7 +237,7 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
                 // Gallery button
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 50,
                   child: OutlinedButton.icon(
                     onPressed: _pickImageFromGallery,
                     icon: Icon(Icons.photo_library_rounded,
@@ -259,7 +259,7 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
                     ),
                   ),
                 ),
-                Gap(36),
+                Gap(50),
               ],
             ),
           );

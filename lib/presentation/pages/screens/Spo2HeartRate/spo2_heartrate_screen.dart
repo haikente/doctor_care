@@ -305,12 +305,18 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               motion: const ScrollMotion(),
                               children: [
                                 SlidableAction(
-                                  onPressed: (context) {
+                                  onPressed: (_) {
+                                    final bloc = context.read<Spo2heartrateBloc>();
                                     AppDialog.showDeleteConfirm(
                                       context: context,
                                       onConfirm: () {
-                                        context.read<Spo2heartrateBloc>().add(DeleteSpo2HeartRateRecord(record.id!.toString()));
-                                        AppSnackBar.show(
+                                        if(!mounted) return;
+
+                                        final id = record.id;
+                                        if(id != null ){
+                                        bloc.add(DeleteSpo2HeartRateRecord(id.toString()));
+                                        }
+                                        AppSnackBar.showSpo2heartRate(
                                           context: context,
                                           type: SnackBarType.delete,
                                         );

@@ -48,8 +48,7 @@ class ImageUploadService {
     }
   }
 
-  /// Upload image to Firebase Storage
-  static Future<String?> uploadImage({
+   static Future<String?> uploadImage({
     required File imageFile,
     required String userId,
     required Function(double) onProgress,

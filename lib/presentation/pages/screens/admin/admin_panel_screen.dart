@@ -62,10 +62,12 @@ class AdminPanelScreen extends StatelessWidget {
                             );
 
                             if (confirm == true && context.mounted) {
+                              final authBloc = context.read<AuthBloc>();
                               // Clear tất cả dữ liệu đăng nhập
                               await AuthStorageService.clearAll();
+                              if (!context.mounted) return;
                               // Logout
-                              context.read<AuthBloc>().add(SignOutEvent());
+                              authBloc.add(SignOutEvent());
                             }
                           },
                           icon: const Icon(Icons.logout, color: Colors.blue),

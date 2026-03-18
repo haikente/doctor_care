@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
 import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
@@ -42,9 +43,9 @@ class QuickHealthStats extends StatelessWidget {
               }
               return _StatCard(
                 icon: Icons.directions_walk_rounded,
-                label: 'Bước chân',
+                label: context.tr('steps'),
                 value: value,
-                unit: 'bước',
+                unit: context.tr('steps_unit'),
                 color: const Color(0xFF2E7D32),
                 progress: progress,
               );
@@ -72,9 +73,9 @@ class QuickHealthStats extends StatelessWidget {
               }
               return _StatCard(
                 icon: Icons.local_drink_outlined,
-                label: 'Nước uống',
+                label: context.tr('daily_water'),
                 value: value,
-                unit: 'ml',
+                unit: context.tr('unit_ml'),
                 color: const Color(0xFF039BE5),
                 progress: progress,
               );
@@ -88,7 +89,6 @@ class QuickHealthStats extends StatelessWidget {
               String value = '--';
               double progress = 0.0;
               if (state is SleepRecordLoaded && state.records.isNotEmpty) {
-                // Lấy record mới nhất hôm nay hoặc đêm qua
                 final todayRecords = state.records
                     .where((r) => _isToday(r.timestamp))
                     .toList();
@@ -101,9 +101,9 @@ class QuickHealthStats extends StatelessWidget {
               }
               return _StatCard(
                 icon: Icons.bedtime_outlined,
-                label: 'Giấc ngủ',
+                label: context.tr('sleep'),
                 value: value,
-                unit: 'giờ',
+                unit: context.tr('unit_hour'),
                 color: const Color(0xFF3949AB),
                 progress: progress,
               );
@@ -129,9 +129,9 @@ class QuickHealthStats extends StatelessWidget {
               }
               return _StatCard(
                 icon: Icons.favorite_border_rounded,
-                label: 'Nhịp tim',
+                label: context.tr('heart_rate_label'),
                 value: value,
-                unit: 'bpm',
+                unit: context.tr('unit_bpm'),
                 color: const Color(0xFFE53935),
                 progress: progress,
               );

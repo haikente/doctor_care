@@ -56,10 +56,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
             );
             // Quay về màn hình login sau 2 giây
+            final navigator = Navigator.of(context);
             Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                Navigator.pop(context);
-              }
+              if (!mounted) return;
+              navigator.pop();
             });
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(

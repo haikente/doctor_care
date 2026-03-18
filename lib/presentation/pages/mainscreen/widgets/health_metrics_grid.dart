@@ -93,9 +93,9 @@ class HealthMetricsGrid extends StatelessWidget {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             crossAxisCount: 2,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            childAspectRatio: 1, // Taller cards
+                            mainAxisSpacing: 14,
+                            crossAxisSpacing: 14,
+                            childAspectRatio: 1,
                             padding: EdgeInsets.zero,
                             children: [
                               _buildMetricCard(
@@ -208,7 +208,7 @@ class HealthMetricsGrid extends StatelessWidget {
                 Icon(
                   Icons.arrow_outward_rounded,
                   color: Colors.grey,
-                  size: 20,
+                  size: 18,
                 ),
               ],
             ),
@@ -216,14 +216,14 @@ class HealthMetricsGrid extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 14,
                 color: AppColor.textSecondary(context),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const Gap(6),
+            const Gap(5),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -232,14 +232,14 @@ class HealthMetricsGrid extends StatelessWidget {
                     value,
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: Colors.grey,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Gap(4),
+                const Gap(5),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(

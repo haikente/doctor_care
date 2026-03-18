@@ -50,7 +50,7 @@ void main() async {
   try {
     await InjectionContainer().init();
   } catch (e) {
-    debugPrint('❌ InjectionContainer init failed: $e');
+    debugPrint('Lỗi khởi tạo InjectionContainer: $e');
   }
 
   runApp(const MyApp());

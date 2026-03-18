@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/step_count.dart';
 import 'package:doctor_care/domain/entities/water_intake.dart';
 import 'package:doctor_care/domain/entities/sleep_record.dart';
@@ -165,7 +166,7 @@ class _ChartContainer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Hoạt động tuần này',
+                    context.tr('weekly_activity'),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -176,8 +177,11 @@ class _ChartContainer extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     activeDays > 0
-                        ? '$activeDays/7 ngày có ghi nhận dữ liệu'
-                        : 'Chưa có dữ liệu tuần này',
+                        ? context.tr(
+                            'active_days_recorded',
+                            params: {'days': activeDays.toString()},
+                          )
+                        : context.tr('no_data_this_week'),
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
                 ],
@@ -191,9 +195,9 @@ class _ChartContainer extends StatelessWidget {
                   color: const Color(0xFF1E88E5).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
-                  'Tuần này',
-                  style: TextStyle(
+                child: Text(
+                  context.tr('this_week'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF1E88E5),
@@ -209,7 +213,7 @@ class _ChartContainer extends StatelessWidget {
             height: 140,
             child: CustomPaint(
               size: const Size(double.infinity, 140),
-              painter: _BarChartPainter(values: scores),
+              painter: _BarChartPainter(context: context, values: scores),
             ),
           ),
 
@@ -221,12 +225,12 @@ class _ChartContainer extends StatelessWidget {
             children: [
               _LegendItem(
                 color: const Color(0xFF1E88E5),
-                label: 'Đạt mục tiêu',
+                label: context.tr('target_reached'),
               ),
               const SizedBox(width: 20),
               _LegendItem(
                 color: const Color(0xFF1E88E5).withOpacity(0.3),
-                label: 'Mục tiêu',
+                label: context.tr('target'),
               ),
             ],
           ),
@@ -269,10 +273,20 @@ class _LegendItem extends StatelessWidget {
 }
 
 class _BarChartPainter extends CustomPainter {
-  final List<String> days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  final BuildContext context;
+  final List<String> days;
   final List<double> values;
 
-  _BarChartPainter({required this.values});
+  _BarChartPainter({required this.context, required this.values})
+    : days = [
+        context.tr('day_mon'),
+        context.tr('day_tue'),
+        context.tr('day_wed'),
+        context.tr('day_thu'),
+        context.tr('day_fri'),
+        context.tr('day_sat'),
+        context.tr('day_sun'),
+      ];
 
   @override
   void paint(Canvas canvas, Size size) {

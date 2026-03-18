@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 
 class DailyHealthTip extends StatelessWidget {
   const DailyHealthTip({super.key});
@@ -7,51 +8,44 @@ class DailyHealthTip extends StatelessWidget {
   static final List<_TipData> _tips = [
     _TipData(
       icon: Icons.water_drop_outlined,
-      title: 'Uống đủ nước',
-      content:
-          'Hãy uống ít nhất 2 lít nước mỗi ngày để duy trì sức khoẻ và giúp cơ thể vận hành tốt nhất.',
+      titleKey: 'tip_water_title',
+      contentKey: 'tip_water_desc',
       gradient: [Color(0xFF039BE5), Color(0xFF0277BD)],
     ),
     _TipData(
       icon: Icons.directions_walk_rounded,
-      title: 'Đi bộ mỗi ngày',
-      content:
-          'Đi bộ 30 phút mỗi ngày giúp giảm nguy cơ bệnh tim mạch và cải thiện tâm trạng.',
+      titleKey: 'tip_walk_title',
+      contentKey: 'tip_walk_desc',
       gradient: [Color(0xFF43A047), Color(0xFF2E7D32)],
     ),
     _TipData(
       icon: Icons.bedtime_outlined,
-      title: 'Ngủ đủ giấc',
-      content:
-          'Ngủ 7-8 tiếng mỗi đêm giúp cơ thể phục hồi và tăng cường hệ miễn dịch.',
+      titleKey: 'tip_sleep_title',
+      contentKey: 'tip_sleep_desc',
       gradient: [Color(0xFF5C6BC0), Color(0xFF3949AB)],
     ),
     _TipData(
       icon: Icons.restaurant_outlined,
-      title: 'Ăn uống lành mạnh',
-      content:
-          'Bổ sung rau xanh và trái cây vào bữa ăn hàng ngày để cung cấp vitamin thiết yếu.',
+      titleKey: 'tip_eat_title',
+      contentKey: 'tip_eat_desc',
       gradient: [Color(0xFFF57C00), Color(0xFFE65100)],
     ),
     _TipData(
       icon: Icons.self_improvement_outlined,
-      title: 'Thư giãn tinh thần',
-      content:
-          'Dành 10 phút mỗi ngày để thiền hoặc hít thở sâu giúp giảm stress hiệu quả.',
+      titleKey: 'tip_relax_title',
+      contentKey: 'tip_relax_desc',
       gradient: [Color(0xFF8E24AA), Color(0xFF6A1B9A)],
     ),
     _TipData(
       icon: Icons.monitor_heart_outlined,
-      title: 'Theo dõi huyết áp',
-      content:
-          'Đo huyết áp định kỳ để phát hiện sớm các vấn đề tim mạch và điều chỉnh lối sống.',
+      titleKey: 'tip_bp_title',
+      contentKey: 'tip_bp_desc',
       gradient: [Color(0xFFE53935), Color(0xFFC62828)],
     ),
     _TipData(
       icon: Icons.fitness_center_outlined,
-      title: 'Tập thể dục',
-      content:
-          'Tập thể dục ít nhất 150 phút/tuần để tăng cường sức khoẻ tim mạch và xương khớp.',
+      titleKey: 'tip_exercise_title',
+      contentKey: 'tip_exercise_desc',
       gradient: [Color(0xFF00897B), Color(0xFF00695C)],
     ),
   ];
@@ -130,7 +124,7 @@ class DailyHealthTip extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '💡 Lời khuyên hôm nay',
+                          context.tr('tip_today'),
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.white.withOpacity(0.8),
@@ -139,7 +133,7 @@ class DailyHealthTip extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          tip.title,
+                          context.tr(tip.titleKey),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -153,7 +147,7 @@ class DailyHealthTip extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  tip.content,
+                  context.tr(tip.contentKey),
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withOpacity(0.9),
@@ -172,14 +166,14 @@ class DailyHealthTip extends StatelessWidget {
 
 class _TipData {
   final IconData icon;
-  final String title;
-  final String content;
+  final String titleKey;
+  final String contentKey;
   final List<Color> gradient;
 
   const _TipData({
     required this.icon,
-    required this.title,
-    required this.content,
+    required this.titleKey,
+    required this.contentKey,
     required this.gradient,
   });
 }

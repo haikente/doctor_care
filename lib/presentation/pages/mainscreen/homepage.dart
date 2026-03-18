@@ -40,9 +40,9 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SingleChildScrollView(
+    return SafeArea(
+      //backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      child: SingleChildScrollView(
         padding: EdgeInsets.zero,
         child: Column(
           children: [
@@ -51,9 +51,9 @@ class _HomepageState extends State<Homepage> {
             const HealthStatusCard(),
             const Gap(24),
             const StepCountTargetChart(),
-            const Gap(30),
+            const Gap(24),
             const HealthMetricsGrid(),
-            const Gap(30),
+            const Gap(24),
             const TodayTarget(),
             const Gap(100),
           ],

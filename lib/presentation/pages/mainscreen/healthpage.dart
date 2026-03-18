@@ -1,4 +1,5 @@
 import 'package:doctor_care/core/pages/app_color.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/widgets/daily_health_tip.dart';
@@ -15,14 +16,13 @@ class Healthpage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
+    return SafeArea(
+      child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              Gap(25),
               Container(
                 padding: const EdgeInsets.all(16),
                 width: double.infinity,
@@ -95,7 +95,7 @@ class Healthpage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "Đối tượng theo dõi",
+                            context.tr('tracking_target'),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.white.withOpacity(0.85),
@@ -105,8 +105,8 @@ class Healthpage extends StatelessWidget {
                           const Gap(2),
                           BlocBuilder<FamilyProfileCubit, FamilyProfileState>(
                             builder: (context, fpState) {
-                              String displayName = "Người dùng";
-                              String subLabel = "Theo dõi sức khoẻ tổng quát";
+                              String displayName = context.tr('user');
+                              String subLabel = context.tr('health_tracking');
                               if (fpState is FamilyProfileLoaded &&
                                   fpState.activeProfile != null) {
                                 displayName = fpState.activeProfile!.name;
@@ -118,7 +118,8 @@ class Healthpage extends StatelessWidget {
                                     .state;
                                 if (authState is Authenticated) {
                                   displayName =
-                                      authState.user.fullName ?? "Người dùng";
+                                      authState.user.fullName ??
+                                      context.tr('user');
                                 }
                               }
                               return Column(
@@ -201,7 +202,7 @@ class Healthpage extends StatelessWidget {
                   ),
                   const Gap(10),
                   Text(
-                    "Tổng quan hôm nay",
+                    context.tr('today_overview'),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -236,8 +237,8 @@ class Healthpage extends StatelessWidget {
                   ),
                   const Gap(10),
                   Text(
-                    "Các chỉ số sức khoẻ",
-                     style: TextStyle(
+                    context.tr('health_metrics'),
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColor.textSecondary(context),
@@ -255,70 +256,70 @@ class Healthpage extends StatelessWidget {
                 childAspectRatio: 0.95,
                 children: [
                   HealthFeatureCard(
-                    title: 'Huyết áp',
+                    title: context.tr('blood_pressure'),
                     subtitle: 'mmHg',
                     icon: Icons.bloodtype_outlined,
                     color: const Color(0xFFE53935),
                     route: '/bloodpressure',
                   ),
                   HealthFeatureCard(
-                    title: 'Chỉ số HbA1c',
+                    title: context.tr('hba1c_index'),
                     subtitle: '%',
                     icon: Icons.medical_information_outlined,
                     color: const Color(0xFFF57C00),
                     route: '/hba1c',
                   ),
                   HealthFeatureCard(
-                    title: 'Nhiệt độ',
+                    title: context.tr('temperature'),
                     subtitle: '°C',
                     icon: Icons.thermostat_outlined,
                     color: const Color(0xFF43A047),
                     route: '/temperature',
                   ),
                   HealthFeatureCard(
-                    title: 'SPO2 & Nhịp tim',
-                    subtitle: '% / bpm',
+                    title: context.tr('spo2_heart_rate'),
+                    subtitle: '% / ${context.tr('unit_bpm')}',
                     icon: Icons.favorite_border_rounded,
                     color: const Color(0xFF8E24AA),
                     route: '/spo2heart',
                   ),
                   HealthFeatureCard(
-                    title: 'BMI & Cân nặng',
+                    title: context.tr('bmi_weight'),
                     subtitle: 'kg/m²',
                     icon: Icons.monitor_weight_outlined,
                     color: const Color(0xFF1E88E5),
                     route: '/bmiweight',
                   ),
                   HealthFeatureCard(
-                    title: 'Lượng nước',
-                    subtitle: 'ml',
+                    title: context.tr('water_intake'),
+                    subtitle: context.tr('unit_ml'),
                     icon: Icons.local_drink_outlined,
                     color: const Color(0xFF039BE5),
                     route: '/waterintake',
                   ),
                   HealthFeatureCard(
-                    title: 'Đường huyết',
+                    title: context.tr('blood_sugar'),
                     subtitle: 'mg/dL',
                     icon: Icons.water_drop_outlined,
                     color: const Color(0xFF00897B),
                     route: '/bloodsugar',
                   ),
                   HealthFeatureCard(
-                    title: 'Giấc ngủ',
-                    subtitle: 'giờ',
+                    title: context.tr('sleep'),
+                    subtitle: context.tr('unit_hour'),
                     icon: Icons.bedtime_outlined,
                     color: const Color(0xFF3949AB),
                     route: '/sleep',
                   ),
                   HealthFeatureCard(
-                    title: 'Bước chân',
-                    subtitle: 'bước',
+                    title: context.tr('steps'),
+                    subtitle: context.tr('steps_unit'),
                     icon: Icons.directions_walk_rounded,
                     color: const Color(0xFF2E7D32),
                     route: '/stepcounter',
                   ),
                   HealthFeatureCard(
-                    title: 'Cholesterol',
+                    title: context.tr('cholesterol_label'),
                     subtitle: 'mg/dL',
                     icon: Icons.bloodtype_rounded,
                     color: const Color(0xFF5E35B1),

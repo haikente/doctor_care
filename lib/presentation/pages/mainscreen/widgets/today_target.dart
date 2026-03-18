@@ -162,6 +162,7 @@ class _TodayTargetState extends State<TodayTarget> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -193,7 +194,7 @@ class _TodayTargetState extends State<TodayTarget> {
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
-                        color: Colors.grey.shade700,
+                        color: AppColor.textPrimary(context),
                       ),
                     ),
                     Text(
@@ -224,17 +225,15 @@ class _TodayTargetState extends State<TodayTarget> {
                     Text(
                       current,
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey.shade700,
+                        fontSize: 13,
+                        color: Colors.grey.shade500,
                       ),
                     ),
                     Text(
                       " / $goal",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey.shade700,
+                       style: TextStyle(
+                       fontSize: 13,
+                       color: Colors.grey.shade500,
                       ),
                     ),
                   ],

@@ -179,7 +179,7 @@ class CustomDateTimePicker {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
           .map(
-            (day) => Container(
+            (day) => SizedBox(
               width: 40,
               child: Center(
                 child: Text(
@@ -341,7 +341,7 @@ class CustomDateTimePicker {
 
     // Empty cells for previous month
     for (int i = 1; i < firstWeekday; i++) {
-      dayWidgets.add(Container(width: 40, height: 40));
+      dayWidgets.add(SizedBox(width: 40, height: 40));
     }
 
     // Days in month
@@ -387,7 +387,7 @@ class CustomDateTimePicker {
     // Fill remaining cells
     const maxCells = 42;
     while (dayWidgets.length < maxCells) {
-      dayWidgets.add(Container(width: 40, height: 40));
+      dayWidgets.add(SizedBox(width: 40, height: 40));
     }
 
     const rowCount = 6;

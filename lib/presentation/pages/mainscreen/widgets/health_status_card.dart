@@ -16,15 +16,16 @@ class HealthStatusCard extends StatelessWidget {
         color: Colors.blue.shade50,
         gradient: LinearGradient(
           colors: [
-          Colors.blue.shade500,
-          Colors.blue.shade400],
+            Colors.blue.shade400,
+            Colors.orange.shade300
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.5),
+            color: Theme.of(context).shadowColor.withOpacity(0.06),
             blurRadius: 20,
             offset: const Offset(0, 5),
           ),
@@ -36,8 +37,8 @@ class HealthStatusCard extends StatelessWidget {
             right: -20,
             top: -30,
             child: Container(
-              width: 130,
-              height: 130,
+              width:90,
+              height: 90,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -46,12 +47,12 @@ class HealthStatusCard extends StatelessWidget {
           ),
           Positioned(
             left: -30,
-            bottom: -30,
+            top: -30,
             child: Container(
-              width: 120,
-              height: 120,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -63,52 +64,23 @@ class HealthStatusCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.favorite_rounded,
+                    Text(
+                      "Tình trạng sức khỏe",
+                      style: TextStyle(
                         color: Colors.white,
-                        size: 24,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Gap(16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Sức khỏe tổng quan",
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const Gap(4),
-                          const Text(
-                            "Tốt",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const Spacer(),
                     GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, '/health-overview');
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                          horizontal: 5,
+                          vertical: 5,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.15),
@@ -120,7 +92,7 @@ class HealthStatusCard extends StatelessWidget {
                               "Chi tiết",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

@@ -215,6 +215,7 @@ class _TrackMealState extends State<TrackMeal> {
           Icon(
             isFiltered ? Icons.filter_list_off : Icons.restaurant_menu,
             size: 64,
+            // ignore: deprecated_member_use
             color: AppColor.textSecondary(context).withOpacity(0.5),
           ),
           const SizedBox(height: 16),

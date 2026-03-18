@@ -83,7 +83,7 @@ class AppLocalizations {
       'drink_water': 'Uống nước',
       'step_count': 'Bước chân',
       'meal_calories': 'Bữa ăn',
-      'step_goal': '10.000 bước',
+      'step_goal': '10000 bước',
       'water_goal': '2000 ml',
       'calorie_goal': '2000 kcal',
 
@@ -98,7 +98,7 @@ class AppLocalizations {
       'no_meals_today': 'Chưa có bữa ăn nào',
       'add_meal_hint': 'Thêm bữa ăn để theo dõi dinh dưỡng',
       'nutrition_summary': 'Tổng kết dinh dưỡng',
-      'add_new_dish': 'Thêm mới món ăn',
+      'add_new_dish': 'Thêm mới',
 
       // ── Meal Capture ──
       'ai_analyzing': 'AI đang nhận diện thành phần dinh dưỡng',
@@ -253,6 +253,59 @@ class AppLocalizations {
       'per_100g': 'Trên 100g',
       'please_add_at_least_one_food': 'Vui lòng thêm ít nhất 1 thực phẩm',
       'default_meal_name': 'Bữa ăn',
+
+      // ── Health Page & Widgets ──
+      'tracking_target': 'Đối tượng theo dõi',
+      'today_overview': 'Tổng quan hôm nay',
+      'blood_pressure': 'Huyết áp',
+      'hba1c_index': 'Chỉ số HbA1c',
+      'temperature': 'Nhiệt độ',
+      'spo2_heart_rate': 'SPO2 & Nhịp tim',
+      'bmi_weight': 'BMI & Cân nặng',
+      'water_intake': 'Lượng nước',
+      'blood_sugar': 'Đường huyết',
+      'sleep': 'Giấc ngủ',
+      'cholesterol_label': 'Cholesterol',
+      'daily_water': 'Nước uống',
+      'heart_rate_label': 'Nhịp tim',
+      'unit_ml': 'ml',
+      'unit_hour': 'giờ',
+      'unit_bpm': 'bpm',
+      'tip_today': '💡 Lời khuyên hôm nay',
+      'tip_water_title': 'Uống đủ nước',
+      'tip_water_desc':
+          'Hãy uống ít nhất 2 lít nước mỗi ngày để duy trì sức khoẻ và giúp cơ thể vận hành tốt nhất.',
+      'tip_walk_title': 'Đi bộ mỗi ngày',
+      'tip_walk_desc':
+          'Đi bộ 30 phút mỗi ngày giúp giảm nguy cơ bệnh tim mạch và cải thiện tâm trạng.',
+      'tip_sleep_title': 'Ngủ đủ giấc',
+      'tip_sleep_desc':
+          'Ngủ 7-8 tiếng mỗi đêm giúp cơ thể phục hồi và tăng cường hệ miễn dịch.',
+      'tip_eat_title': 'Ăn uống lành mạnh',
+      'tip_eat_desc':
+          'Bổ sung rau xanh và trái cây vào bữa ăn hàng ngày để cung cấp vitamin thiết yếu.',
+      'tip_relax_title': 'Thư giãn tinh thần',
+      'tip_relax_desc':
+          'Dành 10 phút mỗi ngày để thiền hoặc hít thở sâu giúp giảm stress hiệu quả.',
+      'tip_bp_title': 'Theo dõi huyết áp',
+      'tip_bp_desc':
+          'Đo huyết áp định kỳ để phát hiện sớm các vấn đề tim mạch và điều chỉnh lối sống.',
+      'tip_exercise_title': 'Tập thể dục',
+      'tip_exercise_desc':
+          'Tập thể dục ít nhất 150 phút/tuần để tăng cường sức khoẻ tim mạch và xương khớp.',
+      'weekly_activity': 'Hoạt động tuần này',
+      'active_days_recorded': '{days}/7 ngày có ghi nhận dữ liệu',
+      'no_data_this_week': 'Chưa có dữ liệu tuần này',
+      'this_week': 'Tuần này',
+      'target_reached': 'Đạt mục tiêu',
+      'target': 'Mục tiêu',
+      'day_mon': 'T2',
+      'day_tue': 'T3',
+      'day_wed': 'T4',
+      'day_thu': 'T5',
+      'day_fri': 'T6',
+      'day_sat': 'T7',
+      'day_sun': 'CN',
     },
     'en': {
       // ── Navigation ──
@@ -383,8 +436,7 @@ class AppLocalizations {
       'invalid_email_format': 'Invalid email format',
       'send_reset_link': 'Send reset link',
       'back_to_login': 'Back to login',
-      'reset_email_sent':
-          'Password reset email sent. Please check your inbox.',
+      'reset_email_sent': 'Password reset email sent. Please check your inbox.',
       'note': 'Note:',
       'reset_password_note_bullets':
           '• Also check spam/junk folder\n• Link is valid for 1 hour\n• If you don\'t receive the email, try again after 5 minutes',
@@ -485,12 +537,66 @@ class AppLocalizations {
       'per_100g': 'Per 100g',
       'please_add_at_least_one_food': 'Please add at least 1 food item',
       'default_meal_name': 'Meal',
+
+      // ── Health Page & Widgets ──
+      'tracking_target': 'Tracking Target',
+      'today_overview': 'Today\'s Overview',
+      'blood_pressure': 'Blood Pressure',
+      'hba1c_index': 'HbA1c Index',
+      'temperature': 'Temperature',
+      'spo2_heart_rate': 'SPO2 & Heart Rate',
+      'bmi_weight': 'BMI & Weight',
+      'water_intake': 'Water Intake',
+      'blood_sugar': 'Blood Sugar',
+      'sleep': 'Sleep',
+      'cholesterol_label': 'Cholesterol',
+      'daily_water': 'Water',
+      'heart_rate_label': 'Heart Rate',
+      'unit_ml': 'ml',
+      'unit_hour': 'hrs',
+      'unit_bpm': 'bpm',
+      'tip_today': '💡 Today\'s Tip',
+      'tip_water_title': 'Drink enough water',
+      'tip_water_desc':
+          'Drink at least 2 liters of water daily to maintain health and keep your body functioning well.',
+      'tip_walk_title': 'Walk every day',
+      'tip_walk_desc':
+          'Walking 30 minutes a day reduces cardiovascular risk and improves mood.',
+      'tip_sleep_title': 'Get enough sleep',
+      'tip_sleep_desc':
+          'Sleeping 7-8 hours a night helps the body recover and boosts the immune system.',
+      'tip_eat_title': 'Eat healthy',
+      'tip_eat_desc':
+          'Add greens and fruits to daily meals for essential vitamins.',
+      'tip_relax_title': 'Relax your mind',
+      'tip_relax_desc':
+          'Spend 10 minutes a day meditating or deep breathing to effectively reduce stress.',
+      'tip_bp_title': 'Monitor blood pressure',
+      'tip_bp_desc':
+          'Regularly check blood pressure to detect heart issues early and adjust lifestyle.',
+      'tip_exercise_title': 'Exercise',
+      'tip_exercise_desc':
+          'Exercise at least 150 minutes/week to strengthen cardiovascular and joint health.',
+      'weekly_activity': 'Weekly Activity',
+      'active_days_recorded': '{days}/7 days with recorded data',
+      'no_data_this_week': 'No data this week',
+      'this_week': 'This Week',
+      'target_reached': 'Target Reached',
+      'target': 'Target',
+      'day_mon': 'Mon',
+      'day_tue': 'Tue',
+      'day_wed': 'Wed',
+      'day_thu': 'Thu',
+      'day_fri': 'Fri',
+      'day_sat': 'Sat',
+      'day_sun': 'Sun',
     },
   };
 
   String translate(String key, {Map<String, String>? params}) {
     final normalizedCode = languageCode;
-    final raw = _localizedValues[normalizedCode]?[key] ??
+    final raw =
+        _localizedValues[normalizedCode]?[key] ??
         _localizedValues['vi']?[key] ??
         key;
 
@@ -509,9 +615,8 @@ class _AppLocalizationsDelegate
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      AppLocalizations.supportedLanguageCodes
-          .contains(locale.languageCode.toLowerCase());
+  bool isSupported(Locale locale) => AppLocalizations.supportedLanguageCodes
+      .contains(locale.languageCode.toLowerCase());
 
   @override
   Future<AppLocalizations> load(Locale locale) {
