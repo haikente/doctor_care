@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,14 +23,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emergencyPhoneController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
-  
+
   DateTime? _selectedDate;
   String? _selectedGender;
   String? _selectedBloodType;
   List<String> _allergies = [];
   List<String> _chronicDiseases = [];
   List<String> _medications = [];
-  
+
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -64,8 +65,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (data['dateOfBirth'] != null) {
             _selectedDate = DateTime.parse(data['dateOfBirth']);
           }
-          _allergies = data['allergies'] != null 
-              ? List<String>.from(data['allergies']) 
+          _allergies = data['allergies'] != null
+              ? List<String>.from(data['allergies'])
               : [];
           _chronicDiseases = data['chronicDiseases'] != null
               ? List<String>.from(data['chronicDiseases'])
@@ -82,7 +83,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+          SnackBar(content: Text('${context.tr("error")}: ${e.toString()}')),
         );
       }
     }
@@ -106,8 +107,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'gender': _selectedGender,
         'bloodType': _selectedBloodType,
         'dateOfBirth': _selectedDate?.toIso8601String(),
-        'height': _heightController.text.isNotEmpty 
-            ? double.parse(_heightController.text) 
+        'height': _heightController.text.isNotEmpty
+            ? double.parse(_heightController.text)
             : null,
         'weight': _weightController.text.isNotEmpty
             ? double.parse(_weightController.text)
@@ -125,8 +126,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Cập nhật thành công!'),
+          SnackBar(
+            content: Text(context.tr('update_success')),
             backgroundColor: Colors.green,
           ),
         );
@@ -136,7 +137,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Lỗi: ${e.toString()}'),
+            content: Text('❌ ${context.tr("error")}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -148,12 +149,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     if (_isLoading) {
       return Scaffold(
         appBar: CustomStackAppBar(
           onBack: () => Navigator.pop(context),
-          title: 'Chỉnh sửa hồ sơ',
+          title: context.tr('edit_profile_title'),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -163,7 +163,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: 'Chỉnh sửa hồ sơ',
+        title: context.tr('edit_profile_title'),
         centerTitle: true,
       ),
       body: Form(
@@ -172,166 +172,168 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             // Basic Info
-            _buildSection(
-              'Thông tin cơ bản',
-              Icons.person,
-              [
-                TextFormField(
-                  controller: _fullNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Họ và tên *',
-                    prefixIcon: Icon(Icons.badge),
+            _buildSection(context.tr('basic_info'), Icons.person, [
+              TextFormField(
+                controller: _fullNameController,
+                decoration: InputDecoration(
+                  labelText: '${context.tr("full_name")} *',
+                  prefixIcon: const Icon(Icons.badge),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return context.tr('please_enter_full_name');
+                  }
+                  return null;
+                },
+              ),
+              const Gap(16),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  labelText: context.tr('phone_number'),
+                  prefixIcon: const Icon(Icons.phone),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const Gap(16),
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: InputDecoration(
+                  labelText: context.tr('gender'),
+                  prefixIcon: const Icon(Icons.wc),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'male',
+                    child: Text(context.tr('gender_male')),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập họ tên';
-                    }
-                    return null;
-                  },
-                ),
-                const Gap(16),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Số điện thoại',
-                    prefixIcon: Icon(Icons.phone),
+                  DropdownMenuItem(
+                    value: 'female',
+                    child: Text(context.tr('gender_female')),
                   ),
-                  keyboardType: TextInputType.phone,
-                ),
-                const Gap(16),
-                DropdownButtonFormField<String>(
-                  value: _selectedGender,
-                  decoration: const InputDecoration(
-                    labelText: 'Giới tính',
-                    prefixIcon: Icon(Icons.wc),
+                  DropdownMenuItem(
+                    value: 'other',
+                    child: Text(context.tr('gender_other')),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'male', child: Text('Nam')),
-                    DropdownMenuItem(value: 'female', child: Text('Nữ')),
-                    DropdownMenuItem(value: 'other', child: Text('Khác')),
-                  ],
-                  onChanged: (value) => setState(() => _selectedGender = value),
+                ],
+                onChanged: (value) => setState(() => _selectedGender = value),
+              ),
+              const Gap(16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.cake),
+                title: Text(
+                  _selectedDate == null
+                      ? context.tr('choose_date_of_birth')
+                      : DateFormat('dd/MM/yyyy').format(_selectedDate!),
                 ),
-                const Gap(16),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.cake),
-                  title: Text(_selectedDate == null
-                      ? 'Chọn ngày sinh'
-                      : DateFormat('dd/MM/yyyy').format(_selectedDate!)),
-                  trailing: const Icon(Icons.calendar_today),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate ?? DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      setState(() => _selectedDate = date);
-                    }
-                  },
-                ),
-              ],
-            ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate ?? DateTime(2000),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) {
+                    setState(() => _selectedDate = date);
+                  }
+                },
+              ),
+            ]),
 
             const Gap(24),
 
             // Health Info
-            _buildSection(
-              'Thông tin sức khỏe',
-              Icons.favorite,
-              [
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedBloodType,
-                  decoration: const InputDecoration(
-                    labelText: 'Nhóm máu',
-                    prefixIcon: Icon(Icons.bloodtype),
+            _buildSection(context.tr('health_info'), Icons.favorite, [
+              DropdownButtonFormField<String>(
+                initialValue: _selectedBloodType,
+                decoration: InputDecoration(
+                  labelText: context.tr('blood_type'),
+                  prefixIcon: const Icon(Icons.bloodtype),
+                ),
+                items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+                    .map(
+                      (type) =>
+                          DropdownMenuItem(value: type, child: Text(type)),
+                    )
+                    .toList(),
+                onChanged: (value) =>
+                    setState(() => _selectedBloodType = value),
+              ),
+              const Gap(16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _heightController,
+                      decoration: InputDecoration(
+                        labelText: context.tr('height_cm'),
+                        prefixIcon: const Icon(Icons.height),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
-                  items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-                      .map((type) => DropdownMenuItem(value: type, child: Text(type)))
-                      .toList(),
-                  onChanged: (value) => setState(() => _selectedBloodType = value),
-                ),
-                const Gap(16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _heightController,
-                        decoration: const InputDecoration(
-                          labelText: 'Chiều cao (cm)',
-                          prefixIcon: Icon(Icons.height),
-                        ),
-                        keyboardType: TextInputType.number,
+                  const Gap(16),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _weightController,
+                      decoration: InputDecoration(
+                        labelText: context.tr('weight_kg'),
+                        prefixIcon: const Icon(Icons.monitor_weight),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
-                    const Gap(16),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _weightController,
-                        decoration: const InputDecoration(
-                          labelText: 'Cân nặng (kg)',
-                          prefixIcon: Icon(Icons.monitor_weight),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ]),
 
             const Gap(24),
 
             // Address
-            _buildSection(
-              'Địa chỉ',
-              Icons.home,
-              [
-                TextFormField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Địa chỉ',
-                    prefixIcon: Icon(Icons.location_on),
-                  ),
-                  maxLines: 2,
+            _buildSection(context.tr('address'), Icons.home, [
+              TextFormField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  labelText: context.tr('address'),
+                  prefixIcon: const Icon(Icons.location_on),
                 ),
-              ],
-            ),
+                maxLines: 2,
+              ),
+            ]),
 
             const Gap(24),
 
             // Emergency Contact
-            _buildSection(
-              'Liên hệ khẩn cấp',
-              Icons.emergency,
-              [
-                TextFormField(
-                  controller: _emergencyContactController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên người liên hệ',
-                    prefixIcon: Icon(Icons.person_pin),
-                  ),
+            _buildSection('Liên hệ khẩn cấp', Icons.emergency, [
+              TextFormField(
+                controller: _emergencyContactController,
+                decoration: const InputDecoration(
+                  labelText: 'Tên người liên hệ',
+                  prefixIcon: Icon(Icons.person_pin),
                 ),
-                const Gap(16),
-                TextFormField(
-                  controller: _emergencyPhoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Số điện thoại khẩn cấp',
-                    prefixIcon: Icon(Icons.phone_in_talk),
-                  ),
-                  keyboardType: TextInputType.phone,
+              ),
+              const Gap(16),
+              TextFormField(
+                controller: _emergencyPhoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại khẩn cấp',
+                  prefixIcon: Icon(Icons.phone_in_talk),
                 ),
-              ],
-            ),
+                keyboardType: TextInputType.phone,
+              ),
+            ]),
 
             const Gap(32),
 
-            CustomButton(text: 'Lưu', onPressed: () {
-              if (_isSaving) return;
-              _saveProfile();
-            }),
+            CustomButton(
+              text: context.tr('save'),
+              onPressed: () {
+                if (_isSaving) return;
+                _saveProfile();
+              },
+            ),
             const Gap(10),
           ],
         ),

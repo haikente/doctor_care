@@ -1,4 +1,5 @@
 import 'package:doctor_care/core/images/images.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/auth/register_screen.dart';
@@ -30,11 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
     _loadSavedCredentials();
   }
 
-  /// Load email và remember me đã lưu
   Future<void> _loadSavedCredentials() async {
     final rememberMe = await AuthStorageService.getRememberMe();
     final savedEmail = await AuthStorageService.getSavedEmail();
-    
+
     if (mounted) {
       setState(() {
         _rememberMe = rememberMe;
@@ -43,8 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       });
     }
-    
-    // Debug
+
     await AuthStorageService.debugPrint();
   }
 
@@ -64,15 +63,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            // Lưu phiên đăng nhập đầy đủ khi login thành công
-            // Dùng email từ state.user (chính xác cho cả Google login)
-            final email = state.user.email.isNotEmpty 
-                ? state.user.email 
+            final email = state.user.email.isNotEmpty
+                ? state.user.email
                 : _emailController.text.trim();
             AuthStorageService.saveLoginSession(
               odLoginUser: state.user.uid,
@@ -80,22 +78,19 @@ class _LoginScreenState extends State<LoginScreen> {
               role: state.role,
               rememberMe: _rememberMe,
             );
-            
-            // Clear error khi login thành công
+
             setState(() {
               _errorMessage = null;
             });
-            
-            // Quay về root — main.dart home: BlocBuilder sẽ tự hiển thị
-            // Navigationbar hoặc AdminPanelScreen dựa vào Authenticated state
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/', (route) => false);
           } else if (state is AuthError) {
-            // Set error message vào state
             setState(() {
               _errorMessage = state.message;
             });
-            
-            // Tự động clear error sau 8 giây
+
             Future.delayed(const Duration(seconds: 8), () {
               if (mounted && _errorMessage == state.message) {
                 setState(() {
@@ -104,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
               }
             });
           } else if (state is AuthLoading) {
-            // Clear error khi bắt đầu loading
             setState(() {
               _errorMessage = null;
             });
@@ -197,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const Gap(8),
                             Text(
-                              "Quản lý sức khỏe của bạn",
+                              l10n.translate('login_subtitle'),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurface.withOpacity(
                                   0.6,
@@ -227,14 +221,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Đăng nhập",
+                                l10n.translate('login_title'),
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const Gap(8),
                               Text(
-                                "Chào mừng bạn trở lại!",
+                                l10n.translate('login_welcome_back'),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface
                                       .withOpacity(0.6),
@@ -248,8 +242,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
-                                  labelText: "Email",
-                                  labelStyle: TextStyle(
+                                  labelText: l10n.translate('email'),
+                                  labelStyle: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 14,
                                   ),
@@ -279,13 +273,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Vui lòng nhập email';
+                                    return l10n.translate('please_enter_email');
                                   }
                                   final emailRegex = RegExp(
                                     r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                                   );
                                   if (!emailRegex.hasMatch(value)) {
-                                    return 'Email không đúng định dạng';
+                                    return l10n.translate(
+                                      'invalid_email_format',
+                                    );
                                   }
                                   return null;
                                 },
@@ -298,8 +294,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
                                 decoration: InputDecoration(
-                                  labelText: "Mật khẩu",
-                                  labelStyle: TextStyle(
+                                  labelText: l10n.translate('password'),
+                                  labelStyle: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 14,
                                   ),
@@ -343,10 +339,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Vui lòng nhập mật khẩu';
+                                    return l10n.translate(
+                                      'please_enter_password',
+                                    );
                                   }
                                   if (value.length < 6) {
-                                    return 'Mật khẩu phải có ít nhất 6 ký tự';
+                                    return l10n.translate('password_min_6');
                                   }
                                   return null;
                                 },
@@ -370,13 +368,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                             });
                                           },
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                         ),
                                       ),
                                       const Gap(8),
                                       Text(
-                                        "Ghi nhớ",
+                                        l10n.translate('remember_me'),
                                         style: theme.textTheme.bodyMedium,
                                       ),
                                     ],
@@ -399,9 +399,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap,
                                     ),
-                                    child: const Text(
-                                      "Quên mật khẩu?",
-                                      style: TextStyle(
+                                    child: Text(
+                                      l10n.translate('forgot_password'),
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -411,7 +411,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               const Gap(16),
 
-                              // ✅ Error Message Display
+                              // Error Message Display
                               if (_errorMessage != null)
                                 Container(
                                   width: double.infinity,
@@ -425,7 +425,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Icon(
                                         Icons.error_outline,
@@ -435,10 +436,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const Gap(12),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Đăng nhập thất bại',
+                                              l10n.translate('login_failed'),
                                               style: TextStyle(
                                                 color: Colors.red.shade900,
                                                 fontSize: 15,
@@ -509,9 +511,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     shadowColor: theme.colorScheme.primary
                                         .withOpacity(0.3),
                                   ),
-                                  child: const Text(
-                                    "Đăng nhập",
-                                    style: TextStyle(
+                                  child: Text(
+                                    l10n.translate('login_btn'),
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.5,
@@ -536,7 +538,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       horizontal: 16,
                                     ),
                                     child: Text(
-                                      'Hoặc',
+                                      l10n.translate('or'),
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: theme.colorScheme.onSurface
@@ -588,7 +590,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       const Gap(12),
                                       Text(
-                                        'Đăng nhập với Google',
+                                        l10n.translate('login_with_google'),
                                         style: TextStyle(
                                           fontSize: 15,
                                           color: theme.colorScheme.onSurface,
@@ -603,7 +605,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
 
-                        // Đăng ký Liên kết
+                        // Register Link
                         Center(
                           child: TextButton(
                             onPressed: () {
@@ -622,14 +624,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: RichText(
                               text: TextSpan(
-                                text: 'Chưa có tài khoản? ',
+                                text: l10n.translate('no_account'),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface
                                       .withOpacity(0.7),
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: 'Đăng ký',
+                                    text: l10n.translate('register'),
                                     style: TextStyle(
                                       color: theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,
@@ -642,7 +644,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
 
                         const Gap(24),
-                        
                       ],
                     ),
                   ),

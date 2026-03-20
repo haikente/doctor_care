@@ -43,10 +43,10 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
     // Lọc theo khoảng thời gian
     if (_startDate != null && _endDate != null) {
       filtered = filtered.where((record) {
-        return record.timestamp
-                .isAfter(_startDate!.subtract(const Duration(days: 1))) &&
-            record.timestamp
-                .isBefore(_endDate!.add(const Duration(days: 1)));
+        return record.timestamp.isAfter(
+              _startDate!.subtract(const Duration(days: 1)),
+            ) &&
+            record.timestamp.isBefore(_endDate!.add(const Duration(days: 1)));
       }).toList();
     }
 
@@ -72,7 +72,7 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Theo dõi đường huyết",
+        title: context.tr('track_blood_sugar'),
         centerTitle: true,
         onInfo: () => Navigator.push(
           context,
@@ -102,18 +102,18 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                       color: Colors.grey,
                     ),
                     const Gap(20),
-                    const Text(
-                      'Chưa có dữ liệu đường huyết',
-                      style: TextStyle(
+                    Text(
+                      context.tr('no_blood_sugar_records'),
+                      style: const TextStyle(
                         fontSize: 18,
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const Gap(10),
-                    const Text(
-                      'Nhấn nút + để thêm bản ghi mới',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    Text(
+                      context.tr('add_new_record_hint'),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -128,12 +128,15 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                 BloodSugarChartWidget(records: records),
                 Gap(20),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "${filteredRecords.length} bản ghi",
+                        "${filteredRecords.length} ${context.tr('record_count').replaceAll('{count}', '').trim()}",
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -165,17 +168,26 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                             },
                           );
                         },
-                        child: const Icon(Icons.science_outlined, color: Colors.black54),
+                        child: const Icon(
+                          Icons.science_outlined,
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
                 ),
 
                 // Filter chips
-                if (_startDate != null || _endDate != null || _selectedStatus != null || _selectedMealStatus != null)
+                if (_startDate != null ||
+                    _endDate != null ||
+                    _selectedStatus != null ||
+                    _selectedMealStatus != null)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 4,
@@ -184,9 +196,16 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                           Chip(
                             label: Text(
                               "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
-                              style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade800,
+                              ),
                             ),
-                            deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                            deleteIcon: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.blue.shade800,
+                            ),
                             onDeleted: () {
                               setState(() {
                                 _startDate = null;
@@ -203,9 +222,16 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                           Chip(
                             label: Text(
                               _selectedStatus!,
-                              style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade800,
+                              ),
                             ),
-                            deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                            deleteIcon: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.blue.shade800,
+                            ),
                             onDeleted: () {
                               setState(() => _selectedStatus = null);
                             },
@@ -219,9 +245,16 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                           Chip(
                             label: Text(
                               _getMealStatusLabel(_selectedMealStatus!),
-                              style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade800,
+                              ),
                             ),
-                            deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                            deleteIcon: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.blue.shade800,
+                            ),
                             onDeleted: () {
                               setState(() => _selectedMealStatus = null);
                             },
@@ -235,79 +268,80 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                     ),
                   ),
 
-                Gap(10),  
+                Gap(10),
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     itemCount: filteredRecords.length,
                     itemBuilder: (context, index) {
-                      final data = filteredRecords[filteredRecords.length - 1 - index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 13),
-                          child: Slidable(
-                            key: ValueKey(data.id),
-                            endActionPane: ActionPane(
-                              motion: const StretchMotion(),
-                              extentRatio: 0.25,
-                              children: [
-                                CustomSlidableAction(
-                                  onPressed: (_) {
-                                    AppDialog.showDeleteConfirm(
-                                      context: context,
-                                      onConfirm: () {
-                                        if (data.id != null) {
-                                          context
-                                              .read<BloodSugarCubit>()
-                                              .deleteBloodSugarRecord(
-                                                data.id.toString(),
-                                              );
-                                        }
-                                      },
-                                    );
-                                  },
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  padding: EdgeInsets.zero,
-                                  autoClose: true,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.delete_forever_outlined,
+                      final data =
+                          filteredRecords[filteredRecords.length - 1 - index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 13),
+                        child: Slidable(
+                          key: ValueKey(data.id),
+                          endActionPane: ActionPane(
+                            motion: const StretchMotion(),
+                            extentRatio: 0.25,
+                            children: [
+                              CustomSlidableAction(
+                                onPressed: (_) {
+                                  AppDialog.showDeleteConfirm(
+                                    context: context,
+                                    onConfirm: () {
+                                      if (data.id != null) {
+                                        context
+                                            .read<BloodSugarCubit>()
+                                            .deleteBloodSugarRecord(
+                                              data.id.toString(),
+                                            );
+                                      }
+                                    },
+                                  );
+                                },
+                                backgroundColor: Colors.redAccent,
+                                foregroundColor: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                padding: EdgeInsets.zero,
+                                autoClose: true,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.delete_forever_outlined,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    const Gap(2),
+                                    Text(
+                                      context.tr('delete'),
+                                      style: const TextStyle(
                                         color: Colors.white,
-                                        size: 20,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      const Gap(2),
-                                      const Text(
-                                        'Xóa',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        InsertBloodSugar(bloodSugar: data),
-                                  ),
-                                );
-                              },
-                              child: _buildDataCard(data),
-                            ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      InsertBloodSugar(bloodSugar: data),
+                                ),
+                              );
+                            },
+                            child: _buildDataCard(data),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             );

@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/domain/entities/family_profile.dart';
 import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
@@ -15,7 +16,7 @@ class FamilyProfileScreen extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Quản lý hồ sơ gia đình",
+        title: context.tr('manage_family_profiles'),
         centerTitle: true,
         icon: const Icon(
           Icons.add_circle_outline_outlined,
@@ -56,7 +57,7 @@ class FamilyProfileScreen extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () =>
                         context.read<FamilyProfileCubit>().loadProfiles(),
-                    child: const Text('Thử lại'),
+                    child: Text(context.tr('retry')),
                   ),
                 ],
               ),
@@ -115,7 +116,7 @@ class FamilyProfileScreen extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.person_add),
-            label: const Text('Thêm hồ sơ'),
+            label: Text(context.tr('add_profile')),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
@@ -233,9 +234,9 @@ class FamilyProfileScreen extends StatelessWidget {
                                 color: Colors.blue.shade50,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Text(
-                                'Đã chọn',
-                                style: TextStyle(
+                              child: Text(
+                                context.tr('selected'),
+                                style: const TextStyle(
                                   color: Colors.blue,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -290,12 +291,12 @@ class FamilyProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                 ),
-               ],
-             ),
-           ),
-         ),
-       ),
-     );
-   }
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
+}

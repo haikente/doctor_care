@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,19 +30,19 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Ghi chú chuyên môn",
+        title: context.tr('medical_notes_title'),
         centerTitle: true,
       ),
       body: Column(
-          children: [
-            _buildPatientSelectorBar(),
-            Expanded(
-              child: _selectedPatientId == null
-                  ? _buildEmptyState()
-                  : _buildNotesSection(),
-            ),
-          ],
-        ),
+        children: [
+          _buildPatientSelectorBar(),
+          Expanded(
+            child: _selectedPatientId == null
+                ? _buildEmptyState()
+                : _buildNotesSection(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -52,10 +53,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.shade600,
-            Colors.blue.shade300,
-          ],
+          colors: [Colors.blue.shade600, Colors.blue.shade300],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -114,7 +112,8 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                       ),
                       const Gap(4),
                       Text(
-                        _selectedPatientName ?? 'Nhấn để chọn bệnh nhân',
+                        _selectedPatientName ??
+                            context.tr('tap_to_select_patient'),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -188,10 +187,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue.shade600,
-                        Colors.purple.shade600,
-                      ],
+                      colors: [Colors.blue.shade600, Colors.purple.shade600],
                     ),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(28),
@@ -223,9 +219,9 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                             ),
                           ),
                           const Gap(14),
-                          const Text(
-                            'Chọn Bệnh Nhân',
-                            style: TextStyle(
+                          Text(
+                            context.tr('choose_patient'),
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -254,10 +250,12 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                       // Search field
                       TextField(
                         controller: _searchController,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 15),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
                         decoration: InputDecoration(
-                          hintText: 'Tìm kiếm bệnh nhân...',
+                          hintText: context.tr('search_patient_hint'),
                           hintStyle: TextStyle(
                             color: Colors.white.withOpacity(0.6),
                             fontSize: 14,
@@ -325,17 +323,17 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       var patients = snapshot.data!.docs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
-                        final name =
-                            (data['fullName'] ?? '').toString().toLowerCase();
-                        final email =
-                            (data['email'] ?? '').toString().toLowerCase();
+                        final name = (data['fullName'] ?? '')
+                            .toString()
+                            .toLowerCase();
+                        final email = (data['email'] ?? '')
+                            .toString()
+                            .toLowerCase();
                         return name.contains(_searchQuery) ||
                             email.contains(_searchQuery);
                       }).toList();
@@ -343,10 +341,10 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                       patients.sort((a, b) {
                         final nameA =
                             (a.data() as Map<String, dynamic>)['fullName'] ??
-                                '';
+                            '';
                         final nameB =
                             (b.data() as Map<String, dynamic>)['fullName'] ??
-                                '';
+                            '';
                         return nameA.toString().compareTo(nameB.toString());
                       });
 
@@ -371,7 +369,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                 ),
                                 const Gap(20),
                                 Text(
-                                  'Không tìm thấy bệnh nhân',
+                                  context.tr('patient_not_found'),
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -380,7 +378,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                 ),
                                 const Gap(8),
                                 Text(
-                                  'Thử tìm kiếm với từ khóa khác',
+                                  context.tr('try_another_search_term'),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade500,
@@ -471,14 +469,16 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                                     Colors.purple.shade100,
                                                   ],
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(14),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: (isSelected
-                                                      ? Colors.purple
-                                                      : Colors.blue)
-                                                  .withOpacity(0.2),
+                                              color:
+                                                  (isSelected
+                                                          ? Colors.purple
+                                                          : Colors.blue)
+                                                      .withOpacity(0.2),
                                               blurRadius: 8,
                                               offset: const Offset(0, 3),
                                             ),
@@ -488,8 +488,8 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                           gender == 'male'
                                               ? Icons.male_rounded
                                               : gender == 'female'
-                                                  ? Icons.female_rounded
-                                                  : Icons.person_rounded,
+                                              ? Icons.female_rounded
+                                              : Icons.person_rounded,
                                           color: isSelected
                                               ? Colors.white
                                               : Colors.purple.shade700,
@@ -531,9 +531,9 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 5,
-                                                ),
+                                                      horizontal: 10,
+                                                      vertical: 5,
+                                                    ),
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
@@ -548,8 +548,10 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                                       color: Colors.red
                                                           .withOpacity(0.25),
                                                       blurRadius: 6,
-                                                      offset:
-                                                          const Offset(0, 3),
+                                                      offset: const Offset(
+                                                        0,
+                                                        3,
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -647,10 +649,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.blue.shade100,
-                  Colors.purple.shade100,
-                ],
+                colors: [Colors.blue.shade100, Colors.purple.shade100],
               ),
               shape: BoxShape.circle,
               boxShadow: [
@@ -670,10 +669,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
           const Gap(32),
           ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
-              colors: [
-                Colors.blue.shade700,
-                Colors.blue.shade300,
-              ],
+              colors: [Colors.blue.shade700, Colors.blue.shade300],
             ).createShader(bounds),
             child: const Text(
               'Bắt đầu ghi chú',
@@ -697,10 +693,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
           const Gap(8),
           Text(
             'để xem hoặc thêm ghi chú chuyên môn',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
           ),
           const Gap(24),
           ElevatedButton.icon(
@@ -708,18 +701,12 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
             icon: const Icon(Icons.person_add_rounded),
             label: const Text(
               'Chọn bệnh nhân',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue.shade600,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 28,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -758,10 +745,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                 topRight: Radius.circular(20),
               ),
               border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
-                ),
+                bottom: BorderSide(color: Colors.grey.shade200, width: 1),
               ),
             ),
             child: Row(
@@ -770,10 +754,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Colors.blue.shade100,
-                        Colors.purple.shade100,
-                      ],
+                      colors: [Colors.blue.shade100, Colors.purple.shade100],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -798,10 +779,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                   icon: const Icon(Icons.add_circle_rounded, size: 16),
                   label: const Text(
                     'Thêm ghi chú',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade600,
@@ -896,13 +874,11 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 14),
                       elevation: 4,
-                      shadowColor:
-                          _getCategoryColor(category).withOpacity(0.2),
+                      shadowColor: _getCategoryColor(category).withOpacity(0.2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                         side: BorderSide(
-                          color:
-                              _getCategoryColor(category).withOpacity(0.2),
+                          color: _getCategoryColor(category).withOpacity(0.2),
                           width: 1.5,
                         ),
                       ),
@@ -939,17 +915,19 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                             gradient: LinearGradient(
                                               colors: [
                                                 _getCategoryColor(category),
-                                                _getCategoryColor(category)
-                                                    .withOpacity(0.7),
+                                                _getCategoryColor(
+                                                  category,
+                                                ).withOpacity(0.7),
                                               ],
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color:
-                                                    _getCategoryColor(category)
-                                                        .withOpacity(0.4),
+                                                color: _getCategoryColor(
+                                                  category,
+                                                ).withOpacity(0.4),
                                                 blurRadius: 6,
                                                 offset: const Offset(0, 3),
                                               ),
@@ -961,7 +939,8 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                               Text(
                                                 _getCategoryIcon(category),
                                                 style: const TextStyle(
-                                                    fontSize: 14),
+                                                  fontSize: 14,
+                                                ),
                                               ),
                                               const Gap(6),
                                               Text(
@@ -978,8 +957,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                         ),
                                         if (priority != 'normal')
                                           Container(
-                                            padding:
-                                                const EdgeInsets.symmetric(
+                                            padding: const EdgeInsets.symmetric(
                                               horizontal: 10,
                                               vertical: 6,
                                             ),
@@ -987,8 +965,9 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                               gradient: LinearGradient(
                                                 colors: [
                                                   _getPriorityColor(priority),
-                                                  _getPriorityColor(priority)
-                                                      .withOpacity(0.7),
+                                                  _getPriorityColor(
+                                                    priority,
+                                                  ).withOpacity(0.7),
                                                 ],
                                               ),
                                               borderRadius:
@@ -996,8 +975,8 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: _getPriorityColor(
-                                                          priority)
-                                                      .withOpacity(0.3),
+                                                    priority,
+                                                  ).withOpacity(0.3),
                                                   blurRadius: 4,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -1009,7 +988,7 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                                 Icon(
                                                   priority == 'high'
                                                       ? Icons
-                                                          .priority_high_rounded
+                                                            .priority_high_rounded
                                                       : Icons.flag_rounded,
                                                   size: 14,
                                                   color: Colors.white,
@@ -1049,8 +1028,10 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                           value: 'edit',
                                           child: Row(
                                             children: [
-                                              Icon(Icons.edit_rounded,
-                                                  color: Colors.blue),
+                                              Icon(
+                                                Icons.edit_rounded,
+                                                color: Colors.blue,
+                                              ),
                                               Gap(10),
                                               Text('Chỉnh sửa'),
                                             ],
@@ -1060,8 +1041,10 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                           value: 'delete',
                                           child: Row(
                                             children: [
-                                              Icon(Icons.delete_rounded,
-                                                  color: Colors.red),
+                                              Icon(
+                                                Icons.delete_rounded,
+                                                color: Colors.red,
+                                              ),
                                               Gap(10),
                                               Text('Xóa'),
                                             ],
@@ -1077,7 +1060,9 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                           );
                                         } else if (value == 'delete') {
                                           _showDeleteNoteDialog(
-                                              context, noteId);
+                                            context,
+                                            noteId,
+                                          );
                                         }
                                       },
                                     ),
@@ -1113,8 +1098,9 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                   gradient: LinearGradient(
                                     colors: [
                                       Colors.transparent,
-                                      _getCategoryColor(category)
-                                          .withOpacity(0.3),
+                                      _getCategoryColor(
+                                        category,
+                                      ).withOpacity(0.3),
                                       Colors.transparent,
                                     ],
                                   ),
@@ -1187,8 +1173,9 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                                         const Gap(6),
                                         Text(
                                           timestamp != null
-                                              ? DateFormat('dd/MM/yyyy HH:mm')
-                                                  .format(timestamp.toDate())
+                                              ? DateFormat(
+                                                  'dd/MM/yyyy HH:mm',
+                                                ).format(timestamp.toDate())
                                               : 'N/A',
                                           style: TextStyle(
                                             fontSize: 12,
@@ -1357,18 +1344,19 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                   await FirebaseFirestore.instance
                       .collection('medicalNotes')
                       .add({
-                    'patientId': _selectedPatientId,
-                    'patientName': _selectedPatientName,
-                    'title': titleController.text.trim(),
-                    'content': contentController.text.trim(),
-                    'category': selectedCategory,
-                    'priority': selectedPriority,
-                    'doctorId': currentUser?.uid,
-                    'doctorName': currentUser?.displayName ??
-                        currentUser?.email ??
-                        'Admin',
-                    'timestamp': FieldValue.serverTimestamp(),
-                  });
+                        'patientId': _selectedPatientId,
+                        'patientName': _selectedPatientName,
+                        'title': titleController.text.trim(),
+                        'content': contentController.text.trim(),
+                        'category': selectedCategory,
+                        'priority': selectedPriority,
+                        'doctorId': currentUser?.uid,
+                        'doctorName':
+                            currentUser?.displayName ??
+                            currentUser?.email ??
+                            'Admin',
+                        'timestamp': FieldValue.serverTimestamp(),
+                      });
 
                   titleController.dispose();
                   contentController.dispose();
@@ -1527,12 +1515,12 @@ class _MedicalNotesScreenState extends State<MedicalNotesScreen> {
                       .collection('medicalNotes')
                       .doc(noteId)
                       .update({
-                    'title': titleController.text.trim(),
-                    'content': contentController.text.trim(),
-                    'category': selectedCategory,
-                    'priority': selectedPriority,
-                    'lastModified': FieldValue.serverTimestamp(),
-                  });
+                        'title': titleController.text.trim(),
+                        'content': contentController.text.trim(),
+                        'category': selectedCategory,
+                        'priority': selectedPriority,
+                        'lastModified': FieldValue.serverTimestamp(),
+                      });
 
                   titleController.dispose();
                   contentController.dispose();

@@ -4,7 +4,10 @@ import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/water_intake.dart';
 import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
 import 'package:doctor_care/presentation/pages/screens/WaterIntake/insert_water_intake.dart';
+import 'package:doctor_care/presentation/bloc/water_reminder/water_reminder_cubit.dart';
+import 'package:doctor_care/presentation/bloc/water_reminder/water_reminder_state.dart';
 import 'package:doctor_care/presentation/pages/screens/WaterIntake/widgets/filter_bottom_sheet_water_intake.dart';
+import 'package:doctor_care/presentation/pages/screens/WaterIntake/widgets/water_reminder_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -87,11 +90,48 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
         onBack: () => Navigator.pop(context),
         title: "Lượng nước uống",
         centerTitle: true,
-        icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 20),
-        onInfo: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const InsertWaterIntake()),
-        ),
+        actions: [
+          // Nút nhắc nhở - hiển thị badge nếu đang bật
+          BlocBuilder<WaterReminderCubit, WaterReminderState>(
+            builder: (context, reminderState) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      reminderState.isEnabled
+                          ? Icons.notifications_active_rounded
+                          : Icons.notifications_none_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    onPressed: () => WaterReminderBottomSheet.show(context),
+                  ),
+                  if (reminderState.isEnabled)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.greenAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          // Nút thêm bản ghi
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 22),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const InsertWaterIntake()),
+            ),
+          ),
+        ],
       ),
       body: BlocConsumer<WaterIntakeBloc, WaterIntakeState>(
         listener: (context, state) {

@@ -1,6 +1,7 @@
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
-import 'package:doctor_care/domain/entities/water_intake.dart';
+import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
+import 'package:doctor_care/presentation/bloc/health_goal/health_goal_state.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
@@ -41,104 +42,141 @@ class _TodayTargetState extends State<TodayTarget> {
           Row(
             children: [
               Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade400,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Gap(10),
+              Expanded(
+                child: Text(
+                  context.tr('today_target'),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColor.textPrimary(context),
                   ),
-                  Gap(10),
-              Text(
-               context.tr('today_target'),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColor.textPrimary(context),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/health-goals'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.tune_rounded, size: 14, color: Colors.blue.shade400),
+                      const Gap(4),
+                      Text(
+                        'Đặt mục tiêu',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue.shade400,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
           const Gap(16),
 
-          // ========== WATER INTAKE TARGET ==========
-          BlocBuilder<WaterIntakeBloc, WaterIntakeState>(
-            builder: (context, state) {
-              int totalWater = 0;
-              if (state is WaterIntakeLoaded) {
-                final todayRecords = state.records
-                    .where((r) => _isToday(r.timestamp))
-                    .toList();
-                totalWater = todayRecords.fold(0, (sum, r) => sum + r.amount);
-              }
-              final waterProgress = WaterIntake.getProgressPercent(totalWater);
-              return _buildTargetCard(
-                icon: Icons.water_drop_rounded,
-                iconColor: Colors.blue,
-                iconBgColor: Colors.blue.shade50,
-                title: context.tr('drink_water'),
-                current: "$totalWater",
-                goal: context.tr('water_goal'),
-                progress: waterProgress / 100,
-                progressColor: Colors.blue,
-                progressBgColor: Colors.blue.shade100,
+          BlocBuilder<HealthGoalCubit, HealthGoalState>(
+            builder: (context, goalState) {
+              return Column(
+                children: [
+                  // ========== WATER INTAKE TARGET ==========
+                  BlocBuilder<WaterIntakeBloc, WaterIntakeState>(
+                    builder: (context, state) {
+                      int totalWater = 0;
+                      if (state is WaterIntakeLoaded) {
+                        final todayRecords = state.records
+                            .where((r) => _isToday(r.timestamp))
+                            .toList();
+                        totalWater = todayRecords.fold(0, (sum, r) => sum + r.amount);
+                      }
+                      final waterGoal = goalState.dailyWaterMl;
+                      final waterProgress = (totalWater / waterGoal).clamp(0.0, 1.0);
+                      return _buildTargetCard(
+                        icon: Icons.water_drop_rounded,
+                        iconColor: Colors.blue,
+                        iconBgColor: Colors.blue.shade50,
+                        title: context.tr('drink_water'),
+                        current: '$totalWater',
+                        goal: '$waterGoal ml',
+                        progress: waterProgress,
+                        progressColor: Colors.blue,
+                        progressBgColor: Colors.blue.shade100,
+                      );
+                    },
+                  ),
+                  const Gap(12),
+
+                  // ========== STEP COUNT TARGET ==========
+                  BlocBuilder<StepCountCubit, StepCountState>(
+                    builder: (context, state) {
+                      int totalSteps = 0;
+                      if (state is StepCountLoaded) {
+                        final todayRecords = state.records
+                            .where((r) => _isToday(r.timestamp))
+                            .toList();
+                        totalSteps = todayRecords.fold(0, (sum, r) => sum + r.steps);
+                      }
+                      final stepGoal = goalState.dailySteps;
+                      final stepProgress = (totalSteps / stepGoal).clamp(0.0, 1.0);
+                      return _buildTargetCard(
+                        icon: Icons.directions_walk_rounded,
+                        iconColor: Colors.green,
+                        iconBgColor: Colors.green.shade50,
+                        title: context.tr('step_count'),
+                        current: '$totalSteps',
+                        goal: '$stepGoal bước',
+                        progress: stepProgress,
+                        progressColor: Colors.green,
+                        progressBgColor: Colors.green.shade100,
+                      );
+                    },
+                  ),
+                  const Gap(12),
+
+                  // ========== MEAL CALORIES TARGET ==========
+                  BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
+                    builder: (context, state) {
+                      double totalCalories = 0;
+                      if (state is MealAnalysesLoaded) {
+                        final todayMeals = state.mealAnalyses
+                            .where((r) => _isToday(r.timestamp))
+                            .toList();
+                        totalCalories = todayMeals.fold(
+                            0.0, (sum, meal) => sum + meal.totalCalories);
+                      }
+                      final calorieGoal = goalState.dailyCalories;
+                      final calorieProgress = (totalCalories / calorieGoal).clamp(0.0, 1.0);
+                      return _buildTargetCard(
+                        icon: Icons.restaurant_menu_rounded,
+                        iconColor: Colors.orange,
+                        iconBgColor: Colors.orange.shade50,
+                        title: context.tr('meal_calories'),
+                        current: totalCalories.toStringAsFixed(0),
+                        goal: '$calorieGoal kcal',
+                        progress: calorieProgress,
+                        progressColor: Colors.orange,
+                        progressBgColor: Colors.orange.shade100,
+                      );
+                    },
+                  ),
+                ],
               );
             },
           ),
-          const Gap(12),
-
-          // ========== STEP COUNT TARGET ==========
-          BlocBuilder<StepCountCubit, StepCountState>(
-            builder: (context, state) {
-              int totalSteps = 0;
-              if (state is StepCountLoaded) {
-                final todayRecords = state.records
-                    .where((r) => _isToday(r.timestamp))
-                    .toList();
-                totalSteps = todayRecords.fold(0, (sum, r) => sum + r.steps);
-              }
-              final stepProgress = (totalSteps / 10000).clamp(0.0, 1.0);
-              return _buildTargetCard(
-                icon: Icons.directions_walk_rounded,
-                iconColor: Colors.green,
-                iconBgColor: Colors.green.shade50,
-                title: context.tr('step_count'),
-                current: "$totalSteps",
-                goal: context.tr('step_goal'),
-                progress: stepProgress,
-                progressColor: Colors.green,
-                progressBgColor: Colors.green.shade100,
-              );
-            },
-          ),
-
-        const Gap(12),
-
-        // ========== MEAL CALORIES TARGET ==========
-        BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
-          builder: (context, state) {
-            double totalCalories = 0;
-            if (state is MealAnalysesLoaded) {
-              final todayMeals = state.mealAnalyses
-                  .where((r) => _isToday(r.timestamp))
-                  .toList();
-              totalCalories = todayMeals.fold(
-                  0.0, (sum, meal) => sum + meal.totalCalories);
-            }
-            final calorieProgress = (totalCalories / 2000).clamp(0.0, 1.0);
-            return _buildTargetCard(
-              icon: Icons.restaurant_menu_rounded,
-              iconColor: Colors.orange,
-              iconBgColor: Colors.orange.shade50,
-              title: context.tr('meal_calories'),
-              current: "${totalCalories.toStringAsFixed(0)} ",
-              goal: context.tr('calorie_goal'),
-              progress: calorieProgress,
-              progressColor: Colors.orange,
-              progressBgColor: Colors.orange.shade100,
-            );
-          },
-        ),  
         ],
       ),
     );

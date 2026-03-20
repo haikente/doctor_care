@@ -8,6 +8,8 @@ class CustomStackAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool centerTitle;
   final Widget? icon;
   final TabBar? bottom;
+  /// Thêm nhiều action buttons bên phải (ưu tiên hơn onInfo nếu được cung cấp)
+  final List<Widget>? actions;
 
   const CustomStackAppBar({
     super.key,
@@ -17,6 +19,7 @@ class CustomStackAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.centerTitle = false,
     this.icon,
     this.bottom,
+    this.actions,
   });
 
   @override
@@ -85,11 +88,12 @@ class CustomStackAppBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                 ),
 
-                // ✅ FIX 2: Luôn có SizedBox bên phải để cân bằng
-                if (onInfo != null)
+                // ✅ FIX 2: Actions bên phải (hỗ trợ nhiều button)
+                if (actions != null && actions!.isNotEmpty)
+                  Row(mainAxisSize: MainAxisSize.min, children: actions!)
+                else if (onInfo != null)
                   IconButton(
-                    icon:
-                        icon ??
+                    icon: icon ??
                         const Icon(
                           Icons.info_outline_rounded,
                           color: Colors.white,
@@ -98,9 +102,7 @@ class CustomStackAppBar extends StatelessWidget implements PreferredSizeWidget {
                     onPressed: onInfo,
                   )
                 else
-                  const SizedBox(
-                    width: 48,
-                  ), // ✅ Placeholder khi không có info button
+                  const SizedBox(width: 48),
               ],
             ),
           ),

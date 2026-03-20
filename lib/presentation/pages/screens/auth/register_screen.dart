@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,7 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
-  String? _errorMessage; 
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -58,23 +59,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            // Clear error khi đăng ký thành công
             setState(() {
               _errorMessage = null;
             });
             Navigator.pushReplacementNamed(context, '/navigation');
           } else if (state is AuthError) {
-            // Set error message vào state
             setState(() {
               _errorMessage = state.message;
             });
-            
-            // Tự động clear error sau 8 giây
+
             Future.delayed(const Duration(seconds: 8), () {
               if (mounted && _errorMessage == state.message) {
                 setState(() {
@@ -83,7 +82,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               }
             });
           } else if (state is AuthLoading) {
-            // Clear error khi bắt đầu loading
             setState(() {
               _errorMessage = null;
             });
@@ -102,9 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                 ),
               ),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             );
           }
 
@@ -167,9 +163,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   theme.colorScheme.secondary,
                                 ],
                               ).createShader(bounds),
-                              child: const Text(
-                                "Tạo Tài Khoản",
-                                style: TextStyle(
+                              child: Text(
+                                l10n.translate('register_title'),
+                                style: const TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -179,10 +175,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const Gap(8),
                             Text(
-                              "Đăng ký để bắt đầu quản lý sức khỏe",
+                              l10n.translate('register_subtitle'),
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface
-                                    .withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.6,
+                                ),
                               ),
                             ),
                           ],
@@ -212,8 +209,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
-                                  labelText: "Email",
-                                  labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                                  labelText: l10n.translate('email'),
+                                  labelStyle: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 14,
+                                  ),
                                   prefixIcon: Icon(
                                     Icons.email_outlined,
                                     color: theme.colorScheme.primary,
@@ -240,13 +240,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Vui lòng nhập email';
+                                    return l10n.translate('please_enter_email');
                                   }
                                   final emailRegex = RegExp(
                                     r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                                   );
                                   if (!emailRegex.hasMatch(value)) {
-                                    return 'Email không đúng định dạng';
+                                    return l10n.translate(
+                                      'invalid_email_format',
+                                    );
                                   }
                                   return null;
                                 },
@@ -259,8 +261,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
                                 decoration: InputDecoration(
-                                  labelText: "Mật khẩu",
-                                  labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                                  labelText: l10n.translate('password'),
+                                  labelStyle: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 14,
+                                  ),
                                   prefixIcon: Icon(
                                     Icons.lock_outline,
                                     color: theme.colorScheme.primary,
@@ -301,10 +306,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Vui lòng nhập mật khẩu';
+                                    return l10n.translate(
+                                      'please_enter_password',
+                                    );
                                   }
                                   if (value.length < 6) {
-                                    return 'Mật khẩu phải có ít nhất 6 ký tự';
+                                    return l10n.translate('password_min_6');
                                   }
                                   return null;
                                 },
@@ -317,8 +324,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 controller: _confirmPasswordController,
                                 obscureText: _obscureConfirmPassword,
                                 decoration: InputDecoration(
-                                  labelText: "Xác nhận mật khẩu",
-                                  labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                                  labelText: l10n.translate('confirm_password'),
+                                  labelStyle: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 14,
+                                  ),
                                   prefixIcon: Icon(
                                     Icons.lock_reset_outlined,
                                     color: theme.colorScheme.primary,
@@ -360,10 +370,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Vui lòng nhập lại mật khẩu';
+                                    return l10n.translate(
+                                      'please_enter_confirm_password',
+                                    );
                                   }
                                   if (value != _passwordController.text) {
-                                    return 'Mật khẩu không khớp';
+                                    return l10n.translate('password_not_match');
                                   }
                                   return null;
                                 },
@@ -395,34 +407,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         ),
                                         const Gap(8),
                                         Text(
-                                          "Yêu cầu mật khẩu:",
+                                          l10n.translate(
+                                            'password_requirements',
+                                          ),
                                           style: theme.textTheme.titleSmall
                                               ?.copyWith(
-                                            color: theme.colorScheme.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                       ],
                                     ),
                                     const Gap(8),
                                     _buildRequirementItem(
                                       theme,
-                                      "Email đúng định dạng (abc@email.com)",
+                                      l10n.translate('req_valid_email'),
                                       _emailController.text.isNotEmpty &&
-                                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                              .hasMatch(_emailController.text),
+                                          RegExp(
+                                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                          ).hasMatch(_emailController.text),
                                     ),
                                     const Gap(4),
                                     _buildRequirementItem(
                                       theme,
-                                      "Mật khẩu ít nhất 6 ký tự",
+                                      l10n.translate('req_password_min'),
                                       _passwordController.text.length >= 6,
                                     ),
                                     const Gap(4),
                                     _buildRequirementItem(
                                       theme,
-                                      "Mật khẩu xác nhận khớp",
-                                      _confirmPasswordController.text
+                                      l10n.translate('req_password_match'),
+                                      _confirmPasswordController
+                                              .text
                                               .isNotEmpty &&
                                           _confirmPasswordController.text ==
                                               _passwordController.text,
@@ -456,8 +473,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             });
                                           },
                                           shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -465,11 +483,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       Expanded(
                                         child: RichText(
                                           text: TextSpan(
-                                            text: 'Tôi đồng ý với ',
+                                            text: l10n.translate('agree_to'),
                                             style: theme.textTheme.bodyMedium,
                                             children: [
                                               TextSpan(
-                                                text: 'Điều khoản sử dụng',
+                                                text: l10n.translate(
+                                                  'terms_of_use',
+                                                ),
                                                 style: TextStyle(
                                                   color:
                                                       theme.colorScheme.primary,
@@ -478,9 +498,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                       TextDecoration.underline,
                                                 ),
                                               ),
-                                              const TextSpan(text: ' và '),
                                               TextSpan(
-                                                text: 'Chính sách bảo mật',
+                                                text:
+                                                    ' ${l10n.translate('and')} ',
+                                              ),
+                                              TextSpan(
+                                                text: l10n.translate(
+                                                  'privacy_policy',
+                                                ),
                                                 style: TextStyle(
                                                   color:
                                                       theme.colorScheme.primary,
@@ -500,7 +525,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                               const Gap(16),
 
-                              // ✅ Error Message Display
+                              // Error Message Display
                               if (_errorMessage != null)
                                 Container(
                                   width: double.infinity,
@@ -514,7 +539,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Icon(
                                         Icons.error_outline,
@@ -524,10 +550,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       const Gap(12),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Đăng ký thất bại',
+                                              l10n.translate('register_failed'),
                                               style: TextStyle(
                                                 color: Colors.red.shade900,
                                                 fontSize: 15,
@@ -576,30 +603,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           if (_formKey.currentState!
                                               .validate()) {
                                             context.read<AuthBloc>().add(
-                                                  SignUpEvent(
-                                                    _emailController.text
-                                                        .trim(),
-                                                    _passwordController.text
-                                                        .trim(),
-                                                  ),
-                                                );
+                                              SignUpEvent(
+                                                _emailController.text.trim(),
+                                                _passwordController.text.trim(),
+                                              ),
+                                            );
                                           }
                                         }
                                       : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: theme.colorScheme.primary,
                                     foregroundColor: Colors.white,
-                                    disabledBackgroundColor:
-                                        theme.colorScheme.primary
-                                            .withOpacity(0.5),
+                                    disabledBackgroundColor: theme
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.5),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     elevation: 0,
                                   ),
-                                  child: const Text(
-                                    "Đăng ký",
-                                    style: TextStyle(
+                                  child: Text(
+                                    l10n.translate('register_btn'),
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.5,
@@ -627,14 +653,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             child: RichText(
                               text: TextSpan(
-                                text: 'Đã có tài khoản? ',
+                                text: l10n.translate('have_account'),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface
                                       .withOpacity(0.7),
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: 'Đăng nhập',
+                                    text: l10n.translate('login_title'),
                                     style: TextStyle(
                                       color: theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,

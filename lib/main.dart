@@ -26,6 +26,10 @@ import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.da
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:doctor_care/presentation/bloc/cholesterol/cholesterol_cubit.dart';
 import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
+import 'package:doctor_care/core/services/water_reminder_service.dart';
+import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
+import 'package:doctor_care/presentation/bloc/water_reminder/water_reminder_cubit.dart';
+import 'package:doctor_care/presentation/pages/screens/HealthGoal/health_goal_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/BloodSugar/blood_sugar_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/SleepRecord/sleep_record_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/StepCount/step_count_screen.dart';
@@ -52,6 +56,8 @@ void main() async {
   } catch (e) {
     debugPrint('Lỗi khởi tạo InjectionContainer: $e');
   }
+
+  await WaterReminderService.instance.initialize();
 
   runApp(const MyApp());
 }
@@ -179,6 +185,15 @@ class MyApp extends StatelessWidget {
         // Meal Analysis
         BlocProvider(create: (context) => di.mealAnalysisBloc),
 
+        // Health Goal
+        BlocProvider(create: (context) => HealthGoalCubit()),
+
+        // Water Reminder
+        BlocProvider(
+          create: (context) =>
+              WaterReminderCubit(WaterReminderService.instance),
+        ),
+
         // Family Profile
         BlocProvider(
           create: (context) => FamilyProfileCubit(
@@ -272,6 +287,7 @@ class MyApp extends StatelessWidget {
               '/stepcounter': (context) => const StepCountScreen(),
               '/cholesterol': (context) => const CholesterolScreen(),
               '/familyprofile': (context) => const FamilyProfileScreen(),
+              '/health-goals': (context) => const HealthGoalScreen(),
             },
           );
             },

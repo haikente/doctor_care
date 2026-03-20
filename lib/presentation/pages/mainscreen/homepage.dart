@@ -26,6 +26,7 @@ class _HomepageState extends State<Homepage> {
     _loadAllHealthData();
   }
 
+  // hàm load dữ liệu sức khỏe từ các cubit/bloc khi trang được khởi tạo
   void _loadAllHealthData() {
     context.read<BloodPressureCubit>().loadBloodPressureRecords();
 

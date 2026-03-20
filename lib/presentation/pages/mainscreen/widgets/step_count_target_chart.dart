@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:flutter/material.dart';
@@ -26,13 +27,18 @@ class StepCountTargetChart extends StatelessWidget {
         double calories = 0;
 
         if (state is StepCountLoaded) {
-          final todayRecords =
-              state.records.where((r) => _isToday(r.timestamp)).toList();
+          final todayRecords = state.records
+              .where((r) => _isToday(r.timestamp))
+              .toList();
           totalSteps = todayRecords.fold(0, (sum, r) => sum + r.steps);
           distance = todayRecords.fold(
-              0.0, (sum, r) => sum + (r.distance ?? 0));
+            0.0,
+            (sum, r) => sum + (r.distance ?? 0),
+          );
           calories = todayRecords.fold(
-              0.0, (sum, r) => sum + (r.caloriesBurned ?? 0));
+            0.0,
+            (sum, r) => sum + (r.caloriesBurned ?? 0),
+          );
         }
 
         final progress = (totalSteps / _dailyGoal).clamp(0.0, 1.0);
@@ -58,11 +64,14 @@ class StepCountTargetChart extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.directions_walk_rounded,
-                        color: progressColor, size: 22),
+                    Icon(
+                      Icons.directions_walk_rounded,
+                      color: progressColor,
+                      size: 22,
+                    ),
                     const Gap(8),
                     Text(
-                      "Bước chân hôm nay",
+                      context.tr('today_steps'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -125,23 +134,25 @@ class StepCountTargetChart extends StatelessWidget {
                             icon: Icons.local_fire_department_rounded,
                             iconColor: Colors.orange,
                             label: "Calories",
-                            value: "${calories.toStringAsFixed(0)} kcal",
+                            value:
+                                "${calories.toStringAsFixed(0)} ${context.tr('unit_kcal')}",
                           ),
                           const Gap(16),
                           _buildStatRow(
                             context,
                             icon: Icons.straighten_rounded,
                             iconColor: Colors.blue,
-                            label: "Quãng đường",
-                            value: "${distance.toStringAsFixed(1)} km",
+                            label: context.tr('distance'),
+                            value:
+                                "${distance.toStringAsFixed(1)} ${context.tr('unit_km')}",
                           ),
                           const Gap(16),
                           _buildStatRow(
                             context,
                             icon: Icons.emoji_events_rounded,
                             iconColor: progressColor,
-                            label: "Trạng thái",
-                            value: _getStatus(totalSteps),
+                            label: context.tr('status'),
+                            value: _getStatus(context, totalSteps),
                           ),
                         ],
                       ),
@@ -180,10 +191,7 @@ class StepCountTargetChart extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade500,
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
               ),
               Text(
                 value,
@@ -215,12 +223,12 @@ class StepCountTargetChart extends StatelessWidget {
     return Colors.teal;
   }
 
-  String _getStatus(int steps) {
-    if (steps < 3000) return 'Ít vận động';
-    if (steps < 6000) return 'Vận động nhẹ';
-    if (steps < 10000) return 'Vận động vừa';
-    if (steps < 15000) return 'Tốt';
-    return 'Rất tích cực';
+  String _getStatus(BuildContext context, int steps) {
+    if (steps < 3000) return context.tr('step_status_sedentary');
+    if (steps < 6000) return context.tr('step_status_light');
+    if (steps < 10000) return context.tr('step_status_moderate');
+    if (steps < 15000) return context.tr('step_status_good');
+    return context.tr('step_status_very_active');
   }
 
   IconData _getStatusIcon(int steps) {

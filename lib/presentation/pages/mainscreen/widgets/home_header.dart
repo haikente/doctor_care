@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/notificationpage.dart';
@@ -20,10 +21,10 @@ class HomeHeader extends StatelessWidget {
           bottomRight: Radius.circular(30),
         ),
         boxShadow: [
-         BoxShadow(
-           color: theme.shadowColor.withOpacity(0.05),
-           blurRadius: 20,
-           offset: const Offset(0, 10),
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -70,7 +71,7 @@ class HomeHeader extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Xin chào, 👋",
+                    context.tr('hello'),
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColor.textSecondary(context),
@@ -92,7 +93,7 @@ class HomeHeader extends StatelessWidget {
                         );
                       } else {
                         return Text(
-                          "Người dùng",
+                          context.tr('user'),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -108,19 +109,25 @@ class HomeHeader extends StatelessWidget {
             ),
 
             GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Notificationpage())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Notificationpage()),
+              ),
               child: Container(
                 width: 45,
                 height: 45,
-                 decoration: BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: Colors.white12),
-                  shape: BoxShape.circle 
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.notifications_active_outlined, color: Colors.black, size: 22,),
+                  Icons.notifications_active_outlined,
+                  color: Colors.black,
+                  size: 22,
+                ),
               ),
-            )
+            ),
           ],
         ),
       ),

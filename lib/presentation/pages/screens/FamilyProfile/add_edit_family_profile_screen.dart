@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
@@ -8,7 +9,6 @@ import 'package:doctor_care/presentation/pages/screens/FamilyProfile/widgets/fil
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-
 
 class AddEditFamilyProfileScreen extends StatefulWidget {
   final FamilyProfile? profile;
@@ -33,22 +33,53 @@ class _AddEditFamilyProfileScreenState
   DateTime? _dateOfBirth;
   bool _isSubmitting = false;
   bool _selfExists = false; // Đã có hồ sơ "Bản thân" chưa
-  bool hasChanges = false;  
+  bool hasChanges = false;
 
   bool get isEditing => widget.profile != null;
 
-  final List<Map<String, dynamic>> _relationships = [
-    {'value': 'self', 'label': 'Bản thân', 'icon': Icons.person},
-    {'value': 'spouse', 'label': 'Vợ/Chồng', 'icon': Icons.favorite},
-    {'value': 'child', 'label': 'Con', 'icon': Icons.child_care},
-    {'value': 'parent', 'label': 'Bố/Mẹ', 'icon': Icons.elderly},
-    {'value': 'sibling', 'label': 'Anh/Chị/Em', 'icon': Icons.people},
-    {'value': 'grandparent', 'label': 'Ông/Bà', 'icon': Icons.elderly_woman},
-    {'value': 'other', 'label': 'Khác', 'icon': Icons.person_outline},
+  List<Map<String, dynamic>> _getRelationships(BuildContext context) => [
+    {'value': 'self', 'label': context.tr('rel_self'), 'icon': Icons.person},
+    {
+      'value': 'spouse',
+      'label': context.tr('rel_spouse'),
+      'icon': Icons.favorite,
+    },
+    {
+      'value': 'child',
+      'label': context.tr('rel_child'),
+      'icon': Icons.child_care,
+    },
+    {
+      'value': 'parent',
+      'label': context.tr('rel_parent'),
+      'icon': Icons.elderly,
+    },
+    {
+      'value': 'sibling',
+      'label': context.tr('rel_sibling'),
+      'icon': Icons.people,
+    },
+    {
+      'value': 'grandparent',
+      'label': context.tr('rel_grandparent'),
+      'icon': Icons.elderly_woman,
+    },
+    {
+      'value': 'other',
+      'label': context.tr('rel_other'),
+      'icon': Icons.person_outline,
+    },
   ];
 
   final List<String> _bloodTypes = [
-    'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-',
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-',
   ];
 
   @override
@@ -97,11 +128,19 @@ class _AddEditFamilyProfileScreenState
       final genderChanged = _selectedGender != p.gender;
       final bloodTypeChanged = _selectedBloodType != p.bloodType;
       final dobChanged = _dateOfBirth != p.dateOfBirth;
-      final heightChanged = _heightController.text != (p.height?.toString() ?? '');
-      final weightChanged = _weightController.text != (p.weight?.toString() ?? '');
+      final heightChanged =
+          _heightController.text != (p.height?.toString() ?? '');
+      final weightChanged =
+          _weightController.text != (p.weight?.toString() ?? '');
 
-      hasChanges = nameChanged || relationshipChanged || genderChanged ||
-          bloodTypeChanged || dobChanged || heightChanged || weightChanged;
+      hasChanges =
+          nameChanged ||
+          relationshipChanged ||
+          genderChanged ||
+          bloodTypeChanged ||
+          dobChanged ||
+          heightChanged ||
+          weightChanged;
     });
   }
 
@@ -123,15 +162,14 @@ class _AddEditFamilyProfileScreenState
         if (state is FamilyProfileLoaded && _isSubmitting) {
           _isSubmitting = false;
           Navigator.pop(context);
-          AppSnackBar.showFamilyProfile(context: context,
-          type: isEditing ? SnackBarType.update : SnackBarType.add);
+          AppSnackBar.showFamilyProfile(
+            context: context,
+            type: isEditing ? SnackBarType.update : SnackBarType.add,
+          );
         } else if (state is FamilyProfileError && _isSubmitting) {
           _isSubmitting = false;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
@@ -139,27 +177,37 @@ class _AddEditFamilyProfileScreenState
         backgroundColor: Colors.grey.shade50,
         appBar: CustomStackAppBar(
           onBack: () => Navigator.pop(context),
-          title: widget.profile != null ? "Cập nhật hồ sơ" : "Thêm mới hồ sơ",
+          title: widget.profile != null
+              ? context.tr('update_profile_title')
+              : context.tr('add_new_profile_title'),
           centerTitle: true,
           icon: widget.profile != null && widget.profile!.relationship != 'self'
-           ? const Icon(Icons.delete_forever_outlined, color: Colors.white, size: 22) 
-           : null,
-         onInfo: widget.profile != null && widget.profile!.relationship != 'self'
-           ? () => AppDialog.showDeleteConfirm(
-           context: context, 
-           content: "Bạn có chắc chắn muốn xoá hồ sơ này không?",
-           onConfirm: (){
-             // Xóa bản ghi từ database
-             if (widget.profile?.id != null) {
-               context.read<FamilyProfileCubit>().removeProfile(widget.profile!.id!);
-             }
-             AppSnackBar.showFamilyProfile(
-               context: context,
-               type: SnackBarType.delete,
-             );
-             Navigator.pop(context);
-          })
-           : null,
+              ? const Icon(
+                  Icons.delete_forever_outlined,
+                  color: Colors.white,
+                  size: 22,
+                )
+              : null,
+          onInfo:
+              widget.profile != null && widget.profile!.relationship != 'self'
+              ? () => AppDialog.showDeleteConfirm(
+                  context: context,
+                  content: context.tr('confirm_delete_profile'),
+                  onConfirm: () {
+                    // Xóa bản ghi từ database
+                    if (widget.profile?.id != null) {
+                      context.read<FamilyProfileCubit>().removeProfile(
+                        widget.profile!.id!,
+                      );
+                    }
+                    AppSnackBar.showFamilyProfile(
+                      context: context,
+                      type: SnackBarType.delete,
+                    );
+                    Navigator.pop(context);
+                  },
+                )
+              : null,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -173,7 +221,7 @@ class _AddEditFamilyProfileScreenState
                 const Gap(24),
 
                 // Tên
-                _buildSectionTitle('Thông tin cơ bản'),
+                _buildSectionTitle(context.tr('basic_info')),
                 const Gap(12),
                 _buildNameField(),
                 const Gap(16),
@@ -191,7 +239,7 @@ class _AddEditFamilyProfileScreenState
                 const Gap(24),
 
                 // Thông tin sức khỏe
-                _buildSectionTitle('Thông tin sức khỏe'),
+                _buildSectionTitle(context.tr('health_info')),
                 const Gap(12),
 
                 // Nhóm máu
@@ -211,7 +259,9 @@ class _AddEditFamilyProfileScreenState
                 // Button
                 CustomButton(
                   expanded: true,
-                  text: widget.profile != null ? "Cập nhật" : "Lưu",
+                  text: widget.profile != null
+                      ? context.tr('update_btn')
+                      : context.tr('save'),
                   enabled: hasChanges,
                   onPressed: _submit,
                 ),
@@ -229,8 +279,8 @@ class _AddEditFamilyProfileScreenState
     if (name.isNotEmpty) {
       final parts = name.split(RegExp(r'\s+'));
       if (parts.length >= 2) {
-        initials =
-            "${parts[parts.length - 2][0]}${parts.last[0]}".toUpperCase();
+        initials = "${parts[parts.length - 2][0]}${parts.last[0]}"
+            .toUpperCase();
       } else {
         initials = parts.first
             .substring(0, parts.first.length >= 2 ? 2 : 1)
@@ -238,9 +288,11 @@ class _AddEditFamilyProfileScreenState
       }
     }
 
-    final color = _relationships
-            .firstWhere((r) => r['value'] == _selectedRelationship)['icon'] ==
-        Icons.person
+    final color =
+        _getRelationships(
+              context,
+            ).firstWhere((r) => r['value'] == _selectedRelationship)['icon'] ==
+            Icons.person
         ? Colors.blue
         : _getRelationshipColor(_selectedRelationship);
 
@@ -267,7 +319,7 @@ class _AddEditFamilyProfileScreenState
           ),
           const Gap(8),
           Text(
-            name.isEmpty ? 'Nhập tên để xem trước' : name,
+            name.isEmpty ? context.tr('enter_name_preview') : name,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -322,16 +374,16 @@ class _AddEditFamilyProfileScreenState
     return TextFormField(
       controller: _nameController,
       decoration: InputDecoration(
-        labelText: 'Họ và tên',
-        labelStyle: TextStyle(color: Colors.grey),
-        prefixIcon: const Icon(Icons.person_outline, color: Colors.black,),
+        labelText: context.tr('full_name'),
+        labelStyle: const TextStyle(color: Colors.grey),
+        prefixIcon: const Icon(Icons.person_outline, color: Colors.black),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.white,
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Vui lòng nhập họ tên';
+          return context.tr('please_enter_full_name');
         }
         return null;
       },
@@ -340,10 +392,9 @@ class _AddEditFamilyProfileScreenState
   }
 
   Widget _buildRelationshipSelector() {
-    // Lọc bỏ "Bản thân" nếu đã có hồ sơ self (trừ khi đang sửa chính hồ sơ self đó)
-    final availableRelationships = _relationships.where((r) {
+    final availableRelationships = _getRelationships(context).where((r) {
       if (r['value'] == 'self' && _selfExists) {
-        return false; // Ẩn "Bản thân" nếu đã tồn tại
+        return false;
       }
       return true;
     }).toList();
@@ -351,9 +402,9 @@ class _AddEditFamilyProfileScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Mối quan hệ *',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        Text(
+          context.tr('relationship_label'),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const Gap(8),
         Wrap(
@@ -368,9 +419,14 @@ class _AddEditFamilyProfileScreenState
                 _validate();
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? color.withValues(alpha: 0.15) : Colors.white,
+                  color: isSelected
+                      ? color.withValues(alpha: 0.15)
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected ? color : Colors.grey.shade300,
@@ -380,13 +436,19 @@ class _AddEditFamilyProfileScreenState
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(r['icon'] as IconData, size: 16, color: isSelected ? color : Colors.grey),
+                    Icon(
+                      r['icon'] as IconData,
+                      size: 16,
+                      color: isSelected ? color : Colors.grey,
+                    ),
                     const Gap(6),
                     Text(
                       r['label'] as String,
                       style: TextStyle(
                         color: isSelected ? color : Colors.grey.shade700,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                         fontSize: 13,
                       ),
                     ),
@@ -404,25 +466,45 @@ class _AddEditFamilyProfileScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Giới tính',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        Text(
+          context.tr('gender'),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const Gap(8),
         Row(
           children: [
-            _buildGenderChip('male', 'Nam', Icons.male, Colors.blue),
+            _buildGenderChip(
+              'male',
+              context.tr('gender_male'),
+              Icons.male,
+              Colors.blue,
+            ),
             const Gap(8),
-            _buildGenderChip('female', 'Nữ', Icons.female, Colors.pink),
+            _buildGenderChip(
+              'female',
+              context.tr('gender_female'),
+              Icons.female,
+              Colors.pink,
+            ),
             const Gap(8),
-            _buildGenderChip('other', 'Khác', Icons.transgender, Colors.purple),
+            _buildGenderChip(
+              'other',
+              context.tr('gender_other'),
+              Icons.transgender,
+              Colors.purple,
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildGenderChip(String value, String label, IconData icon, Color color) {
+  Widget _buildGenderChip(
+    String value,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
     final isSelected = _selectedGender == value;
     return Expanded(
       child: GestureDetector(
@@ -476,19 +558,24 @@ class _AddEditFamilyProfileScreenState
     return DropdownButtonFormField<String>(
       initialValue: _selectedBloodType,
       decoration: InputDecoration(
-        labelText: 'Nhóm máu',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelText: context.tr('blood_type'),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.bloodtype_outlined),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.white,
       ),
       items: [
-        const DropdownMenuItem(value: null, child: Text('Chưa chọn', style: TextStyle(color: Colors.grey),)),
-        ..._bloodTypes.map((type) => DropdownMenuItem(
-              value: type,
-              child: Text(type),
-            )),
+        DropdownMenuItem(
+          value: null,
+          child: Text(
+            context.tr('not_selected'),
+            style: const TextStyle(color: Colors.grey),
+          ),
+        ),
+        ..._bloodTypes.map(
+          (type) => DropdownMenuItem(value: type, child: Text(type)),
+        ),
       ],
       onChanged: (value) {
         setState(() => _selectedBloodType = value);
@@ -502,8 +589,8 @@ class _AddEditFamilyProfileScreenState
       controller: _heightController,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
-        labelText: 'Chiều cao (cm)',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelText: context.tr('height_cm'),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.height),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
@@ -513,7 +600,7 @@ class _AddEditFamilyProfileScreenState
         if (value != null && value.isNotEmpty) {
           final num = double.tryParse(value);
           if (num == null || num < 30 || num > 250) {
-            return 'Chiều cao không hợp lệ';
+            return context.tr('height_invalid');
           }
         }
         return null;
@@ -526,8 +613,8 @@ class _AddEditFamilyProfileScreenState
       controller: _weightController,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
-        labelText: 'Cân nặng (kg)',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelText: context.tr('weight_kg'),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.monitor_weight_outlined),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
@@ -537,7 +624,7 @@ class _AddEditFamilyProfileScreenState
         if (value != null && value.isNotEmpty) {
           final num = double.tryParse(value);
           if (num == null || num < 1 || num > 300) {
-            return 'Cân nặng không hợp lệ';
+            return context.tr('weight_invalid');
           }
         }
         return null;
@@ -545,7 +632,7 @@ class _AddEditFamilyProfileScreenState
     );
   }
 
-void _submit() {
+  void _submit() {
     if (!_formKey.currentState!.validate()) return;
     if (_isSubmitting) return;
 

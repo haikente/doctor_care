@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
@@ -27,11 +28,11 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
   DateTime? _selectedDateTime;
   String _selectedMealStatus = 'fasting';
 
-  final List<Map<String, String>> _mealOptions = [
-    {'key': 'fasting', 'label': 'Lúc đói'},
-    {'key': 'before_meal', 'label': 'Trước ăn'},
-    {'key': 'after_meal', 'label': 'Sau ăn 2h'},
-    {'key': 'random', 'label': 'Ngẫu nhiên'},
+  List<Map<String, String>> _getMealOptions(BuildContext context) => [
+    {'key': 'fasting', 'label': context.tr('meal_status_fasting')},
+    {'key': 'before_meal', 'label': context.tr('meal_status_before_meal')},
+    {'key': 'after_meal', 'label': context.tr('meal_status_after_meal')},
+    {'key': 'random', 'label': context.tr('meal_status_random')},
   ];
 
   @override
@@ -91,8 +92,8 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
         onBack: () => Navigator.pop(context),
         centerTitle: true,
         title: widget.bloodSugar != null
-            ? "Chỉnh sửa đường huyết"
-            : "Thêm mới đường huyết",
+            ? context.tr('edit_blood_sugar_title')
+            : context.tr('add_blood_sugar_title'),
         icon: widget.bloodSugar != null
             ? const Icon(
                 Icons.delete_forever_outlined,
@@ -104,8 +105,7 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
             ? () {
                 AppDialog.showDeleteConfirm(
                   context: context,
-                  content:
-                      "Bạn có chắc chắn muốn xoá chỉ số đường huyết này không?",
+                  content: context.tr('confirm_delete_blood_sugar'),
                   onConfirm: () {
                     if (widget.bloodSugar?.id != null) {
                       context.read<BloodSugarCubit>().deleteBloodSugarRecord(
@@ -128,9 +128,9 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Chọn thời gian",
-                      style: TextStyle(
+                    Text(
+                      context.tr('select_time'),
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -179,10 +179,10 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
 
                     const Gap(20),
                     Row(
-                      children: const [
+                      children: [
                         Text(
-                          "Đường huyết (mg/dL)",
-                          style: TextStyle(
+                          context.tr('blood_sugar_value'),
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -205,7 +205,7 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                       ],
                       onChanged: (_) => _validate(),
                       decoration: InputDecoration(
-                        hintText: "Nhập chỉ số đường huyết",
+                        hintText: context.tr('enter_blood_sugar'),
                         hintStyle: const TextStyle(fontSize: 14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -229,9 +229,9 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                     ),
 
                     const Gap(20),
-                    const Text(
-                      "Thời điểm đo",
-                      style: TextStyle(
+                    Text(
+                      context.tr('measurement_time'),
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -241,7 +241,7 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                     Wrap(
                       spacing: 12,
                       runSpacing: 8,
-                      children: _mealOptions.map((option) {
+                      children: _getMealOptions(context).map((option) {
                         final isSelected = _selectedMealStatus == option['key'];
                         return ChoiceChip(
                           shape: RoundedRectangleBorder(
@@ -275,9 +275,9 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
                     ),
 
                     const Gap(20),
-                    const Text(
-                      "Ghi chú (tuỳ chọn)",
-                      style: TextStyle(
+                    Text(
+                      context.tr('note_optional'),
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -318,7 +318,9 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
             const Gap(12),
             CustomButton(
               expanded: true,
-              text: widget.bloodSugar != null ? "Cập nhật" : "Lưu",
+              text: widget.bloodSugar != null
+                  ? context.tr('update_btn')
+                  : context.tr('save'),
               enabled: isValid && hasChanges,
               onPressed: () {
                 final record = BloodSugar(

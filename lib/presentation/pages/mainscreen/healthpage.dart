@@ -247,6 +247,7 @@ class Healthpage extends StatelessWidget {
                   ),
                 ],
               ),
+              const Gap(24),
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
