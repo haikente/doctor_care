@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
@@ -255,9 +256,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                       children: [
                         Text(
                           "${filteredRecords.length} bản ghi",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
+                            color: AppColor.textPrimary(context),
                           ),
                         ),
                         GestureDetector(
@@ -290,7 +292,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.science_outlined, color: Colors.black54),
+                          child: Icon(Icons.science_outlined, color: AppColor.textSecondary(context)),
                         ),
                       ],
                     ),
@@ -523,7 +525,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                     Gap(5),
                     Text(
                       'mmHg',
-                      style: TextStyle(color: Colors.black, fontSize: 13),
+                      style: TextStyle(color: AppColor.textSecondary(context), fontSize: 13),
                     ),
                   ],
                 ),

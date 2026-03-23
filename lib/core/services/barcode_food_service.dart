@@ -95,12 +95,12 @@ class BarcodeFoodService {
       final servingGrams = _resolveServingGrams(product, displayName);
 
       if (kDebugMode) {
-        debugPrint('[Barcode] ✅ ${food.name} — ${food.caloriesPer100g} kcal/100g — serving=${servingGrams}g');
+        debugPrint('[Barcode] ${food.name} — ${food.caloriesPer100g} kcal/100g — serving=${servingGrams}g');
       }
 
       return (food: food, servingGrams: servingGrams);
     } catch (e, st) {
-      if (kDebugMode) debugPrint('[Barcode] ❌ Exception: $e\n$st');
+      if (kDebugMode) debugPrint('[Barcode] Exception: $e\n$st');
       return null;
     }
   }

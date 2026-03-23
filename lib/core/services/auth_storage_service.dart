@@ -35,7 +35,7 @@ class AuthStorageService {
       await prefs.setString(_keyEmail, email);
       await prefs.setString(_keyUserRole, role);
       await prefs.setBool(_keyRememberMe, true);
-      print('✅ Đã lưu phiên đăng nhập - Auto login enabled');
+      print('Đã lưu phiên đăng nhập - Auto login enabled');
     } else {
       // Không ghi nhớ -> chỉ lưu email để hiển thị
       await prefs.setBool(_keyIsLoggedIn, false);

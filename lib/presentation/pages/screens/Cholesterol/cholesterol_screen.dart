@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
@@ -299,9 +300,10 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
               children: [
                 Text(
                   'Toàn phần: ${data.totalCholesterol.toStringAsFixed(0)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 18,
+                    color: AppColor.textSecondary(context),
                   ),
                 ),
                 const Gap(5),

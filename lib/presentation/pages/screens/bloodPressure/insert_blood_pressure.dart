@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
@@ -113,7 +114,7 @@ void initState() {
                 onConfirm: (){
                   if(widget.bloodPressure?.id != null) {
                     context.read<BloodPressureCubit>().deleteBloodPressureRecord(widget.bloodPressure!.id.toString());
-                    Navigator.pop(context); // Đóng trang hiện tại sau khi xóa
+                    Navigator.pop(context);
                   }
                 });
             }
@@ -123,7 +124,7 @@ void initState() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Chọn thời gian", style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),),
+          Text("Chọn thời gian", style: TextStyle(color: AppColor.textSecondary(context), fontSize: 14, fontWeight: FontWeight.w500),),
 
            Gap(8),
               TextField(
@@ -159,7 +160,7 @@ void initState() {
 
               Row(
                 children: [
-                  Text("Tâm thu (mmHg)", style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),),
+                  Text("Tâm thu (mmHg)", style: TextStyle(color: AppColor.textSecondary(context), fontSize: 14, fontWeight: FontWeight.w500),),
                   Gap(5),
                   Icon(Icons.grade, size: 15, color: Colors.red,),
                 ],
@@ -211,7 +212,7 @@ void initState() {
               Gap(20),
               Row(
                 children: [
-                  Text("Tâm trương (mmHg)", style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),),
+                  Text("Tâm trương (mmHg)", style: TextStyle(color: AppColor.textSecondary(context), fontSize: 14, fontWeight: FontWeight.w500),),
                   Gap(5),
                   Icon(Icons.grade, size: 15, color: Colors.red,),
                 ],

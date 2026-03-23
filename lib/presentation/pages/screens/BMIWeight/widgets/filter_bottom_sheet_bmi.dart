@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +91,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   child: Center(
                     child: Text(
                       "Lọc kết quả",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColor.textSecondary(context)),
                     ),
                   ),
                 ),
@@ -108,7 +109,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColor.textSecondary(context))),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],

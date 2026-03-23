@@ -4,7 +4,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:doctor_care/domain/entities/food_item.dart';
 import 'package:doctor_care/core/database_food/food_database_helper.dart';
 
-/// Service for analyzing meal images using Gemini AI
+// dịch vụ phân tích hình ảnh bữa ăn sử dụng Gemini AI
 class GeminiAIService {
   static const String _defaultApiKey =
       'AIzaSyDDJoB-b_Jb3BNnjDiwGvRroGLUkHGcIyk';
@@ -36,7 +36,7 @@ class GeminiAIService {
     }
   }
 
-  /// Create detailed prompt for meal analysis
+  /// Khởi tạo prompt phân tích hình ảnh bữa ăn
   String _createAnalysisPrompt() {
     return '''
 Phân tích hình ảnh bữa ăn này và cung cấp tên món ăn cùng danh sách các thành phần nguyên liệu chi tiết.
@@ -77,7 +77,7 @@ Lưu ý:
       }
       cleanedText = cleanedText.trim();
 
-      // Parse JSON response
+      // phân tích JSON phản hồi
       final jsonResponse = _parseJson(cleanedText);
       final dishName = jsonResponse['dishName'] as String?;
       final healthRecommendations =
@@ -92,11 +92,11 @@ Lưu ý:
         final portionGrams = (foodData['portionGrams'] as num).toDouble();
         final category = foodData['category'] as String;
 
-        // Try to find matching food in database
+        // Tìm kiếm thông tin dinh dưỡng trong database
         final nutritionData = await _findFoodInDatabase(name, nameEn);
 
         if (nutritionData != null) {
-          // Calculate nutrition for the portion
+          // Tính toán dinh dưỡng cho khẩu phần đã ước tính
           final calories = nutritionData.calculateCalories(portionGrams);
           final protein = nutritionData.calculateProtein(portionGrams);
           final carbs = nutritionData.calculateCarbs(portionGrams);
@@ -118,7 +118,7 @@ Lưu ý:
             ),
           );
         } else {
-          // Use estimated values if not found in database
+          // Sử dụng giá trị ước tính nếu không tìm thấy trong database
           foodItems.add(
             FoodItem(
               foodName: name,
@@ -146,12 +146,12 @@ Lưu ý:
     }
   }
 
-  /// Parse JSON using dart:convert
+  /// Phân tích JSON sử dụng dart:convert
   Map<String, dynamic> _parseJson(String jsonString) {
     return json.decode(jsonString) as Map<String, dynamic>;
   }
 
-  /// Find food in database by name
+  /// Tìm kiếm thực phẩm trong database theo tên
   Future<dynamic> _findFoodInDatabase(String name, String nameEn) async {
     final dbHelper = FoodDatabaseHelper.instance;
     return await dbHelper.findFood(name, nameEn);

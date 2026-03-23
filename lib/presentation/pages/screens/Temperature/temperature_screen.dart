@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/ui/snackbar_helper.dart';
@@ -143,7 +144,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.science_outlined, color: Colors.black54,),
+                          child: Icon(Icons.science_outlined, color: AppColor.textSecondary(context),),
                         )
                       ],
                     ),
@@ -385,7 +386,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             children: [
               Text('${temperature.value}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),),
               Gap(5),
-              Text('°C', style: TextStyle(color: Colors.black, fontSize: 24),),
+              Text('°C', style: TextStyle(color: AppColor.textSecondary(context), fontSize: 24),),
             ],
           ),
 

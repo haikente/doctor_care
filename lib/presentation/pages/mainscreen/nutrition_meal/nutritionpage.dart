@@ -236,18 +236,10 @@ class _NutritionPageState extends State<NutritionPage> {
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.grey.withOpacity(0.5),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+       ),
       child: Row(
         children: [
           Expanded(
@@ -315,18 +307,10 @@ class _NutritionPageState extends State<NutritionPage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32),
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+       decoration: BoxDecoration(
+         color: Theme.of(context).cardColor,
+         borderRadius: BorderRadius.circular(16),
+       ),
       child: Column(
         children: [
           Icon(Icons.restaurant_menu_rounded,
@@ -361,16 +345,8 @@ class _NutritionPageState extends State<NutritionPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.grey.withOpacity(0.5),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+       color: Theme.of(context).cardColor,
+       borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [

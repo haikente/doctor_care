@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
@@ -119,7 +120,7 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                                 },
                               );
                             },
-                            child: Icon(Icons.science_outlined, color: Colors.black54),
+                            child: Icon(Icons.science_outlined, color: AppColor.textSecondary(context)),
                           )
                         ],
                       ),
@@ -267,13 +268,6 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         children: [

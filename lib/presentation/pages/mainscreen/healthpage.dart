@@ -27,8 +27,12 @@ class Healthpage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade400,
                   borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade400, Colors.orange.shade300],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.blue.withOpacity(0.1),

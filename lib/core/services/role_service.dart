@@ -162,9 +162,9 @@ class RoleService {
     print('   Email: ${user.email}');
     print('   UID: ${user.uid}');
     print('   Role: $role');
-    print('   Is Admin: ${role == 'admin' ? '✅' : '❌'}');
-    print('   Is Doctor: ${role == 'doctor' ? '✅' : '❌'}');
-    print('   Is Patient: ${role == 'patient' ? '✅' : '❌'}');
+    print('   Is Admin: ${role == 'admin' ? '' : ''}');
+    print('   Is Doctor: ${role == 'doctor' ? '' : ''}');
+    print('   Is Patient: ${role == 'patient' ? '' : ''}');
     print('==================');
   }
 }
