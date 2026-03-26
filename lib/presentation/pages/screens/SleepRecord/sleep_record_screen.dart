@@ -36,7 +36,9 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
     // Lọc theo khoảng thời gian
     if (_startDate != null && _endDate != null) {
       filtered = filtered.where((r) {
-        return r.timestamp.isAfter(_startDate!.subtract(const Duration(days: 1))) &&
+        return r.timestamp.isAfter(
+              _startDate!.subtract(const Duration(days: 1)),
+            ) &&
             r.timestamp.isBefore(_endDate!.add(const Duration(days: 1)));
       }).toList();
     }
@@ -60,12 +62,18 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
 
   String _getQualityLabel(int quality) {
     switch (quality) {
-      case 1: return 'Rất tệ';
-      case 2: return 'Tệ';
-      case 3: return 'Bình thường';
-      case 4: return 'Tốt';
-      case 5: return 'Rất tốt';
-      default: return '';
+      case 1:
+        return 'Rất tệ';
+      case 2:
+        return 'Tệ';
+      case 3:
+        return 'Bình thường';
+      case 4:
+        return 'Tốt';
+      case 5:
+        return 'Rất tốt';
+      default:
+        return '';
     }
   }
 
@@ -78,9 +86,7 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
         centerTitle: true,
         onInfo: () => Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const InsertSleepRecordScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const InsertSleepRecordScreen()),
         ),
         icon: const Icon(
           Icons.add_circle_outline_outlined,
@@ -91,7 +97,9 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
       body: BlocBuilder<SleepRecordCubit, SleepRecordState>(
         builder: (context, state) {
           if (state is SleepRecordLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(color: Colors.blue[600]),
+            );
           } else if (state is SleepRecordLoaded) {
             final records = state.records;
 
@@ -146,14 +154,20 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                               initialEndDate: _endDate,
                               initialDurationStatus: _selectedDurationStatus,
                               initialQuality: _selectedQuality,
-                              onApply: (startDate, endDate, durationStatus, quality) {
-                                setState(() {
-                                  _startDate = startDate;
-                                  _endDate = endDate;
-                                  _selectedDurationStatus = durationStatus;
-                                  _selectedQuality = quality;
-                                });
-                              },
+                              onApply:
+                                  (
+                                    startDate,
+                                    endDate,
+                                    durationStatus,
+                                    quality,
+                                  ) {
+                                    setState(() {
+                                      _startDate = startDate;
+                                      _endDate = endDate;
+                                      _selectedDurationStatus = durationStatus;
+                                      _selectedQuality = quality;
+                                    });
+                                  },
                               onReset: () {
                                 setState(() {
                                   _startDate = null;
@@ -164,13 +178,19 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                               },
                             );
                           },
-                          child: const Icon(Icons.science_outlined, color: Colors.black54),
+                          child: const Icon(
+                            Icons.science_outlined,
+                            color: Colors.black54,
+                          ),
                         ),
                       ],
                     ),
 
                     // Filter chips
-                    if (_startDate != null || _endDate != null || _selectedDurationStatus != null || _selectedQuality != null)
+                    if (_startDate != null ||
+                        _endDate != null ||
+                        _selectedDurationStatus != null ||
+                        _selectedQuality != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Wrap(
@@ -181,9 +201,16 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                               Chip(
                                 label: Text(
                                   "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
-                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade800,
+                                  ),
                                 ),
-                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                deleteIcon: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.blue.shade800,
+                                ),
                                 onDeleted: () {
                                   setState(() {
                                     _startDate = null;
@@ -200,11 +227,20 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                               Chip(
                                 label: Text(
                                   _selectedDurationStatus!,
-                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade800,
+                                  ),
                                 ),
-                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                deleteIcon: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.blue.shade800,
+                                ),
                                 onDeleted: () {
-                                  setState(() => _selectedDurationStatus = null);
+                                  setState(
+                                    () => _selectedDurationStatus = null,
+                                  );
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
@@ -216,9 +252,16 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                               Chip(
                                 label: Text(
                                   _getQualityLabel(_selectedQuality!),
-                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade800,
+                                  ),
                                 ),
-                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                deleteIcon: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.blue.shade800,
+                                ),
                                 onDeleted: () {
                                   setState(() => _selectedQuality = null);
                                 },
@@ -238,7 +281,8 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: filteredRecords.length,
                       itemBuilder: (context, index) {
-                        final data = filteredRecords[filteredRecords.length - 1 - index];
+                        final data =
+                            filteredRecords[filteredRecords.length - 1 - index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 13),
                           child: Slidable(
@@ -294,10 +338,9 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        InsertSleepRecordScreen(
-                                          sleepRecord: data,
-                                        ),
+                                    builder: (_) => InsertSleepRecordScreen(
+                                      sleepRecord: data,
+                                    ),
                                   ),
                                 );
                               },

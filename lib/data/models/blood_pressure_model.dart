@@ -1,26 +1,32 @@
 import 'package:doctor_care/domain/entities/blood_pressure.dart';
 
-class BloodPressureModel extends BloodPressure{
+class BloodPressureModel extends BloodPressure {
+  final int? profileId;
+
   BloodPressureModel({
     super.id,
-    required super.timestamp, 
-    required super.systolic, 
-    required super.diastolic});
+    this.profileId,
+    required super.timestamp,
+    required super.systolic,
+    required super.diastolic,
+  });
 
-    factory BloodPressureModel.fromMap(Map<String, dynamic> map) {
+  factory BloodPressureModel.fromMap(Map<String, dynamic> map) {
     return BloodPressureModel(
       id: map['id'],
+      profileId: map['profileId'],
       timestamp: DateTime.parse(map['timestamp']),
       systolic: map['systolic'],
       diastolic: map['diastolic'],
     );
-    }
+  }
 
-    Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     return {
       'timestamp': timestamp.toIso8601String(),
       'systolic': systolic,
       'diastolic': diastolic,
+      'profileId': profileId,
     };
-    }
+  }
 }

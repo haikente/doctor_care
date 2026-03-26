@@ -7,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 10;
+  static const _dbVersion = 17;
 
   Database? _database;
 
@@ -28,7 +28,6 @@ class DbHelper {
       onUpgrade: _onUpgrade,
     );
 
-    // Ensure meal analysis tables exist (fix for dev environment issues)
     await _ensureMealTablesExist(db);
 
     return db;
@@ -40,7 +39,8 @@ class DbHelper {
       CREATE TABLE hba1c (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         value REAL NOT NULL,
-        date TEXT NOT NULL
+        date TEXT NOT NULL,
+        profileId INTEGER
       )
     ''');
 
@@ -50,7 +50,8 @@ class DbHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT NOT NULL,
         systolic INTEGER NOT NULL,
-        diastolic INTEGER NOT NULL
+        diastolic INTEGER NOT NULL,
+        profileId INTEGER
       )
     ''');
 
@@ -504,7 +505,108 @@ class DbHelper {
       print('✅ Created family_profile table (v10)');
     }
 
-    print('✅ Database upgrade completed');
+    // ✅ Upgrade to version 11: Add profileId to blood_pressure
+    if (oldVersion < 11) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(blood_pressure)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE blood_pressure ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng huyết áp (v11)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào blood_pressure: $e');
+      }
+    }
+
+    if (oldVersion < 12) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(hba1c)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute('ALTER TABLE hba1c ADD COLUMN profileId INTEGER');
+          print('Đã thêm cột profileId vào bảng hba1c (v12)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào hba1c: $e');
+      }
+    }
+
+    if (oldVersion < 13) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(temperature)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE temperature ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng temperature (v13)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào temperature: $e');
+      }
+    }
+
+    if (oldVersion < 14) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(spo2heartrate)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE spo2heartrate ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng spo2heartrate (v14)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào spo2heartrate: $e');
+      }
+    }
+
+    if (oldVersion < 16) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(blood_sugar)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE blood_sugar ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng blood_sugar (v16)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào blood_sugar: $e');
+      }
+    }
+
+    if (oldVersion < 17) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(cholesterol)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE cholesterol ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng cholesterol (v16)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào cholesterol: $e');
+      }
+    }
+
+    print('Nâng cấp cơ sở dữ liệu đã hoàn tất');
   }
 
   Future<void> deleteDatabase() async {
@@ -529,7 +631,7 @@ class DbHelper {
       "SELECT sql FROM sqlite_master WHERE type='table' AND name='temperature'",
     );
     if (tempSchema.isNotEmpty) {
-      print('📊 Temperature schema: ${tempSchema.first['sql']}');
+      print('Temperature schema: ${tempSchema.first['sql']}');
     }
 
     // Check spo2heartrate schema
@@ -537,9 +639,9 @@ class DbHelper {
       "SELECT sql FROM sqlite_master WHERE type='table' AND name='spo2heartrate'",
     );
     if (spo2Schema.isNotEmpty) {
-      print('📊 Spo2HeartRate schema: ${spo2Schema.first['sql']}');
+      print('Spo2HeartRate schema: ${spo2Schema.first['sql']}');
     } else {
-      print('⚠️ Table spo2heartrate does not exist!');
+      print('Table spo2heartrate does not exist!');
     }
   }
 
