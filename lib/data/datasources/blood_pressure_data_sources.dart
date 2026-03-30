@@ -141,9 +141,7 @@ class BloodPressureDataSourcesImpl implements BloodPressureDataSources {
           profileId: activeProfileId ?? bp.profileId,
         ),
       );
-    } catch (_) {
-      // Keep local update successful even if cloud sync fails.
-    }
+    } catch (_) {}
   }
 
   @override

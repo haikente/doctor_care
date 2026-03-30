@@ -7,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 17;
+  static const _dbVersion = 20;
 
   Database? _database;
 
@@ -191,6 +191,19 @@ class DbHelper {
         avatar TEXT,
         isActive INTEGER NOT NULL DEFAULT 0,
         createdAt TEXT NOT NULL
+      )
+    ''');
+
+    // ✅ Creatinine table
+    await db.execute('''
+      CREATE TABLE creatinine (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        value REAL NOT NULL,
+        timestamp TEXT NOT NULL,
+        note TEXT,
+        age INTEGER,
+        gender TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -603,6 +616,55 @@ class DbHelper {
         }
       } catch (e) {
         print('Lỗi khi thêm profileId vào cholesterol: $e');
+      }
+    }
+
+    if (oldVersion < 18) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS creatinine (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          value REAL NOT NULL,
+          timestamp TEXT NOT NULL,
+          note TEXT,
+          age INTEGER,
+          gender TEXT,
+          profileId INTEGER
+        )
+      ''');
+      print('✅ Created creatinine table (v18)');
+    }
+
+    if (oldVersion < 19) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(bmi_weight)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE bmi_weight ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng bmi_weight (v19)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào bmi_weight: $e');
+      }
+    }
+
+    if (oldVersion < 20) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(water_intake)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE water_intake ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng water_intake (v20)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào water_intake: $e');
       }
     }
 

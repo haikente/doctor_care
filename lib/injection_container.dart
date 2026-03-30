@@ -89,6 +89,14 @@ import 'package:doctor_care/domain/usecase/cholesterol/insert_cholesterol.dart';
 import 'package:doctor_care/domain/usecase/cholesterol/update_cholesterol.dart';
 import 'package:doctor_care/domain/usecase/cholesterol/delete_cholesterol.dart';
 
+// Creatinine Imports
+import 'package:doctor_care/data/datasources/creatinine_data_source.dart';
+import 'package:doctor_care/data/repositories/creatinine_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/creatinine/get_creatinine.dart';
+import 'package:doctor_care/domain/usecase/creatinine/insert_creatinine.dart';
+import 'package:doctor_care/domain/usecase/creatinine/update_creatinine.dart';
+import 'package:doctor_care/domain/usecase/creatinine/delete_creatinine.dart';
+
 // Family Profile Imports
 import 'package:doctor_care/data/datasources/family_profile_data_source.dart';
 import 'package:doctor_care/data/repositories/family_profile_repository_impl.dart';
@@ -98,6 +106,14 @@ import 'package:doctor_care/domain/usecase/family_profile/update_family_profile.
 import 'package:doctor_care/domain/usecase/family_profile/delete_family_profile.dart';
 import 'package:doctor_care/domain/usecase/family_profile/set_active_family_profile.dart';
 import 'package:doctor_care/domain/usecase/family_profile/get_active_family_profile.dart';
+
+// Water Intake Imports
+import 'package:doctor_care/data/datasources/water_intake_data_source.dart';
+import 'package:doctor_care/data/repositories/water_intake_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/water_intake/get_water_intake.dart';
+import 'package:doctor_care/domain/usecase/water_intake/insert_water_intake.dart';
+import 'package:doctor_care/domain/usecase/water_intake/update_water_intake.dart';
+import 'package:doctor_care/domain/usecase/water_intake/delete_water_intake.dart';
 
 // Database
 import 'package:doctor_care/core/db/db_helper.dart';
@@ -170,6 +186,20 @@ class InjectionContainer {
   InsertCholesterol? _insertCholesterol;
   UpdateCholesterol? _updateCholesterol;
   DeleteCholesterol? _deleteCholesterol;
+
+  // Creatinine fields
+  CreatinineRepositoryImpl? _creatinineRepository;
+  GetCreatinine? _getCreatinine;
+  InsertCreatinine? _insertCreatinine;
+  UpdateCreatinine? _updateCreatinine;
+  DeleteCreatinine? _deleteCreatinine;
+
+  // Water Intake fields
+  WaterIntakeRepositoryImpl? _waterIntakeRepository;
+  GetWaterIntake? _getWaterIntake;
+  InsertWaterIntake? _insertWaterIntake;
+  UpdateWaterIntake? _updateWaterIntake;
+  DeleteWaterIntake? _deleteWaterIntake;
 
   // Family Profile fields
   FamilyProfileRepositoryImpl? _familyProfileRepository;
@@ -258,6 +288,18 @@ class InjectionContainer {
   InsertCholesterol get insertCholesterol => _insertCholesterol!;
   UpdateCholesterol get updateCholesterol => _updateCholesterol!;
   DeleteCholesterol get deleteCholesterol => _deleteCholesterol!;
+
+  // Creatinine UseCase Getters
+  GetCreatinine get getCreatinine => _getCreatinine!;
+  InsertCreatinine get insertCreatinine => _insertCreatinine!;
+  UpdateCreatinine get updateCreatinine => _updateCreatinine!;
+  DeleteCreatinine get deleteCreatinine => _deleteCreatinine!;
+
+  // Water Intake UseCase Getters
+  GetWaterIntake get getWaterIntake => _getWaterIntake!;
+  InsertWaterIntake get insertWaterIntake => _insertWaterIntake!;
+  UpdateWaterIntake get updateWaterIntake => _updateWaterIntake!;
+  DeleteWaterIntake get deleteWaterIntake => _deleteWaterIntake!;
 
   // Family Profile UseCase Getters
   GetFamilyProfiles get getFamilyProfiles => _getFamilyProfiles!;
@@ -370,6 +412,22 @@ class InjectionContainer {
     _insertCholesterol = InsertCholesterol(_cholesterolRepository!);
     _updateCholesterol = UpdateCholesterol(_cholesterolRepository!);
     _deleteCholesterol = DeleteCholesterol(_cholesterolRepository!);
+
+    // Creatinine
+    final creatinineDataSource = CreatinineDataSourceImpl();
+    _creatinineRepository = CreatinineRepositoryImpl(creatinineDataSource);
+    _getCreatinine = GetCreatinine(_creatinineRepository!);
+    _insertCreatinine = InsertCreatinine(_creatinineRepository!);
+    _updateCreatinine = UpdateCreatinine(_creatinineRepository!);
+    _deleteCreatinine = DeleteCreatinine(_creatinineRepository!);
+
+    // Water Intake
+    final waterIntakeDataSource = WaterIntakeDataSourceImpl();
+    _waterIntakeRepository = WaterIntakeRepositoryImpl(dataSource: waterIntakeDataSource);
+    _getWaterIntake = GetWaterIntake(_waterIntakeRepository!);
+    _insertWaterIntake = InsertWaterIntake(_waterIntakeRepository!);
+    _updateWaterIntake = UpdateWaterIntake(_waterIntakeRepository!);
+    _deleteWaterIntake = DeleteWaterIntake(_waterIntakeRepository!);
 
     // Family Profile
     final familyProfileDataSource = FamilyProfileDataSourceImpl();

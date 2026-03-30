@@ -25,6 +25,7 @@ import 'package:doctor_care/presentation/bloc/blood_sugar/blood_sugar_cubit.dart
 import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:doctor_care/presentation/bloc/cholesterol/cholesterol_cubit.dart';
+import 'package:doctor_care/presentation/bloc/creatinine/creatinine_cubit.dart';
 import 'package:doctor_care/presentation/bloc/family_profile/family_profile_cubit.dart';
 import 'package:doctor_care/core/services/water_reminder_service.dart';
 import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
@@ -34,6 +35,7 @@ import 'package:doctor_care/presentation/pages/screens/BloodSugar/blood_sugar_sc
 import 'package:doctor_care/presentation/pages/screens/SleepRecord/sleep_record_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/StepCount/step_count_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/Cholesterol/cholesterol_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/Creatinine/creatinine_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/auth/login_screen.dart';
 import 'package:doctor_care/splash.dart';
@@ -140,7 +142,14 @@ class MyApp extends StatelessWidget {
         ),
 
         // Water Intake
-        BlocProvider(create: (context) => WaterIntakeBloc(di.dbHelper)),
+        BlocProvider(
+          create: (context) => WaterIntakeBloc(
+            getWaterIntake: di.getWaterIntake,
+            insertWaterIntake: di.insertWaterIntake,
+            updateWaterIntake: di.updateWaterIntake,
+            deleteWaterIntake: di.deleteWaterIntake,
+          ),
+        ),
 
         // Blood Sugar
         BlocProvider(
@@ -179,6 +188,16 @@ class MyApp extends StatelessWidget {
             di.insertCholesterol,
             di.updateCholesterol,
             di.deleteCholesterol,
+          ),
+        ),
+
+        // Creatinine
+        BlocProvider(
+          create: (context) => CreatinineCubit(
+            di.getCreatinine,
+            di.insertCreatinine,
+            di.updateCreatinine,
+            di.deleteCreatinine,
           ),
         ),
 
@@ -222,10 +241,7 @@ class MyApp extends StatelessWidget {
 
                 // Locale
                 locale: localeState.locale,
-                supportedLocales: const [
-                  Locale('vi'),
-                  Locale('en'),
-                ],
+                supportedLocales: const [Locale('vi'), Locale('en')],
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
@@ -241,55 +257,58 @@ class MyApp extends StatelessWidget {
                         navigatorKey.currentState?.pushNamedAndRemoveUntil(
                           '/',
                           (route) => false,
-                    );
-                  }
+                        );
+                      }
+                    },
+                    child: child!,
+                  );
                 },
-                child: child!,
-              );
-            },
 
-            home: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is Authenticated) {
-                  // Đảm bảo hồ sơ "Bản thân" tồn tại khi mở app
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.read<FamilyProfileCubit>().ensureSelfProfile(
-                      name: state.user.fullName ?? state.user.email.split('@').first,
-                      gender: state.user.gender,
-                      bloodType: state.user.bloodType,
-                      height: state.user.height,
-                      weight: state.user.weight,
-                      dateOfBirth: state.user.dateOfBirth,
-                    );
-                  });
-                  // Admin → admin panel, Patient → navigation
-                  if (state.role == 'admin') {
-                    return const AdminPanelScreen();
-                  }
-                  return const Navigationbar();
-                }
-                return const Splash();
-              },
-            ),
-            routes: {
-              '/login': (context) => const LoginScreen(),
-              '/navigation': (context) => const Navigationbar(),
-              '/admin-panel': (context) => const AdminPanelScreen(),
-              '/health-overview': (context) => const HealthOverviewScreen(),
-              '/bloodpressure': (context) => const BloodPressureScreen(),
-              '/hba1c': (context) => const Hba1cScreen(),
-              '/temperature': (context) => const TemperatureScreen(),
-              '/spo2heart': (context) => const Spo2HeartRateScreen(),
-              '/bmiweight': (context) => const BmiWeightScreen(),
-              '/waterintake': (context) => const WaterIntakeScreen(),
-              '/bloodsugar': (context) => const BloodSugarScreen(),
-              '/sleep': (context) => const SleepRecordScreen(),
-              '/stepcounter': (context) => const StepCountScreen(),
-              '/cholesterol': (context) => const CholesterolScreen(),
-              '/familyprofile': (context) => const FamilyProfileScreen(),
-              '/health-goals': (context) => const HealthGoalScreen(),
-            },
-          );
+                home: BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is Authenticated) {
+                      // Đảm bảo hồ sơ "Bản thân" tồn tại khi mở app
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        context.read<FamilyProfileCubit>().ensureSelfProfile(
+                          name:
+                              state.user.fullName ??
+                              state.user.email.split('@').first,
+                          gender: state.user.gender,
+                          bloodType: state.user.bloodType,
+                          height: state.user.height,
+                          weight: state.user.weight,
+                          dateOfBirth: state.user.dateOfBirth,
+                        );
+                      });
+                      // Admin → admin panel, Patient → navigation
+                      if (state.role == 'admin') {
+                        return const AdminPanelScreen();
+                      }
+                      return const Navigationbar();
+                    }
+                    return const Splash();
+                  },
+                ),
+                routes: {
+                  '/login': (context) => const LoginScreen(),
+                  '/navigation': (context) => const Navigationbar(),
+                  '/admin-panel': (context) => const AdminPanelScreen(),
+                  '/health-overview': (context) => const HealthOverviewScreen(),
+                  '/bloodpressure': (context) => const BloodPressureScreen(),
+                  '/hba1c': (context) => const Hba1cScreen(),
+                  '/temperature': (context) => const TemperatureScreen(),
+                  '/spo2heart': (context) => const Spo2HeartRateScreen(),
+                  '/bmiweight': (context) => const BmiWeightScreen(),
+                  '/waterintake': (context) => const WaterIntakeScreen(),
+                  '/bloodsugar': (context) => const BloodSugarScreen(),
+                  '/sleep': (context) => const SleepRecordScreen(),
+                  '/stepcounter': (context) => const StepCountScreen(),
+                  '/cholesterol': (context) => const CholesterolScreen(),
+                  '/familyprofile': (context) => const FamilyProfileScreen(),
+                  '/health-goals': (context) => const HealthGoalScreen(),
+                  '/creatinine': (context) => const CreatinineScreen(),
+                },
+              );
             },
           );
         },

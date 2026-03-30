@@ -330,6 +330,13 @@ class Healthpage extends StatelessWidget {
                     color: const Color(0xFF5E35B1),
                     route: '/cholesterol',
                   ),
+                  HealthFeatureCard(
+                    title: 'Creatinine/eGFR',
+                    subtitle: 'mg/dL',
+                    icon: Icons.science_outlined,
+                    color: const Color(0xFF00695C),
+                    route: '/creatinine',
+                  ),
                 ],
               ),
               Gap(100),

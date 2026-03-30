@@ -5,12 +5,14 @@ class WaterIntake {
   final int amount; // ml
   final DateTime timestamp;
   final String? note;
+  final int? profileId;
 
   WaterIntake({
     this.id,
     required this.amount,
     required this.timestamp,
     this.note,
+    this.profileId,
   });
 
   // Getter: Icon theo lượng nước

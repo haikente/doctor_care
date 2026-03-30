@@ -1,28 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/db/db_helper.dart';
-import 'package:doctor_care/data/models/bmi_weight_model.dart';
+import 'package:doctor_care/data/models/creatinine_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sqflite/sqflite.dart';
 
-abstract class BMIWeightDataSource {
-  Future<List<BMIWeightModel>> getAllBMIWeightRecords();
-  Future<void> addBMIWeightRecord(BMIWeightModel record);
-  Future<void> updateBMIWeightRecord(BMIWeightModel record);
-  Future<void> deleteBMIWeightRecord(String id);
+// lớp trừu tượng để định nghĩa các phương thức cần thiết cho việc quản lý dữ liệu creatinine
+abstract class CreatinineDataSource {
+  Future<void> addCreatinine(CreatinineModel record);
+  Future<void> updateCreatinine(CreatinineModel record);
+  Future<List<CreatinineModel>> getAllCreatinines();
+  Future<void> deleteCreatinine(int id);
 }
 
-class BMIWeightDataSourceImpl implements BMIWeightDataSource {
+// lớp triển khai các phương thức của CreatinineDataSource
+class CreatinineDataSourceImpl implements CreatinineDataSource {
   final dbHelper = DbHelper.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  CollectionReference<Map<String, dynamic>>? get _bmiweightCollection {
+  CollectionReference<Map<String, dynamic>>? get _creatinineCollection {
     final uid = _auth.currentUser?.uid;
     if (uid == null || uid.isEmpty) return null;
-    return _firestore.collection("users").doc(uid).collection('bmi_weight');
+    return _firestore.collection('users').doc(uid).collection('creatinine');
   }
 
-  String _docIdFromLocalId(int localId) => 'bmiw_$localId';
+  String _docIdFromLocalId(int localId) => 'creatinine_$localId';
 
   Future<int?> _getActiveFamilyProfileId(Database db) async {
     final rows = await db.query(
@@ -33,31 +35,39 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
       limit: 1,
     );
     if (rows.isEmpty) return null;
-    return rows.first['id'] as int;
+    return rows.first['id'] as int?;
   }
 
-  Future<void> _syncUpsertToCloud(BMIWeightModel record) async {
-    final collection = _bmiweightCollection;
+  Future<void> _syncUpsertToCloud(CreatinineModel record) async {
+    final collection = _creatinineCollection;
     if (collection == null || record.id == null) return;
 
     await collection.doc(_docIdFromLocalId(record.id!)).set({
       'id': record.id,
       'timestamp': record.timestamp.toIso8601String(),
-      'weight': record.weight,
-      'height': record.height,
+      'value': record.value,
+      'note': record.note,
+      'age': record.age,
+      'gender': record.gender,
       'profileId': record.profileId,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 
+  Future<void> _syncDeleteFromCloud(int localId) async {
+    final collection = _creatinineCollection;
+    if (collection == null) return;
+    await collection.doc(_docIdFromLocalId(localId)).delete();
+  }
+
   Future<void> _hydrateLocalFromCloudIfEmpty(Database db) async {
-    final collection = _bmiweightCollection;
+    final collection = _creatinineCollection;
     if (collection == null) return;
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
     final localCount =
         Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM bmi_weight'),
+          await db.rawQuery('SELECT COUNT(*) FROM creatinine'),
         ) ??
         0;
     if (localCount > 0) return;
@@ -73,51 +83,33 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
 
       final map = <String, dynamic>{
         'timestamp': timestampRaw,
-        'weight': data['weight'],
-        'height': data['height'],
+        'value': data['value'],
+        'note': data['note'],
+        'age': data['age'],
+        'gender': data['gender'],
         'profileId': data['profileId'] ?? activeProfileId,
       };
-      await db.insert('bmi_weight', map);
+      await db.insert('creatinine', map);
     }
   }
 
-  Future<void> _syncDeleteFromCloud(int localId) async {
-    final collection = _bmiweightCollection;
-    if (collection == null) return;
-    await collection.doc(_docIdFromLocalId(localId)).delete();
-  }
-
   @override
-  Future<List<BMIWeightModel>> getAllBMIWeightRecords() async {
-    final db = await dbHelper.database;
-    try {
-      await _hydrateLocalFromCloudIfEmpty(db);
-    } catch (_) {}
-    final activeProfileId = await _getActiveFamilyProfileId(db);
-    final result = await db.query(
-      "bmi_weight",
-      where: activeProfileId == null ? null : 'profileId = ?',
-      whereArgs: activeProfileId == null ? null : [activeProfileId],
-      orderBy: 'timestamp ASC',
-    );
-    return result.map((e) => BMIWeightModel.fromMap((e))).toList();
-  }
-
-  @override
-  Future<void> addBMIWeightRecord(BMIWeightModel record) async {
+  Future<void> addCreatinine(CreatinineModel record) async {
     final db = await dbHelper.database;
     final activeProfileId = await _getActiveFamilyProfileId(db);
-    final id = await db.insert('bmi_weight', {
+    final id = await db.insert('creatinine', {
       ...record.toMap(),
       if (activeProfileId != null) 'profileId': activeProfileId,
     });
     try {
       await _syncUpsertToCloud(
-        BMIWeightModel(
+        CreatinineModel(
           id: id,
+          value: record.value,
           timestamp: record.timestamp,
-          height: record.height,
-          weight: record.weight,
+          note: record.note,
+          age: record.age,
+          gender: record.gender,
           profileId: activeProfileId,
         ),
       );
@@ -125,16 +117,33 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
   }
 
   @override
-  Future<void> deleteBMIWeightRecord(String id) async {
+  Future<void> deleteCreatinine(int id) async {
     final db = await dbHelper.database;
-    await db.delete('bmi_weight', where: 'id = ?', whereArgs: [id]);
+    await db.delete('creatinine', where: 'id = ?', whereArgs: [id]);
     try {
-      await _syncDeleteFromCloud(int.parse(id));
+      await _syncDeleteFromCloud(id);
     } catch (_) {}
   }
 
   @override
-  Future<void> updateBMIWeightRecord(BMIWeightModel record) async {
+  Future<List<CreatinineModel>> getAllCreatinines() async {
+    final db = await dbHelper.database;
+    try {
+      await _hydrateLocalFromCloudIfEmpty(db);
+    } catch (_) {}
+
+    final activeProfileId = await _getActiveFamilyProfileId(db);
+    final result = await db.query(
+      'creatinine',
+      where: activeProfileId == null ? null : 'profileId = ?',
+      whereArgs: activeProfileId == null ? null : [activeProfileId],
+      orderBy: 'timestamp ASC',
+    );
+    return result.map((e) => CreatinineModel.fromMap(e)).toList();
+  }
+
+  @override
+  Future<void> updateCreatinine(CreatinineModel record) async {
     final db = await dbHelper.database;
     final activeProfileId = await _getActiveFamilyProfileId(db);
     final payload = {
@@ -142,18 +151,20 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
       if (activeProfileId != null) 'profileId': activeProfileId,
     };
     await db.update(
-      'bmi_weight',
+      'creatinine',
       payload,
       where: 'id = ?',
       whereArgs: [record.id],
     );
     try {
       await _syncUpsertToCloud(
-        BMIWeightModel(
+        CreatinineModel(
           id: record.id,
+          value: record.value,
           timestamp: record.timestamp,
-          height: record.height,
-          weight: record.weight,
+          note: record.note,
+          age: record.age,
+          gender: record.gender,
           profileId: activeProfileId ?? record.profileId,
         ),
       );

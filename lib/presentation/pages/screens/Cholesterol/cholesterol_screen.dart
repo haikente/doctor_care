@@ -29,8 +29,15 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
       // Lọc theo thời gian
       if (_startDate != null && _endDate != null) {
         final date = DateTime(
-            record.timestamp.year, record.timestamp.month, record.timestamp.day);
-        final start = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+          record.timestamp.year,
+          record.timestamp.month,
+          record.timestamp.day,
+        );
+        final start = DateTime(
+          _startDate!.year,
+          _startDate!.month,
+          _startDate!.day,
+        );
         final end = DateTime(_endDate!.year, _endDate!.month, _endDate!.day);
         if (date.isBefore(start) || date.isAfter(end)) return false;
       }
@@ -136,13 +143,18 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                               },
                             );
                           },
-                          child: const Icon(Icons.science_outlined, color: Colors.black54),
+                          child: const Icon(
+                            Icons.science_outlined,
+                            color: Colors.black54,
+                          ),
                         ),
                       ],
                     ),
 
                     // Filter chips
-                    if (_startDate != null || _endDate != null || _selectedStatus != null)
+                    if (_startDate != null ||
+                        _endDate != null ||
+                        _selectedStatus != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Wrap(
@@ -153,9 +165,16 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                               Chip(
                                 label: Text(
                                   "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
-                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade900,
+                                  ),
                                 ),
-                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade900,),
+                                deleteIcon: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.blue.shade900,
+                                ),
                                 onDeleted: () {
                                   setState(() {
                                     _startDate = null;
@@ -172,9 +191,16 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                               Chip(
                                 label: Text(
                                   _selectedStatus!,
-                                  style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade900,
+                                  ),
                                 ),
-                                deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade900,),
+                                deleteIcon: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.blue.shade900,
+                                ),
                                 onDeleted: () {
                                   setState(() => _selectedStatus = null);
                                 },
@@ -194,7 +220,8 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: filteredRecords.length,
                       itemBuilder: (context, index) {
-                        final data = filteredRecords[filteredRecords.length - 1 - index];
+                        final data =
+                            filteredRecords[filteredRecords.length - 1 - index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 13),
                           child: Slidable(

@@ -6,6 +6,7 @@ class WaterIntakeModel extends WaterIntake {
     required super.amount,
     required super.timestamp,
     super.note,
+    super.profileId,
   });
 
   // From Map (SQLite)
@@ -15,6 +16,7 @@ class WaterIntakeModel extends WaterIntake {
       amount: map['amount'] as int,
       timestamp: DateTime.parse(map['timestamp'] as String),
       note: map['note'] as String?,
+      profileId: map['profileId'] as int?,
     );
   }
 
@@ -25,6 +27,7 @@ class WaterIntakeModel extends WaterIntake {
       'amount': amount,
       'timestamp': timestamp.toIso8601String(),
       'note': note,
+      'profileId': profileId,
     };
   }
 
@@ -34,12 +37,14 @@ class WaterIntakeModel extends WaterIntake {
     int? amount,
     DateTime? timestamp,
     String? note,
+    int? profileId,
   }) {
     return WaterIntakeModel(
       id: id ?? this.id,
       amount: amount ?? this.amount,
       timestamp: timestamp ?? this.timestamp,
       note: note ?? this.note,
+      profileId: profileId ?? this.profileId,
     );
   }
 }
