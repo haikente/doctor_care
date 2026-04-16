@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-/// 🔐 Admin Setup Screen - Chỉ dùng 1 lần để tạo admin đầu tiên
-/// Sau khi tạo xong, XÓA màn hình này để bảo mật!
 class AdminSetupScreen extends StatefulWidget {
   const AdminSetupScreen({super.key});
 
@@ -19,7 +17,6 @@ class _AdminSetupScreenState extends State<AdminSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  // 🔑 Secret key để bảo vệ (Thay đổi key này!)
   final String _adminSecretKey = "DOCTORCARE_ADMIN_2026";
 
   Future<void> _createAdminAccount() async {
@@ -38,8 +35,7 @@ class _AdminSetupScreenState extends State<AdminSetupScreen> {
       final firestore = FirebaseFirestore.instance;
 
       // 1. Tạo user trong Firebase Auth
-      final userCredential =
-          await firebaseAuth.createUserWithEmailAndPassword(
+      final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -172,10 +168,7 @@ class _AdminSetupScreenState extends State<AdminSetupScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.red.shade700,
-              Colors.red.shade900,
-            ],
+            colors: [Colors.red.shade700, Colors.red.shade900],
           ),
         ),
         child: SafeArea(
@@ -325,7 +318,8 @@ class _AdminSetupScreenState extends State<AdminSetupScreen> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
+                                        Colors.white,
+                                      ),
                                     ),
                                   )
                                 : const Icon(Icons.person_add),

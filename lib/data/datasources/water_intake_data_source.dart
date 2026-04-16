@@ -50,36 +50,43 @@ class WaterIntakeDataSourceImpl implements WaterIntakeDataSource {
     }, SetOptions(merge: true));
   }
 
-  Future<void> _hydrateLocalFromCloudIfEmpty(Database db) async {
+  Future<void> _syncDownFromCloud(Database db) async {
     final collection = _collection;
     if (collection == null) return;
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
-    final localCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM water_intake'),
-        ) ??
-        0;
-
-    if (localCount > 0) return;
 
     final cloudSnapshot = await collection
         .orderBy('timestamp', descending: false)
         .get();
+
+    final batch = db.batch();
 
     for (final doc in cloudSnapshot.docs) {
       final data = doc.data();
       final timestampRaw = data['timestamp'];
       if (timestampRaw is! String) continue;
 
+      final profileIdRaw = data['profileId'];
+      final profileId = (profileIdRaw is int)
+          ? profileIdRaw
+          : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
+
       final map = <String, dynamic>{
         'timestamp': timestampRaw,
         'amount': data['amount'],
         'note': data['note'],
-        'profileId': data['profileId'] ?? activeProfileId,
+        'profileId': profileId,
       };
-      await db.insert('water_intake', map);
+
+      batch.insert(
+        'water_intake',
+        map,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
+
+    await batch.commit(noResult: true);
   }
 
   Future<void> _syncDeleteFromCloud(int localId) async {
@@ -92,7 +99,7 @@ class WaterIntakeDataSourceImpl implements WaterIntakeDataSource {
   Future<List<WaterIntakeModel>> getAllWaterIntakeRecords() async {
     final db = await dbHelper.database;
     try {
-      await _hydrateLocalFromCloudIfEmpty(db);
+      await _syncDownFromCloud(db);
     } catch (_) {}
 
     final activeProfileId = await _getActiveFamilyProfileId(db);

@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/services/session_service.dart';
 import 'package:doctor_care/domain/entities/user_entity.dart';
 import 'package:doctor_care/domain/usecase/auth/check_auth_status_usecase.dart';
 import 'package:doctor_care/domain/usecase/auth/sign_in_usecase.dart';
@@ -34,6 +35,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
     on<ResetPasswordEvent>(_onResetPassword);
+    on<ForceSignOutEvent>(_onForceSignOut);
+  }
+
+  void _startSessionListener() {
+    SessionService.instance.listenForSessionConflict(
+      onConflict: () => add(ForceSignOutEvent()),
+    );
   }
 
   Future<void> _onCheckAuthStatus(
@@ -45,6 +53,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       ifLeft: (failure) async => emit(Unauthenticated()),
       ifRight: (user) async {
+        // Khôi phục token local và bắt đầu lắng nghe session conflict
+        await SessionService.instance.restoreLocalToken();
+        _startSessionListener();
         final role = await RoleService.getCurrentUserRole();
         emit(Authenticated(user, role: role));
       },
@@ -57,6 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       ifLeft: (failure) async => emit(AuthError(failure.message)),
       ifRight: (user) async {
+        _startSessionListener();
         final role = await RoleService.getCurrentUserRole();
         emit(Authenticated(user, role: role));
       },
@@ -65,6 +77,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
+    SessionService.instance.stopListening();
     await signOutUseCase();
     emit(Unauthenticated());
   }
@@ -90,10 +103,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       ifLeft: (failure) async => emit(AuthError(failure.message)),
       ifRight: (user) async {
+        _startSessionListener();
         final role = await RoleService.getCurrentUserRole();
         emit(Authenticated(user, role: role));
       },
     );
+  }
+
+  Future<void> _onForceSignOut(
+    ForceSignOutEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    SessionService.instance.stopListening();
+    await signOutUseCase();
+    emit(SessionConflict());
   }
 
   Future<void> _onResetPassword(

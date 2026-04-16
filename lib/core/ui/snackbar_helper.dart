@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 enum SnackBarType { add, update, delete }
 
 class AppSnackBar {
-
-    static void showFamilyProfile({
+  static void showFamilyProfile({
     required BuildContext context,
     required SnackBarType type,
   }) {
@@ -32,9 +31,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),
@@ -74,9 +71,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),
@@ -116,9 +111,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),
@@ -129,8 +122,6 @@ class AppSnackBar {
       ),
     );
   }
-
-  
 
   static void showtemperature({
     required BuildContext context,
@@ -160,9 +151,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),
@@ -173,7 +162,6 @@ class AppSnackBar {
       ),
     );
   }
-
 
   static void show({
     required BuildContext context,
@@ -203,9 +191,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),
@@ -217,6 +203,45 @@ class AppSnackBar {
     );
   }
 
+  static void showMenstrualCycle({
+    required BuildContext context,
+    required SnackBarType type,
+  }) {
+    final config = {
+      SnackBarType.add: _SnackBarConfig(
+        color: Colors.green,
+        icon: Icons.check_circle,
+        text: 'Đã thêm chu kỳ kinh nguyệt thành công',
+      ),
+      SnackBarType.update: _SnackBarConfig(
+        color: Colors.orange,
+        icon: Icons.edit,
+        text: 'Cập nhật chu kỳ kinh nguyệt thành công',
+      ),
+      SnackBarType.delete: _SnackBarConfig(
+        color: Colors.red,
+        icon: Icons.delete_outline,
+        text: 'Đã xóa chu kỳ kinh nguyệt thành công',
+      ),
+    };
+
+    final settings = config[type]!;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: settings.color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Row(
+          children: [
+            Icon(settings.icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(settings.text)),
+          ],
+        ),
+      ),
+    );
+  }
 
   static void showbmiweight({
     required BuildContext context,
@@ -246,9 +271,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),
@@ -288,9 +311,7 @@ class AppSnackBar {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: settings.color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(settings.icon, color: Colors.white),

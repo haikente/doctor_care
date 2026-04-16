@@ -132,7 +132,6 @@ class MealAnalysisLocalDataSource {
     await db.delete('meal_analysis', where: 'id = ?', whereArgs: [id]);
   }
 
-  /// Get food items for a specific meal
   Future<List<FoodItem>> _getFoodItemsForMeal(int mealId) async {
     final db = await _dbHelper.database;
 

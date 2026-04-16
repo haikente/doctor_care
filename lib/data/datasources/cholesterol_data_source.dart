@@ -95,7 +95,7 @@ class CholesterolDataSourceImpl implements CholesterolDataSource {
   Future<List<CholesterolModel>> getAllCholesterols() async {
     final db = await dbHelper.database;
     try {
-      await _hydrateLocalFromCloudIfEmpty(db);
+      await _syncDownFromCloud(db);
     } catch (_) {}
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
@@ -137,36 +137,53 @@ class CholesterolDataSourceImpl implements CholesterolDataSource {
     } catch (_) {}
   }
 
-  Future<void> _hydrateLocalFromCloudIfEmpty(Database db) async {
+  Future<void> _syncDownFromCloud(Database db) async {
     final collection = _cholesterolCollection;
     if (collection == null) return;
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
-    final localCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM cholesterol'),
-        ) ??
-        0;
-    if (localCount > 0) return;
 
     final cloudSnapshot = await collection
         .orderBy('timestamp', descending: false)
         .get();
+
+    final batch = db.batch();
 
     for (final doc in cloudSnapshot.docs) {
       final data = doc.data();
       final timestampRaw = data['timestamp'];
       if (timestampRaw is! String) continue;
 
-      final map = <String, dynamic>{
+      final profileIdRaw = data['profileId'];
+      final profileId = (profileIdRaw is int)
+          ? profileIdRaw
+          : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
+
+      if (profileId == null) continue;
+
+      final payload = <String, dynamic>{
         'totalCholesterol': data['totalCholesterol'],
-        'profileId': data['profileId'] ?? activeProfileId,
+        'profileId': profileId,
         'hdl': data['hdl'],
         'ldl': data['ldl'],
         'triglycerides': data['triglycerides'],
         'timestamp': timestampRaw,
       };
-      await db.insert('cholesterol', map);
+
+      batch.update(
+        'cholesterol',
+        payload,
+        where: 'profileId = ? AND timestamp = ?',
+        whereArgs: [profileId, timestampRaw],
+      );
+
+      batch.insert(
+        'cholesterol',
+        payload,
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     }
+
+    await batch.commit(noResult: true);
   }
 }

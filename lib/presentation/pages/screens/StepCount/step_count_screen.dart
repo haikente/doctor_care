@@ -1,4 +1,5 @@
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/services/health_sync_service.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/step_count.dart';
@@ -71,6 +72,7 @@ class _StepCountScreenState extends State<StepCountScreen> {
               child: CircularProgressIndicator(color: Colors.blue),
             );
           }
+
           if (state is StepCountLoaded) {
             final records = state.records;
             if (records.isEmpty) {
@@ -97,12 +99,13 @@ class _StepCountScreenState extends State<StepCountScreen> {
                 ),
               );
             }
+
             final filteredRecords = _filterRecords(records);
+
             return Column(
               children: [
                 // Biểu đồ tròn phân bố mức vận động
                 StepCountPieChart(records: records),
-
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
@@ -120,30 +123,101 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  FilterBottomSheetStepCount.show(
-                                    context: context,
-                                    initialStartDate: _startDate,
-                                    initialEndDate: _endDate,
-                                    initialStatus: _selectedStatus,
-                                    onApply: (startDate, endDate, status) {
-                                      setState(() {
-                                        _startDate = startDate;
-                                        _endDate = endDate;
-                                        _selectedStatus = status;
-                                      });
+                              Row(
+                                children: [
+                                  // Nút Đồng bộ dữ liệu Sức khoẻ
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final messenger = ScaffoldMessenger.of(context);
+                                      final cubit = context.read<StepCountCubit>();
+
+                                      final hasPermission = await HealthSyncService.instance.requestPermissions();
+                                      if (!hasPermission) {
+                                        if (!context.mounted) return;
+                                        messenger.showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Từ chối quyền truy cập Sức Khoẻ. Không thể đồng bộ số bước.',
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      final steps = await HealthSyncService.instance.getTodaysSteps();
+                                      if (!context.mounted) return;
+
+                                      if (steps != null && steps > 0) {
+                                        final now = DateTime.now();
+                                        // Lưu timestamp là bắt đầu ngày để tránh trùng khi sync.
+                                        final midnight = DateTime(now.year, now.month, now.day);
+
+                                        final record = StepCount(
+                                          steps: steps,
+                                          timestamp: midnight,
+                                        );
+
+                                        cubit.insertStepCountRecord(record);
+
+                                        messenger.showSnackBar(
+                                          SnackBar(content: Text('Đã đồng bộ $steps bước từ Sức Khoẻ!')),
+                                        );
+                                      } else {
+                                        messenger.showSnackBar(
+                                          const SnackBar(content: Text('Chưa có dữ liệu bước chân hôm nay!')),
+                                        );
+                                      }
                                     },
-                                    onReset: () {
-                                      setState(() {
-                                        _startDate = null;
-                                        _endDate = null;
-                                        _selectedStatus = null;
-                                      });
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: Colors.blue.shade200),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.sync, size: 16, color: Colors.blue.shade800),
+                                          const Gap(4),
+                                          Text(
+                                            "Đồng bộ",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.blue.shade800,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const Gap(15),
+                                  GestureDetector(
+                                    onTap: () {
+                                      FilterBottomSheetStepCount.show(
+                                        context: context,
+                                        initialStartDate: _startDate,
+                                        initialEndDate: _endDate,
+                                        initialStatus: _selectedStatus,
+                                        onApply: (startDate, endDate, status) {
+                                          setState(() {
+                                            _startDate = startDate;
+                                            _endDate = endDate;
+                                            _selectedStatus = status;
+                                          });
+                                        },
+                                        onReset: () {
+                                          setState(() {
+                                            _startDate = null;
+                                            _endDate = null;
+                                            _selectedStatus = null;
+                                          });
+                                        },
+                                      );
                                     },
-                                  );
-                                },
-                                child: const Icon(Icons.science_outlined, color: Colors.black54),
+                                    child: const Icon(Icons.science_outlined, color: Colors.black54),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -202,81 +276,80 @@ class _StepCountScreenState extends State<StepCountScreen> {
                             itemCount: filteredRecords.length,
                             itemBuilder: (context, index) {
                               final data = filteredRecords[filteredRecords.length - 1 - index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 13),
-                          child: Slidable(
-                            key: ValueKey(data.id),
-                            endActionPane: ActionPane(
-                              motion: const StretchMotion(),
-                              extentRatio: 0.25,
-                              children: [
-                                CustomSlidableAction(
-                                  onPressed: (_) {
-                                    AppDialog.showDeleteConfirm(
-                                      context: context,
-                                      onConfirm: () {
-                                        if (data.id != null) {
-                                          context
-                                              .read<StepCountCubit>()
-                                              .deleteStepCountRecord(
-                                                data.id.toString(),
-                                              );
-                                        }
-                                      },
-                                    );
-                                  },
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  padding: EdgeInsets.zero,
-                                  autoClose: true,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 13),
+                                child: Slidable(
+                                  key: ValueKey(data.id),
+                                  endActionPane: ActionPane(
+                                    motion: const StretchMotion(),
+                                    extentRatio: 0.25,
                                     children: [
-                                      const Icon(
-                                        Icons.delete_forever_outlined,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      const Gap(2),
-                                      Text(
-                                        context.tr('delete'),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
+                                      CustomSlidableAction(
+                                        onPressed: (_) {
+                                          AppDialog.showDeleteConfirm(
+                                            context: context,
+                                            onConfirm: () {
+                                              if (data.id != null) {
+                                                context
+                                                    .read<StepCountCubit>()
+                                                    .deleteStepCountRecord(data.id.toString());
+                                              }
+                                            },
+                                          );
+                                        },
+                                        backgroundColor: Colors.redAccent,
+                                        foregroundColor: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        padding: EdgeInsets.zero,
+                                        autoClose: true,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.delete_forever_outlined,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                            const Gap(2),
+                                            Text(
+                                              context.tr('delete'),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => InsertStepCount(stepCount: data),
+                                      ),
+                                    ),
+                                    child: _buildDataCard(data),
+                                  ),
                                 ),
-                              ],
-                            ),
-                            child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      InsertStepCount(stepCount: data),
-                                ),
-                              ),
-                              child: _buildDataCard(data),
-                            ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ],
-      );
+              ],
+            );
           }
+
           if (state is StepCountError) {
             return Center(child: Text(state.message));
           }
+
           return Center(child: Text(context.tr('no_step_data')));
         },
       ),

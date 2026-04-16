@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/admin_stats.dart';
+import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/admin_stats_widgets.dart';
+import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/admin_backup_service.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:doctor_care/presentation/pages/screens/admin/admin_settings_screen.dart';
 
 class Usercase {
   void showEditUserDialog(
@@ -32,7 +36,7 @@ class Usercase {
 
     String selectedGender = userData['gender'] ?? 'male';
     String selectedBloodType = userData['bloodType'] ?? 'O+';
-    String selectedRole = userData['role'] ?? 'patient';
+    String selectedRole = userData['role'] ?? 'users';
     DateTime? selectedDate = userData['dateOfBirth'] != null
         ? DateTime.parse(userData['dateOfBirth'])
         : null;
@@ -223,8 +227,8 @@ class Usercase {
                     ),
                     items: const [
                       DropdownMenuItem(
-                        value: 'patient',
-                        child: Text('Bệnh nhân'),
+                        value: 'users',
+                        child: Text('Người dùng'),
                       ),
                       DropdownMenuItem(value: 'admin', child: Text('Admin')),
                     ],
@@ -304,8 +308,6 @@ class Usercase {
                   emergencyContactController.dispose();
                   emergencyPhoneController.dispose();
                   
-                 
-
                   if (!dialogContext.mounted) {
                     
                     return;
@@ -396,18 +398,243 @@ class Usercase {
   }
 
   void showStatistics(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('📊 Thống kê'),
-        content: const Text('Chức năng thống kê đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.82,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-        ],
-      ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
+                child: Center(
+                   child: Container(
+                   width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(Icons.analytics, color: Colors.blue.shade500,),
+                    const Gap(8),
+                    Text(
+                      'Thống kê',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(12),
+
+              Expanded(
+                child: FutureBuilder<AdminStats>(
+                  future: const AdminStatsService().load(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, size: 40),
+                            const Gap(8),
+                            Text(
+                              'Không tải được thống kê',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Gap(6),
+                            Text(
+                              snapshot.error.toString(),
+                              style: theme.textTheme.bodySmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final stats = snapshot.data;
+                    if (stats == null) {
+                      return const Center(child: Text('Không có dữ liệu.'));
+                    }
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GridView.count(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio: 1.15,
+                            children: [
+                              AdminStatsWidgets.statsGridCard(
+                                theme,
+                                icon: Icons.people,
+                                title: 'Tổng người dùng',
+                                value: stats.totalUsers.toString(),
+                                gradientColors: [
+                                  Colors.blue.shade400,
+                                  Colors.blue.shade800,
+                                ],
+                              ),
+                              AdminStatsWidgets.statsGridCard(
+                                theme,
+                                icon: Icons.person,
+                                title: 'Người dùng',
+                                value: stats.userCount.toString(),
+                                gradientColors: [
+                                  Colors.green.shade400,
+                                  Colors.green.shade800,
+                                ],
+                              ),
+                              AdminStatsWidgets.statsGridCard(
+                                theme,
+                                icon: Icons.admin_panel_settings,
+                                title: 'Admin',
+                                value: stats.adminCount.toString(),
+                                gradientColors: [
+                                  Colors.deepPurple.shade400,
+                                  Colors.deepPurple.shade800,
+                                ],
+                              ),
+                              AdminStatsWidgets.statsGridCard(
+                                theme,
+                                icon: Icons.storage,
+                                title: 'Dữ liệu y tế',
+                                value: (stats.stepCountDocs +
+                                        stats.waterIntakeDocs +
+                                        stats.spo2Docs +
+                                        stats.temperatureDocs)
+                                    .toString(),
+                                gradientColors: [
+                                  Colors.orange.shade400,
+                                  Colors.orange.shade800,
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          const Gap(24),
+                          Text(
+                            'Chi Tiết Dữ Liệu Lưu Trữ',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const Gap(12),
+
+                          AdminStatsWidgets.modernCollectionRow(
+                            theme,
+                            label: 'Dữ liệu Bước chân',
+                            value: stats.stepCountDocs,
+                            icon: Icons.directions_walk,
+                            color: Colors.blue,
+                          ),
+                          AdminStatsWidgets.modernCollectionRow(
+                            theme,
+                            label: 'Lượng nước uống',
+                            value: stats.waterIntakeDocs,
+                            icon: Icons.water_drop,
+                            color: Colors.lightBlue,
+                          ),
+                          AdminStatsWidgets.modernCollectionRow(
+                            theme,
+                            label: 'Nhịp tim & SpO2',
+                            value: stats.spo2Docs,
+                            icon: Icons.monitor_heart,
+                            color: Colors.red,
+                          ),
+                          AdminStatsWidgets.modernCollectionRow(
+                            theme,
+                            label: 'Nhiệt độ cơ thể',
+                            value: stats.temperatureDocs,
+                            icon: Icons.thermostat,
+                            color: Colors.orange,
+                          ),
+
+                          const Gap(24),
+                          Text(
+                            'Thống Kê Bước Chân (7 Ngày Qua)',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const Gap(12),
+                          AdminStatsWidgets.stepsBarChart(
+                            theme,
+                            stats.last7DaysSteps,
+                          ),
+
+                          const Gap(24),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.grey.withOpacity(0.1),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.grey.shade600,
+                                  size: 20,
+                                ),
+                                const Gap(10),
+                                Expanded(
+                                  child: Text(
+                                    'Dữ liệu được cập nhật tự động từ hệ thống cloud tĩnh của tất cả người dùng.',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey.shade600,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -430,33 +657,171 @@ class Usercase {
   }
 
   void showSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('⚙️ Cấu hình hệ thống'),
-        content: const Text('Chức năng cấu hình đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AdminSettingsScreen()),
     );
   }
 
   void showBackupDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('💾 Sao lưu & Khôi phục'),
-        content: const Text('Chức năng backup đang được phát triển...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 16, 16),
+              child: Column(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const Gap(16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.backup_rounded,
+                          color: Colors.teal,
+                          size: 26,
+                        ),
+                      ),
+                      const Gap(16),
+                      const Expanded(
+                        child: Text(
+                          'Sao lưu & Khôi phục',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close_rounded),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.grey.shade100,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Text(
+                'Lưu ý: Bạn có thể trích xuất Database ra file (.db), hoặc khôi phục từ file chọn trong máy. Sau khi khôi phục, bạn cần khởi động lại ứng dụng.',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            const Gap(16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await AdminBackupService.exportDatabase(context);
+                      },
+                      icon: const Icon(Icons.ios_share_rounded),
+                      label: const Text('Trích xuất (Export)'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Colors.blue.shade50,
+                        foregroundColor: Colors.blue.shade700,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final success = await AdminBackupService.importDatabase(context);
+                        if (success && context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.file_download_rounded),
+                      label: const Text('Phục hồi (Import)'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Colors.orange.shade50,
+                        foregroundColor: Colors.orange.shade700,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await AdminBackupService.exportToExcel(context);
+                      },
+                      icon: const Icon(Icons.table_chart_rounded),
+                      label: const Text('Xuất báo cáo Excel (.xlsx)'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Colors.green.shade50,
+                        foregroundColor: Colors.green.shade700,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

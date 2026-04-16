@@ -352,8 +352,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               const Gap(16),
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
@@ -362,15 +361,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                         width: 24,
                                         child: Checkbox(
                                           value: _rememberMe,
-                                          onChanged: (value) {
+                                          onChanged: (value) async {
+                                            final next = value ?? false;
                                             setState(() {
-                                              _rememberMe = value ?? false;
+                                              _rememberMe = next;
                                             });
+
+                                            // Không tích ghi nhớ => yêu cầu đăng nhập lại mỗi lần mở app
+                                            if (!next) {
+                                              await AuthStorageService.clearRememberMe();
+                                            } else {
+                                              // Tích ghi nhớ => lưu trạng thái + email (session sẽ được lưu khi login thành công)
+                                              await AuthStorageService.saveRememberMe(
+                                                true,
+                                                _emailController.text.trim(),
+                                              );
+                                            }
                                           },
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
+                                            borderRadius: BorderRadius.circular(4),
                                           ),
                                         ),
                                       ),

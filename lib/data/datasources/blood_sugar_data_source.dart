@@ -56,35 +56,43 @@ class BloodSugarDataSourceImpl implements BloodSugarDataSource {
     await collection.doc(_docIdFromLocalId(localId)).delete();
   }
 
-  Future<void> _hydrateLocalFromCloudIfEmpty(Database db) async {
+  Future<void> _syncDownFromCloud(Database db) async {
     final collection = _bloodSugarCollection;
     if (collection == null) return;
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
-    final localCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM blood_sugar'),
-        ) ??
-        0;
-    if (localCount > 0) return;
 
     final cloudSnapshot = await collection
         .orderBy('timestamp', descending: false)
         .get();
+
+    final batch = db.batch();
 
     for (final doc in cloudSnapshot.docs) {
       final data = doc.data();
       final timestampRaw = data['timestamp'];
       if (timestampRaw is! String) continue;
 
+      final profileIdRaw = data['profileId'];
+      final profileId = (profileIdRaw is int)
+          ? profileIdRaw
+          : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
+
       final map = <String, dynamic>{
         'timestamp': timestampRaw,
         'value': data['value'],
         'mealStatus': data['mealStatus'],
-        'profileId': data['profileId'] ?? activeProfileId,
+        'profileId': profileId,
       };
-      await db.insert('blood_sugar', map);
+
+      batch.insert(
+        'blood_sugar',
+        map,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
+
+    await batch.commit(noResult: true);
   }
 
   @override
@@ -121,7 +129,7 @@ class BloodSugarDataSourceImpl implements BloodSugarDataSource {
   Future<List<BloodSugarModel>> getAllBloodSugars() async {
     final db = await dbHelper.database;
     try {
-      await _hydrateLocalFromCloudIfEmpty(db);
+      await _syncDownFromCloud(db);
     } catch (_) {}
 
     final activeProfileId = await _getActiveFamilyProfileId(db);

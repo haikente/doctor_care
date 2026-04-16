@@ -50,35 +50,43 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
     }, SetOptions(merge: true));
   }
 
-  Future<void> _hydrateLocalFromCloudIfEmpty(Database db) async {
+  Future<void> _syncDownFromCloud(Database db) async {
     final collection = _bmiweightCollection;
     if (collection == null) return;
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
-    final localCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM bmi_weight'),
-        ) ??
-        0;
-    if (localCount > 0) return;
 
     final cloudSnapshot = await collection
         .orderBy('timestamp', descending: false)
         .get();
+
+    final batch = db.batch();
 
     for (final doc in cloudSnapshot.docs) {
       final data = doc.data();
       final timestampRaw = data['timestamp'];
       if (timestampRaw is! String) continue;
 
+      final profileIdRaw = data['profileId'];
+      final profileId = (profileIdRaw is int)
+          ? profileIdRaw
+          : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
+
       final map = <String, dynamic>{
         'timestamp': timestampRaw,
         'weight': data['weight'],
         'height': data['height'],
-        'profileId': data['profileId'] ?? activeProfileId,
+        'profileId': profileId,
       };
-      await db.insert('bmi_weight', map);
+
+      batch.insert(
+        'bmi_weight',
+        map,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
+
+    await batch.commit(noResult: true);
   }
 
   Future<void> _syncDeleteFromCloud(int localId) async {
@@ -91,7 +99,7 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
   Future<List<BMIWeightModel>> getAllBMIWeightRecords() async {
     final db = await dbHelper.database;
     try {
-      await _hydrateLocalFromCloudIfEmpty(db);
+      await _syncDownFromCloud(db);
     } catch (_) {}
     final activeProfileId = await _getActiveFamilyProfileId(db);
     final result = await db.query(

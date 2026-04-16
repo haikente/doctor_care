@@ -37,6 +37,8 @@ import 'package:doctor_care/presentation/pages/screens/StepCount/step_count_scre
 import 'package:doctor_care/presentation/pages/screens/Cholesterol/cholesterol_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/Creatinine/creatinine_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/MenstrualCycle/menstrual_cycle_screen.dart';
+import 'package:doctor_care/presentation/bloc/menstrual_cycle/menstrual_cycle_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/auth/login_screen.dart';
 import 'package:doctor_care/splash.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -201,6 +203,16 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        // Menstrual Cycle
+        BlocProvider(
+          create: (context) => MenstrualCycleCubit(
+            getMenstrualCycles: di.getMenstrualCycles,
+            insertMenstrualCycle: di.insertMenstrualCycle,
+            updateMenstrualCycle: di.updateMenstrualCycle,
+            deleteMenstrualCycle: di.deleteMenstrualCycle,
+          ),
+        ),
+
         // Meal Analysis
         BlocProvider(create: (context) => di.mealAnalysisBloc),
 
@@ -258,6 +270,35 @@ class MyApp extends StatelessWidget {
                           '/',
                           (route) => false,
                         );
+                      } else if (state is SessionConflict) {
+                        // Chuyển về trang login
+                        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                          '/',
+                          (route) => false,
+                        );
+                        // Hiện dialog thông báo
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          final ctx = navigatorKey.currentContext;
+                          if (ctx != null) {
+                            showDialog(
+                              context: ctx,
+                              barrierDismissible: false,
+                              builder: (_) => AlertDialog(
+                                title: const Text('Phiên đăng nhập hết hạn'),
+                                content: const Text(
+                                  'Tài khoản của bạn đã được đăng nhập trên thiết bị khác. '
+                                  'Mỗi tài khoản chỉ được phép đăng nhập trên một thiết bị.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(),
+                                    child: const Text('Đã hiểu'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        });
                       }
                     },
                     child: child!,
@@ -307,6 +348,7 @@ class MyApp extends StatelessWidget {
                   '/familyprofile': (context) => const FamilyProfileScreen(),
                   '/health-goals': (context) => const HealthGoalScreen(),
                   '/creatinine': (context) => const CreatinineScreen(),
+                  '/menstrual-cycle': (context) => const MenstrualCycleScreen(),
                 },
               );
             },

@@ -21,8 +21,7 @@ class _InsertCholesterolState extends State<InsertCholesterol> {
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _hdlController = TextEditingController();
   final TextEditingController _ldlController = TextEditingController();
-  final TextEditingController _triglyceridesController =
-      TextEditingController();
+  final TextEditingController _triglyceridesController = TextEditingController();
   final TextEditingController _dateTimeController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 

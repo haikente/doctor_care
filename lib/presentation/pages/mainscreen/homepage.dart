@@ -3,6 +3,8 @@ import 'package:doctor_care/presentation/bloc/hba1c/hba1c_cubit.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:doctor_care/presentation/bloc/temperature/temperature_cubit.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
+import 'package:doctor_care/presentation/bloc/sleep_record/sleep_record_cubit.dart';
+import 'package:doctor_care/presentation/bloc/water_intake/water_intake_bloc.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/widgets/health_metrics_grid.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/widgets/health_status_card.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/widgets/home_header.dart';
@@ -37,12 +39,16 @@ class _HomepageState extends State<Homepage> {
     context.read<Spo2heartrateBloc>().add(LoadSpo2HeartRateRecords());
 
     context.read<StepCountCubit>().loadStepCounts();
+
+    context.read<SleepRecordCubit>().loadSleepRecords();
+
+    context.read<WaterIntakeBloc>().add(LoadWaterIntakeRecords());
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      //backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      
       child: SingleChildScrollView(
         padding: EdgeInsets.zero,
         child: Column(

@@ -40,3 +40,6 @@ class ResetPasswordEvent extends AuthEvent {
   @override
   List<Object> get props => [email];
 }
+
+/// Bị đăng xuất do thiết bị khác đăng nhập.
+class ForceSignOutEvent extends AuthEvent {}

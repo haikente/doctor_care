@@ -20,8 +20,9 @@ class FamilyProfileModel extends FamilyProfile {
       id: map['id'],
       name: map['name'] ?? '',
       relationship: map['relationship'] ?? 'other',
-      dateOfBirth:
-          map['dateOfBirth'] != null ? DateTime.parse(map['dateOfBirth']) : null,
+      dateOfBirth: map['dateOfBirth'] != null
+          ? DateTime.parse(map['dateOfBirth'])
+          : null,
       gender: map['gender'],
       bloodType: map['bloodType'],
       height: map['height'] != null ? (map['height'] as num).toDouble() : null,

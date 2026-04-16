@@ -34,7 +34,6 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     context.read<BloodPressureCubit>().loadBloodPressureRecords();
   }
 
-  // ✅ FIX: Hàm filter cho chart - Sửa tên trạng thái
   List<BloodPressure> filterChartData(List<BloodPressure> records) {
     List<BloodPressure> filtered = records;
     
@@ -61,7 +60,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
       }).toList();
     }
     
-    // ✅ FIX: Lọc theo trạng thái - Đổi tên cho khớp
+
     if (chartSelectedStatus.isNotEmpty) {
       filtered = filtered.where((record) {
         String status;
@@ -70,7 +69,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
         } else if (record.systolic < 120 && record.diastolic < 80) {
           status = "Bình thường";
         } else if (record.systolic < 130 && record.diastolic < 80) {
-          status = "Bình thường cao"; // ✅ FIX: Đổi từ "Cao bình thường"
+          status = "Bình thường cao"; 
         } else if (record.systolic < 140 || record.diastolic < 90) {
           status = "Tăng huyết áp độ 1";
         } else if (record.systolic < 180 || record.diastolic < 120) {
@@ -85,7 +84,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     return filtered;
   }
 
-  // ✅ Hàm filter cho card list (giữ nguyên - đã đúng)
+  
   List<BloodPressure> filterByStatus(List<BloodPressure> records) {
     List<BloodPressure> filtered = records;
 
@@ -104,7 +103,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
       }).toList();
     }
 
-    // Lọc theo trạng thái
+  
     if (selectedStatus.isNotEmpty) {
       if (selectedStatus == "Huyết áp thấp") {
         filtered = filtered.where((record) =>
@@ -163,8 +162,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
             );
           } else if (state is BloodPressureLoaded) {
             final bloodRecords = state.records;
-
-            // ✅ FIX: Thêm dấu ngoặc () để logic đúng
+            
             if (bloodRecords.isNotEmpty && (startDate == null || endDate == null)) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 setState(() {
@@ -465,7 +463,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                           ),
                         );
                       },
-                    )
+                    ),
                   ],
                 ),
               ),

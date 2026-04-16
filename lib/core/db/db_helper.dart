@@ -7,7 +7,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 20;
+  static const _dbVersion = 28;
 
   Database? _database;
 
@@ -31,6 +31,15 @@ class DbHelper {
     await _ensureMealTablesExist(db);
 
     return db;
+  }
+
+  /// Closes the database connection safely. Useful for backup/restore operations.
+  Future<void> closeDatabase() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+      print('🔒 Database connection closed safely');
+    }
   }
 
   Future _onCreate(Database db, int version) async {
@@ -62,7 +71,8 @@ class DbHelper {
         value REAL NOT NULL,
         timestamp TEXT NOT NULL,
         measurementLocation TEXT NOT NULL DEFAULT 'armpit',
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -72,7 +82,8 @@ class DbHelper {
         spo2 INTEGER NOT NULL CHECK(spo2 >= 0 AND spo2 <= 100),
         heartRate INTEGER NOT NULL CHECK(heartRate >= 30 AND heartRate <= 250),
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -83,7 +94,8 @@ class DbHelper {
         weight REAL NOT NULL,
         height REAL NOT NULL,
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -93,7 +105,8 @@ class DbHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         amount INTEGER NOT NULL,
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -104,7 +117,8 @@ class DbHelper {
         value REAL NOT NULL,
         mealStatus TEXT NOT NULL DEFAULT 'random',
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -116,7 +130,8 @@ class DbHelper {
         wakeTime TEXT NOT NULL,
         quality INTEGER NOT NULL CHECK(quality >= 1 AND quality <= 5),
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -128,7 +143,8 @@ class DbHelper {
         distance REAL,
         caloriesBurned REAL,
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -141,7 +157,8 @@ class DbHelper {
         ldl REAL NOT NULL,
         triglycerides REAL NOT NULL,
         timestamp TEXT NOT NULL,
-        note TEXT
+        note TEXT,
+        profileId INTEGER
       )
     ''');
 
@@ -206,6 +223,62 @@ class DbHelper {
         profileId INTEGER
       )
     ''');
+
+    // ✅ Menstrual Cycle table
+    await db.execute('''
+      CREATE TABLE menstrual_cycle (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        startDate TEXT NOT NULL,
+        endDate TEXT,
+        cycleLength INTEGER,
+        periodLength INTEGER NOT NULL DEFAULT 5,
+        symptoms TEXT,
+        note TEXT,
+        profileId INTEGER
+      )
+    ''');
+
+    // Ensure deduplicates by (profileId, timestamp) for all health tables
+    try {
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_step_count_profile_timestamp ON step_count(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_blood_pressure_profile_timestamp ON blood_pressure(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_hba1c_profile_date ON hba1c(profileId, date)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_temperature_profile_timestamp ON temperature(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_spo2heartrate_profile_timestamp ON spo2heartrate(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_bmi_weight_profile_timestamp ON bmi_weight(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_water_intake_profile_timestamp ON water_intake(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_blood_sugar_profile_timestamp ON blood_sugar(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_cholesterol_profile_timestamp ON cholesterol(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_creatinine_profile_timestamp ON creatinine(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_sleep_record_profile_timestamp ON sleep_record(profileId, timestamp)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_menstrual_cycle_profile_startDate ON menstrual_cycle(profileId, startDate)',
+      );
+    } catch (e) {
+      print('❌ Error creating unique indexes in onCreate: $e');
+    }
 
     print('✅ Created all tables (version $version)');
   }
@@ -284,9 +357,9 @@ class DbHelper {
           )
         ''');
 
-        print('✅ Database upgrade completed');
+        print('Database upgrade completed');
       } catch (e) {
-        print('❌ Error during database upgrade: $e');
+        print('Error during database upgrade: $e');
         rethrow;
       }
     }
@@ -353,9 +426,9 @@ class DbHelper {
               });
             }
 
-            print('✅ Migrated ${oldData.length} records to new schema (v5)');
+            print('Migrated ${oldData.length} records to new schema (v5)');
           } else {
-            print('✅ Temperature table already has correct schema');
+            print('Temperature table already has correct schema');
           }
         }
 
@@ -369,9 +442,9 @@ class DbHelper {
             note TEXT
           )
         ''');
-        print('✅ Created spo2heartrate table (v5)');
+        print('Created spo2heartrate table (v5)');
       } catch (e) {
-        print('❌ Error upgrading to v5: $e');
+        print('Error upgrading to v5: $e');
         rethrow;
       }
     }
@@ -419,7 +492,7 @@ class DbHelper {
           FOREIGN KEY (meal_analysis_id) REFERENCES meal_analysis(id) ON DELETE CASCADE
         )
       ''');
-      print('✅ Created meal_analysis and food_items tables (v7)');
+      print('Created meal_analysis and food_items tables (v7)');
     }
 
     // ✅ Upgrade to version 8: Add dish_name to meal_analysis
@@ -440,11 +513,11 @@ class DbHelper {
             await db.execute(
               'ALTER TABLE meal_analysis ADD COLUMN dish_name TEXT',
             );
-            print('✅ Added dish_name column to meal_analysis table (v8)');
+            print('Added dish_name column to meal_analysis table (v8)');
           }
         }
       } catch (e) {
-        print('❌ Error adding dish_name column: $e');
+        print('Error adding dish_name column: $e');
       }
     }
 
@@ -631,7 +704,7 @@ class DbHelper {
           profileId INTEGER
         )
       ''');
-      print('✅ Created creatinine table (v18)');
+      print('Created creatinine table (v18)');
     }
 
     if (oldVersion < 19) {
@@ -665,6 +738,141 @@ class DbHelper {
         }
       } catch (e) {
         print('Lỗi khi thêm profileId vào water_intake: $e');
+      }
+    }
+
+     if (oldVersion < 21) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(step_count)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE step_count ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng step_count (v21)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào step_count: $e');
+      }
+    }
+
+    if (oldVersion < 25) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(sleep_record)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('profileId')) {
+          await db.execute(
+            'ALTER TABLE sleep_record ADD COLUMN profileId INTEGER',
+          );
+          print('Đã thêm cột profileId vào bảng sleep_record (v2)');
+        }
+      } catch (e) {
+        print('Lỗi khi thêm profileId vào sleep_record: $e');
+      }
+    }
+
+    if (oldVersion < 22) {
+      Future<void> ensureProfileId(String table) async {
+        try {
+          final columns = await db.rawQuery('PRAGMA table_info($table)');
+          final columnNames = columns.map((col) => col['name'] as String).toList();
+          if (!columnNames.contains('profileId')) {
+            await db.execute('ALTER TABLE $table ADD COLUMN profileId INTEGER');
+            print('Added profileId to $table (v22)');
+          }
+        } catch (e) {
+          print(' Error adding profileId to $table (v22): $e');
+        }
+      }
+
+      await ensureProfileId('temperature');
+      await ensureProfileId('water_intake');
+      await ensureProfileId('step_count');
+      await ensureProfileId('spo2heartrate');
+      await ensureProfileId('cholesterol');
+    }
+
+    if (oldVersion < 23) {
+      try {
+        await db.execute(
+          'CREATE UNIQUE INDEX IF NOT EXISTS idx_step_count_profile_timestamp ON step_count(profileId, timestamp)',
+        );
+        print('Created unique index idx_step_count_profile_timestamp (v23)');
+      } catch (e) {
+        print('Error creating unique index for step_count (v23): $e');
+      }
+    }
+
+    if (oldVersion < 24) {
+      final indexes = {
+        'idx_blood_pressure_profile_timestamp': 'blood_pressure(profileId, timestamp)',
+        'idx_hba1c_profile_date': 'hba1c(profileId, date)',
+        'idx_temperature_profile_timestamp': 'temperature(profileId, timestamp)',
+        'idx_spo2heartrate_profile_timestamp': 'spo2heartrate(profileId, timestamp)',
+        'idx_bmi_weight_profile_timestamp': 'bmi_weight(profileId, timestamp)',
+        'idx_water_intake_profile_timestamp': 'water_intake(profileId, timestamp)',
+        'idx_blood_sugar_profile_timestamp': 'blood_sugar(profileId, timestamp)',
+        'idx_cholesterol_profile_timestamp': 'cholesterol(profileId, timestamp)',
+        'idx_creatinine_profile_timestamp': 'creatinine(profileId, timestamp)',
+      };
+      for (final entry in indexes.entries) {
+        try {
+          await db.execute(
+            'CREATE UNIQUE INDEX IF NOT EXISTS ${entry.key} ON ${entry.value}',
+          );
+          print('Created index ${entry.key} (v24)');
+        } catch (e) {
+          print('Error creating index ${entry.key} (v24): $e');
+        }
+      }
+    }
+
+    try {
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_sleep_record_profile_timestamp ON sleep_record(profileId, timestamp)',
+      );
+    } catch (e) {
+      print('Error creating idx_sleep_record_profile_timestamp in onUpgrade: $e');
+    }
+
+    // ✅ Version 27: Menstrual Cycle table
+    if (oldVersion < 27) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS menstrual_cycle (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          startDate TEXT NOT NULL,
+          endDate TEXT,
+          cycleLength INTEGER,
+          periodLength INTEGER NOT NULL DEFAULT 5,
+          symptoms TEXT,
+          note TEXT,
+          profileId INTEGER
+        )
+      ''');
+      print('✅ Created menstrual_cycle table (v27)');
+    }
+
+    // ✅ Version 28: Remove duplicates and add unique index
+    if (oldVersion < 28) {
+      try {
+        await db.execute('''
+          DELETE FROM menstrual_cycle 
+          WHERE id NOT IN (
+            SELECT MAX(id) 
+            FROM menstrual_cycle 
+            GROUP BY profileId, startDate
+          )
+        ''');
+        await db.execute(
+          'CREATE UNIQUE INDEX IF NOT EXISTS idx_menstrual_cycle_profile_startDate ON menstrual_cycle(profileId, startDate)',
+        );
+        print('✅ Removed duplicates and created idx_menstrual_cycle_profile_startDate (v28)');
+      } catch (e) {
+        print('Error in v28 migration: $e');
       }
     }
 
@@ -707,7 +915,31 @@ class DbHelper {
     }
   }
 
-  // Force recreate database - USE THIS TO FIX SCHEMA ISSUES
+  Future<void> dedupMenstrualCycle() async {
+    final db = await database;
+
+    try {
+      await db.transaction((txn) async {
+        await txn.execute('''
+          DELETE FROM menstrual_cycle
+          WHERE id NOT IN (
+            SELECT MAX(id)
+            FROM menstrual_cycle
+            GROUP BY profileId, startDate
+          )
+        ''');
+
+        await txn.execute(
+          'CREATE UNIQUE INDEX IF NOT EXISTS idx_menstrual_cycle_profile_startDate ON menstrual_cycle(profileId, startDate)',
+        );
+      });
+
+      print('Dedup menstrual_cycle completed');
+    } catch (e) {
+      print('Dedup menstrual_cycle failed: $e');
+    }
+  }
+
   Future<void> recreateDatabase() async {
     print('🔄 Recreating database...');
     await deleteDatabase();
@@ -724,7 +956,6 @@ class DbHelper {
     );
 
     if (tables.isEmpty) {
-      print('⚠️ Table meal_analysis missing, forcing creation...');
 
       // Create meal_analysis table
       await db.execute('''
@@ -757,8 +988,6 @@ class DbHelper {
           FOREIGN KEY (meal_analysis_id) REFERENCES meal_analysis(id) ON DELETE CASCADE
         )
       ''');
-
-      print('✅ Forced creation of meal analysis tables');
     } else {
       // Check if dish_name column exists (in case table exists but column missing)
       try {
@@ -771,11 +1000,8 @@ class DbHelper {
           await db.execute(
             'ALTER TABLE meal_analysis ADD COLUMN dish_name TEXT',
           );
-          print('✅ Added dish_name column to existing meal_analysis table');
         }
-      } catch (e) {
-        print('❌ Error checking/adding dish_name column: $e');
-      }
+      } catch (_) {}
     }
   }
 }

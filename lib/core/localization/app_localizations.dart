@@ -79,6 +79,7 @@ class AppLocalizations {
       'step_status_good': 'Tốt',
       'step_status_very_active': 'Rất tích cực',
       'details': 'Chi tiết',
+      'Not verified': 'Chưa xác minh',
 
       // ── Photo Options ──
       'choose_from_gallery': 'Chọn từ thư viện',
@@ -158,7 +159,7 @@ class AppLocalizations {
       // ── Auth ──
       'forgot_password_title': 'Quên mật khẩu',
       'reset_password_title': 'Đặt lại mật khẩu',
-      'reset_password_desc':
+      'reset_password_desc': 
           'Nhập email của bạn để nhận liên kết đặt lại mật khẩu. Chúng tôi sẽ gửi hướng dẫn đến địa chỉ email này.',
       'email': 'Email',
       'your_email_hint': 'Email của bạn',
@@ -171,6 +172,15 @@ class AppLocalizations {
       'note': 'Lưu ý:',
       'reset_password_note_bullets':
           '• Kiểm tra cả hộp thư spam/junk\n• Liên kết có hiệu lực trong 1 giờ\n• Nếu không nhận được email, thử lại sau 5 phút',
+
+      // ── Account & Security ──
+      'reset_password': 'Đặt lại mật khẩu',
+      'send_reset_password_email': 'Gửi email đặt lại mật khẩu',
+      'reload_account_status': 'Tải lại trạng thái tài khoản',
+      'refresh_verification_state': 'Làm mới trạng thái xác minh',
+      'sign_out_and_clear_session': 'Đăng xuất và xóa phiên đã lưu',
+      'verified': 'Đã xác minh',
+      'not_verified': 'Chưa xác minh',
 
       // ── Common ──
       'save': 'Lưu',
@@ -433,6 +443,39 @@ class AppLocalizations {
       'note_list': 'Danh sách ghi chú',
       'add_note': 'Thêm ghi chú',
       'not_yet_updated': 'Chưa cập nhật',
+
+      // ── Menstrual Cycle ──
+      'menstrual_cycle': 'Chu kỳ kinh nguyệt',
+      'menstrual_cycle_subtitle': 'ngày/chu kỳ',
+      'menstrual_cycle_overview': 'Tổng quan',
+      'menstrual_cycle_calendar': 'Lịch',
+      'menstrual_cycle_history': 'Lịch sử',
+      'menstrual_cycle_add': 'Thêm chu kỳ',
+      'menstrual_cycle_edit': 'Chỉnh sửa chu kỳ',
+      'menstrual_cycle_new': 'Thêm chu kỳ mới',
+      'menstrual_cycle_start_date': 'Ngày bắt đầu hành kinh',
+      'menstrual_cycle_end_date': 'Ngày kết thúc hành kinh (tuỳ chọn)',
+      'menstrual_cycle_period_length': 'Thời gian hành kinh',
+      'menstrual_cycle_symptoms': 'Triệu chứng',
+      'menstrual_cycle_note': 'Ghi chú (tuỳ chọn)',
+      'menstrual_cycle_save': 'Lưu chu kỳ',
+      'menstrual_cycle_update': 'Cập nhật',
+      'menstrual_cycle_delete_confirm': 'Bạn có chắc chắn muốn xóa chu kỳ này không?',
+      'menstrual_cycle_no_data': 'Chưa có dữ liệu chu kỳ',
+      'menstrual_cycle_next': 'Kỳ kinh tiếp',
+      'menstrual_cycle_ovulation': 'Rụng trứng',
+      'menstrual_cycle_fertile_window': 'Cửa sổ thụ thai',
+      'menstrual_cycle_ongoing': 'Đang diễn ra',
+      'menstrual_cycle_latest': 'Chu kỳ gần nhất',
+      'menstrual_cycle_avg_length': 'Chu kỳ TB',
+      'menstrual_cycle_total': 'Tổng chu kỳ',
+      'menstrual_cycle_phase_period': 'Đang hành kinh',
+      'menstrual_cycle_phase_fertile': 'Cửa sổ thụ thai',
+      'menstrual_cycle_phase_ovulation': 'Ngày rụng trứng',
+      'menstrual_cycle_phase_normal': 'Giai đoạn bình thường',
+      'menstrual_cycle_days': 'ngày',
+      'menstrual_cycle_days_left': 'còn {days} ngày',
+      'menstrual_cycle_days_ago': '{days} ngày trước',
     },
     'en': {
       // ── Navigation ──
@@ -844,6 +887,39 @@ class AppLocalizations {
       'note_list': 'Note List',
       'add_note': 'Add Note',
       'not_yet_updated': 'Not updated',
+
+      // ── Menstrual Cycle ──
+      'menstrual_cycle': 'Menstrual Cycle',
+      'menstrual_cycle_subtitle': 'days/cycle',
+      'menstrual_cycle_overview': 'Overview',
+      'menstrual_cycle_calendar': 'Calendar',
+      'menstrual_cycle_history': 'History',
+      'menstrual_cycle_add': 'Add Cycle',
+      'menstrual_cycle_edit': 'Edit Cycle',
+      'menstrual_cycle_new': 'Add New Cycle',
+      'menstrual_cycle_start_date': 'Period Start Date',
+      'menstrual_cycle_end_date': 'Period End Date (optional)',
+      'menstrual_cycle_period_length': 'Period Length',
+      'menstrual_cycle_symptoms': 'Symptoms',
+      'menstrual_cycle_note': 'Note (optional)',
+      'menstrual_cycle_save': 'Save Cycle',
+      'menstrual_cycle_update': 'Update',
+      'menstrual_cycle_delete_confirm': 'Are you sure you want to delete this cycle?',
+      'menstrual_cycle_no_data': 'No cycle data yet',
+      'menstrual_cycle_next': 'Next Period',
+      'menstrual_cycle_ovulation': 'Ovulation',
+      'menstrual_cycle_fertile_window': 'Fertile Window',
+      'menstrual_cycle_ongoing': 'Ongoing',
+      'menstrual_cycle_latest': 'Latest Cycle',
+      'menstrual_cycle_avg_length': 'Avg Cycle',
+      'menstrual_cycle_total': 'Total Cycles',
+      'menstrual_cycle_phase_period': 'Menstruating',
+      'menstrual_cycle_phase_fertile': 'Fertile Window',
+      'menstrual_cycle_phase_ovulation': 'Ovulation Day',
+      'menstrual_cycle_phase_normal': 'Normal Phase',
+      'menstrual_cycle_days': 'days',
+      'menstrual_cycle_days_left': '{days} days left',
+      'menstrual_cycle_days_ago': '{days} days ago',
     },
   };
 

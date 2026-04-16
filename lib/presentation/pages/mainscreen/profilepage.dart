@@ -5,6 +5,7 @@ import 'package:doctor_care/core/services/image_upload_service.dart';
 import 'package:doctor_care/presentation/bloc/locale/locale_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
 import 'package:doctor_care/presentation/pages/screens/FamilyProfile/family_profile_screen.dart';
+import 'package:doctor_care/presentation/pages/screens/profile/account_security_screen.dart';
 import 'package:doctor_care/presentation/pages/screens/profile/edit_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,7 +83,14 @@ class Profilepage extends StatelessWidget {
                         iconColor: Colors.teal,
                         title: context.tr('account_security'),
                         subtitle: context.tr('account_security_sub'),
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AccountSecurityScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ]),
 

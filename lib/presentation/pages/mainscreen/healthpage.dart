@@ -337,6 +337,13 @@ class Healthpage extends StatelessWidget {
                     color: const Color(0xFF00695C),
                     route: '/creatinine',
                   ),
+                  HealthFeatureCard(
+                    title: context.tr('menstrual_cycle'),
+                    subtitle: context.tr('menstrual_cycle_subtitle'),
+                    icon: Icons.woman_rounded,
+                    color: const Color(0xFFE91E8C),
+                    route: '/menstrual-cycle',
+                  ),
                 ],
               ),
               Gap(100),

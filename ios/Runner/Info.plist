@@ -26,9 +26,13 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string><key>NSCameraUsageDescription</key>
+	<string>Main</string>
+    <key>NSCameraUsageDescription</key>
 	<string>Cần camera để quét mã vạch thực phẩm</string>
+    <key>NSHealthShareUsageDescription</key>
+    <string>Chúng tôi cần quyền đọc dữ liệu sức khoẻ để đồng bộ số bước chân của bạn một cách chính xác.</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>Chúng tôi cần quyền ghi dữ liệu sức khoẻ để đồng bộ thông tin của bạn.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

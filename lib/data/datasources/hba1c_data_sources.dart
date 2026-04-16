@@ -56,34 +56,42 @@ class Hba1cDataSourcesImpl implements Hba1cDataSources {
     await collection.doc(_docIdFromLocalId(localId)).delete();
   }
 
-  Future<void> _hydrateLocalFromCloudIfEmpty(Database db) async {
+  Future<void> _syncDownFromCloud(Database db) async {
     final collection = _hba1cCollection;
     if (collection == null) return;
 
     final activeProfileId = await _getActiveFamilyProfileId(db);
-    final localCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery("SELECT COUNT(*) FROM hba1c"),
-        ) ??
-        0;
 
-    if (localCount > 0) return;
     final cloudSnapshot = await collection
         .orderBy('date', descending: false)
         .get();
+
+    final batch = db.batch();
 
     for (final doc in cloudSnapshot.docs) {
       final data = doc.data();
       final dateRaw = data['date'];
       if (dateRaw is! String) continue;
 
+      final profileIdRaw = data['profileId'];
+      final profileId = (profileIdRaw is int)
+          ? profileIdRaw
+          : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
+
       final map = <String, dynamic>{
         'date': dateRaw,
         'value': data['value'],
-        'profileId': data['profileId'] ?? activeProfileId,
+        'profileId': profileId,
       };
-      await db.insert('hba1c', map);
+
+      batch.insert(
+        'hba1c',
+        map,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
+
+    await batch.commit(noResult: true);
   }
 
   @override
@@ -110,7 +118,7 @@ class Hba1cDataSourcesImpl implements Hba1cDataSources {
   Future<List<Hba1cModel>> getAllHba1c() async {
     final db = await dbHelper.database;
     try {
-      await _hydrateLocalFromCloudIfEmpty(db);
+      await _syncDownFromCloud(db);
     } catch (_) {}
 
     final activeProfileId = await _getActiveFamilyProfileId(db);

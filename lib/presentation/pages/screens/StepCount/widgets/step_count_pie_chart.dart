@@ -111,16 +111,10 @@ class StepCountPieChart extends StatelessWidget {
           // Tổng quan
           Row(
             children: [
-              _buildSummaryItem(
-                "Trung bình",
-                "$avgSteps bước/ngày",
-                Colors.blue.shade700,
+              _buildSummaryItem("Trung bình", "$avgSteps bước/ngày", Colors.blue.shade700,
               ),
               const Gap(16),
-              _buildSummaryItem(
-                "Tổng bản ghi",
-                "$total",
-                Colors.grey.shade600,
+              _buildSummaryItem("Tổng bản ghi", "$total", Colors.grey.shade600,
               ),
             ],
           ),

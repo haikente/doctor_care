@@ -516,17 +516,12 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
-            Colors.blue.shade500, // đoạn màu xanh
-            Colors.blue.shade300, // giữ nguyên xanh đến điểm stops
-            Colors.white, // phần còn lại màu trắng
+            Colors.blue.shade500,
+            Colors.blue.shade300,
+            Colors.white,
             Colors.white,
           ],
-          stops: [
-            0.0, // bắt đầu
-            0.2, // xanh hết 0%
-            0.3, // từ đây chuyển sang trắng
-            1.0, // hết container
-          ],
+          stops: [0.0, 0.2, 0.3, 1.0],
         ),
         color: Colors.white10,
         borderRadius: BorderRadius.circular(16),
@@ -553,7 +548,10 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
                     Gap(5),
                     Text(
                       '%',
-                      style: TextStyle(color: AppColor.textSecondary(context), fontSize: 24),
+                      style: TextStyle(
+                        color: AppColor.textSecondary(context),
+                        fontSize: 24,
+                      ),
                     ),
                   ],
                 ),

@@ -18,7 +18,10 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
 
-    
+    <!-- ✅ Permissions for Health Connect (Step Counter) -->
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>    
     <application
         android:label="doctor_care"
         android:name="${applicationName}"
@@ -43,6 +46,11 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            
+            <!-- ✅ Health Connect Permissions Rationale -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
         <!-- ✅ flutter_local_notifications receivers -->
@@ -76,5 +84,7 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- ✅ Query for Health Connect App -->
+        <package android:name="com.google.android.apps.healthdata" />
     </queries>
 </manifest>

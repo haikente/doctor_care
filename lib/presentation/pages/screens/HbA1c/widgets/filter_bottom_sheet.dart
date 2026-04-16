@@ -4,13 +4,13 @@ import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 
 class FilterBottomSheet extends StatefulWidget {
-  final DateTime? initialStartDate; 
+  final DateTime? initialStartDate;
   final DateTime? initialEndDate;
-  final String initialStatus; 
+  final String initialStatus;
   final DateTime firstAvailableDate;
-  final DateTime lastAvailableDate; 
-  final Function(DateTime?, DateTime?, String) onApply; 
-  final VoidCallback onReset; // HÃ m gá»i khi nháº¥n nÃºt "Bá»™ lá»c" 
+  final DateTime lastAvailableDate;
+  final Function(DateTime?, DateTime?, String) onApply;
+  final VoidCallback onReset; // HÃ m gá»i khi nháº¥n nÃºt "Bá»™ lá»c"
 
   const FilterBottomSheet({
     super.key,
@@ -30,7 +30,7 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   late DateTime? tempStartDate;
   late DateTime? tempEndDate;
-  late String tempStatus; // Tráº¡ng thÃ¡i táº¡m thá»i
+  late String tempStatus;
 
   @override
   void initState() {
@@ -42,8 +42,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
   }
 
   void _openCustomDatePicker(BuildContext context) {
@@ -111,14 +111,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: Center(
                     child: Text(
                       "Lọc kết quả",
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(Icons.clear, size: 24),
-                )
+                ),
               ],
             ),
           ),
@@ -129,14 +132,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  "Thời gian",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 15),
               ],
             ),
           ),
 
-        // Date range picker  
+          // Date range picker
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
@@ -169,7 +175,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // Trạng thái
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Trạng thái", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              "Trạng thái",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           // Status Chips
@@ -184,7 +193,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       tempStatus = "";
                     });
                   },
-                  child: _buildStatusChip("Tất cả", tempStatus == "" || tempStatus == "Tất cả"),
+                  child: _buildStatusChip(
+                    "Tất cả",
+                    tempStatus == "" || tempStatus == "Tất cả",
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -192,7 +204,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       tempStatus = "Bình thường";
                     });
                   },
-                  child: _buildStatusChip("Bình thường", tempStatus == "Bình thường"),
+                  child: _buildStatusChip(
+                    "Bình thường",
+                    tempStatus == "Bình thường",
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_care/core/services/session_service.dart';
 import 'package:doctor_care/domain/failures/failures.dart';
 import 'package:doctor_care/data/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,6 +35,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (user == null) {
         throw ServerFailure("Tài khoản không tồn tại");
       }
+
+      // Đăng ký session token cho thiết bị này
+      await SessionService.instance.generateAndStoreSession();
 
       // Fetch User Data from Firestore
       final docSnapshot = await firestore
@@ -79,6 +83,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signOut() async {
+    await SessionService.instance.clearSession();
     await googleSignIn.signOut();
     await firebaseAuth.signOut();
   }
@@ -223,8 +228,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         role = 'patient';
       }
 
-      // Double check if we need to explicitly create the document if _getUserRole returns 'patient' (default) but doc doesn't exist
-      // Ideally, specific persistence logic should be handled. For now, assuming if _getUserRole returns default, we might want to ensure creation.
       final docSnapshot = await firestore
           .collection('users')
           .doc(user.uid)
@@ -240,6 +243,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             .doc(user.uid)
             .set(userModel.toMap());
       }
+
+      // Đăng ký session token cho thiết bị này
+      await SessionService.instance.generateAndStoreSession();
 
       final userDoc = await firestore.collection('users').doc(user.uid).get();
       if (userDoc.exists && userDoc.data() != null) {

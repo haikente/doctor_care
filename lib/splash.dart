@@ -33,17 +33,20 @@ class _SplashState extends State<Splash> {
     // Debug
     await AuthStorageService.debugPrint();
     
-    if (hasSession && currentUser != null || currentUser != null) {
-      // Có Firebase user → dispatch CheckAuthStatus để AuthBloc 
-      // chuyển sang Authenticated → main.dart home: sẽ tự rebuild thành Navigationbar
-      if (mounted) {
-        context.read<AuthBloc>().add(CheckAuthStatusEvent());
+    if (!hasSession) {
+      if (currentUser != null) {
+        try {
+          await FirebaseAuth.instance.signOut();
+        } catch (_) {}
       }
-    } else {
-      // Chưa login → đi tới màn hình đăng nhập
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+
+    if (mounted) {
+      context.read<AuthBloc>().add(CheckAuthStatusEvent());
     }
   }
 

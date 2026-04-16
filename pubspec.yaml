@@ -41,7 +41,7 @@ dependencies:
   dart_either: ^2.0.0
   flutter_slidable: ^4.0.3
   intl: ^0.20.2
-  shared_preferences: ^2.1.1
+  shared_preferences: ^2.5.5
 
   cupertino_icons: ^1.0.8
   firebase_core: ^4.4.0
@@ -50,13 +50,18 @@ dependencies:
   google_sign_in: ^6.2.2
   firebase_storage: ^13.0.6
   image_picker: ^1.2.1
-  permission_handler: ^11.3.0
+  permission_handler: ^12.0.1
   fl_chart: ^1.1.1
   google_generative_ai: ^0.4.7
   mobile_scanner: ^7.2.0
   http: ^1.6.0
   flutter_local_notifications: ^21.0.0
   timezone: ^0.11.0
+  health: ^13.3.1
+  file_picker: ^11.0.2
+  path_provider: ^2.1.5
+  share_plus: ^12.0.2
+  excel: ^4.0.6
 
 dev_dependencies:
   flutter_test:

@@ -33,3 +33,6 @@ class AuthError extends AuthState {
 }
 
 class PasswordResetSent extends AuthState {}
+
+/// Bị đăng xuất vì tài khoản đã đăng nhập trên thiết bị khác.
+class SessionConflict extends AuthState {}

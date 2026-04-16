@@ -1,6 +1,8 @@
 import 'package:doctor_care/domain/entities/step_count.dart';
 
 class StepCountModel extends StepCount {
+  final int? profileId;
+
   StepCountModel({
     super.id,
     required super.steps,
@@ -8,11 +10,13 @@ class StepCountModel extends StepCount {
     super.caloriesBurned,
     required super.timestamp,
     super.note,
+    this.profileId,
   });
 
   factory StepCountModel.fromMap(Map<String, dynamic> map) {
     return StepCountModel(
       id: map['id'],
+      profileId: map['profileId'],
       steps: map['steps'],
       distance: map['distance'] != null
           ? (map['distance'] as num).toDouble()
@@ -27,6 +31,8 @@ class StepCountModel extends StepCount {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
+      'profileId':profileId,
       'steps': steps,
       'distance': distance,
       'caloriesBurned': caloriesBurned,

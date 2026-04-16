@@ -1,4 +1,11 @@
 import 'package:dio/dio.dart';
+// Menstrual Cycle Imports
+import 'package:doctor_care/data/datasources/menstrual_cycle_data_source.dart';
+import 'package:doctor_care/data/repositories/menstrual_cycle_repository_impl.dart';
+import 'package:doctor_care/domain/usecase/menstrual_cycle/get_menstrual_cycles.dart';
+import 'package:doctor_care/domain/usecase/menstrual_cycle/insert_menstrual_cycle.dart';
+import 'package:doctor_care/domain/usecase/menstrual_cycle/update_menstrual_cycle.dart';
+import 'package:doctor_care/domain/usecase/menstrual_cycle/delete_menstrual_cycle.dart';
 import 'package:doctor_care/data/datasources/blood_pressure_data_sources.dart';
 import 'package:doctor_care/data/datasources/hba1c_data_sources.dart';
 import 'package:doctor_care/data/datasources/temperature_data_sources.dart';
@@ -210,6 +217,13 @@ class InjectionContainer {
   SetActiveFamilyProfile? _setActiveFamilyProfile;
   GetActiveFamilyProfile? _getActiveFamilyProfile;
 
+  // Menstrual Cycle fields
+  MenstrualCycleRepositoryImpl? _menstrualCycleRepository;
+  GetMenstrualCycles? _getMenstrualCycles;
+  InsertMenstrualCycle? _insertMenstrualCycle;
+  UpdateMenstrualCycle? _updateMenstrualCycle;
+  DeleteMenstrualCycle? _deleteMenstrualCycle;
+
   // Meal Analysis fields
   MealAnalysisRepositoryImpl? _mealAnalysisRepository;
   AnalyzeMealImageUseCase? _analyzeMealImageUseCase;
@@ -308,6 +322,12 @@ class InjectionContainer {
   DeleteFamilyProfile get deleteFamilyProfile => _deleteFamilyProfile!;
   SetActiveFamilyProfile get setActiveFamilyProfile => _setActiveFamilyProfile!;
   GetActiveFamilyProfile get getActiveFamilyProfile => _getActiveFamilyProfile!;
+
+  // Menstrual Cycle UseCase Getters
+  GetMenstrualCycles get getMenstrualCycles => _getMenstrualCycles!;
+  InsertMenstrualCycle get insertMenstrualCycle => _insertMenstrualCycle!;
+  UpdateMenstrualCycle get updateMenstrualCycle => _updateMenstrualCycle!;
+  DeleteMenstrualCycle get deleteMenstrualCycle => _deleteMenstrualCycle!;
 
   // Meal Analysis Getters
   MealAnalysisBloc get mealAnalysisBloc => _mealAnalysisBloc!;
@@ -438,6 +458,14 @@ class InjectionContainer {
     _deleteFamilyProfile = DeleteFamilyProfile(_familyProfileRepository!);
     _setActiveFamilyProfile = SetActiveFamilyProfile(_familyProfileRepository!);
     _getActiveFamilyProfile = GetActiveFamilyProfile(_familyProfileRepository!);
+
+    // Menstrual Cycle
+    final menstrualCycleDataSource = MenstrualCycleDataSourceImpl();
+    _menstrualCycleRepository = MenstrualCycleRepositoryImpl(menstrualCycleDataSource);
+    _getMenstrualCycles = GetMenstrualCycles(_menstrualCycleRepository!);
+    _insertMenstrualCycle = InsertMenstrualCycle(_menstrualCycleRepository!);
+    _updateMenstrualCycle = UpdateMenstrualCycle(_menstrualCycleRepository!);
+    _deleteMenstrualCycle = DeleteMenstrualCycle(_menstrualCycleRepository!);
 
     // Meal Analysis
     final mealAnalysisLocalDataSource = MealAnalysisLocalDataSource();
