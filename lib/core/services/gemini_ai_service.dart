@@ -9,7 +9,7 @@ import 'package:doctor_care/core/database_food/food_database_helper.dart';
 
 class GeminiAIService {
   static const String _defaultApiKey =
-      'AIzaSyA50VIHi8qRMIfRN2tDu3g5dqRiM0qWwj4';
+      '';
   late final GenerativeModel _model;
 
   static const int _requestTimeoutSeconds = 60;
