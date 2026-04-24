@@ -1,7 +1,6 @@
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
 import 'package:equatable/equatable.dart';
 
-/// States for meal analysis BLoC
 abstract class MealAnalysisState extends Equatable {
   const MealAnalysisState();
 
@@ -9,17 +8,17 @@ abstract class MealAnalysisState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Initial state
+// trạng thái ban đầu
 class MealAnalysisInitial extends MealAnalysisState {
   const MealAnalysisInitial();
 }
 
-/// Loading state
+// trạng thái đang tải
 class MealAnalysisLoading extends MealAnalysisState {
   const MealAnalysisLoading();
 }
 
-/// Analysis completed successfully
+// trạng thái phân tích thành công
 class MealAnalysisSuccess extends MealAnalysisState {
   final MealAnalysis mealAnalysis;
 
@@ -29,7 +28,7 @@ class MealAnalysisSuccess extends MealAnalysisState {
   List<Object?> get props => [mealAnalysis];
 }
 
-/// Meal saved successfully
+// trạng thái lưu thành công
 class MealAnalysisSaved extends MealAnalysisState {
   final int mealId;
 
@@ -39,7 +38,7 @@ class MealAnalysisSaved extends MealAnalysisState {
   List<Object?> get props => [mealId];
 }
 
-/// Meal analyses loaded
+// trạng thái tải thành công
 class MealAnalysesLoaded extends MealAnalysisState {
   final List<MealAnalysis> mealAnalyses;
 
@@ -49,12 +48,12 @@ class MealAnalysesLoaded extends MealAnalysisState {
   List<Object?> get props => [mealAnalyses];
 }
 
-/// Meal deleted successfully
+// trạng thái xóa thành công
 class MealAnalysisDeleted extends MealAnalysisState {
   const MealAnalysisDeleted();
 }
 
-/// Error state
+// trạng thái lỗi
 class MealAnalysisError extends MealAnalysisState {
   final String message;
 
@@ -62,4 +61,14 @@ class MealAnalysisError extends MealAnalysisState {
 
   @override
   List<Object?> get props => [message];
+}
+
+// trạng thái gợi ý thành công
+class MealSuggestionLoaded extends MealAnalysisState {
+  final Map<String, dynamic> suggestion;
+
+  const MealSuggestionLoaded(this.suggestion);
+
+  @override
+  List<Object?> get props => [suggestion];
 }

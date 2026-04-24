@@ -492,6 +492,7 @@ class InjectionContainer {
       saveMealAnalysisUseCase: _saveMealAnalysisUseCase!,
       getAllMealAnalysesUseCase: _getAllMealAnalysesUseCase!,
       deleteMealAnalysisUseCase: _deleteMealAnalysisUseCase!,
+      geminiAIService: geminiAIService,
     );
   }
 

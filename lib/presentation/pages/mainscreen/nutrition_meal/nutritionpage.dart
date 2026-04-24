@@ -6,6 +6,7 @@ import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/insert_dish.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/trackmeal.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/widgets/calorie_chart.dart';
+import 'package:doctor_care/presentation/pages/screens/meal_analysis/meal_suggestion_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -85,6 +86,85 @@ class _NutritionPageState extends State<NutritionPage> {
 
               const Gap(20),
               const CalorieChart(),
+
+              // AI Gợi ý bữa ăn card
+              const Gap(16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MealSuggestionScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.green.shade400, Colors.teal.shade400],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const Gap(14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'AI Gợi ý bữa ăn',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Gap(2),
+                            Text(
+                              'Dựa trên chỉ số sức khỏe của bạn',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.85),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Colors.white.withOpacity(0.7),
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               //phân bổ dinh dưỡng
               Gap(20),
               Row(

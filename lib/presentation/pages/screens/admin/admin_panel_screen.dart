@@ -166,11 +166,18 @@ class AdminPanelScreen extends StatelessWidget {
               // Stats Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: StreamBuilder<QuerySnapshot>(
+                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: FirebaseFirestore.instance
                       .collection('users')
                       .snapshots(),
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const SizedBox(
+                        height: 100,
+                        child: Center(child: Text('Không tải được thống kê')),
+                      );
+                    }
+
                     if (!snapshot.hasData) {
                       return const SizedBox(
                         height: 100,
@@ -180,11 +187,7 @@ class AdminPanelScreen extends StatelessWidget {
 
                     final totalUsers = snapshot.data!.docs.length;
                     final adminCount = snapshot.data!.docs
-                        .where(
-                          (doc) =>
-                              (doc.data() as Map<String, dynamic>)['role'] ==
-                              'admin',
-                        )
+                        .where((doc) => doc.data()['role'] == 'admin')
                         .length;
                     final userCount = totalUsers - adminCount;
 
@@ -501,12 +504,18 @@ class AdminPanelScreen extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: StreamBuilder<QuerySnapshot>(
+                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: FirebaseFirestore.instance
                       .collection('users')
                       .orderBy('email')
                       .snapshots(),
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('Không tải được danh sách người dùng'),
+                      );
+                    }
+
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
@@ -518,17 +527,37 @@ class AdminPanelScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(20),
                       itemCount: users.length,
                       itemBuilder: (context, index) {
-                        final userData =
-                            users[index].data() as Map<String, dynamic>;
-                        final email = userData['email'] ?? 'No email';
-                        final role = userData['role'] ?? 'users';
-                        final uid = userData['uid'] ?? users[index].id;
-                        final fullName =
-                            userData['fullName'] ?? 'Chưa cập nhật';
+                        final userData = users[index].data();
+                        final email = _displayText(
+                          userData['email'],
+                          fallback: 'No email',
+                        );
+                        final role = _displayText(
+                          userData['role'],
+                          fallback: 'users',
+                        );
+                        final uid = _displayText(
+                          userData['uid'] ?? users[index].id,
+                          fallback: users[index].id,
+                        );
+                        final fullName = _displayText(
+                          userData['fullName'],
+                          fallback: 'Chưa cập nhật',
+                        );
                         final phoneNumber = userData['phoneNumber'];
                         final gender = userData['gender'];
                         final bloodType = userData['bloodType'];
                         final isAdmin = role == 'admin';
+                        final dobText = _formatDateOfBirth(
+                          userData['dateOfBirth'],
+                        );
+                        final allergies = _toStringList(userData['allergies']);
+                        final chronicDiseases = _toStringList(
+                          userData['chronicDiseases'],
+                        );
+                        final medications = _toStringList(
+                          userData['medications'],
+                        );
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 16),
@@ -650,13 +679,8 @@ class AdminPanelScreen extends StatelessWidget {
                                         ),
                                       if (bloodType != null)
                                         _buildInfoRow('🩸 Nhóm máu', bloodType),
-                                      if (userData['dateOfBirth'] != null)
-                                        _buildInfoRow(
-                                          '🎂 Ngày sinh',
-                                          DateTime.parse(
-                                            userData['dateOfBirth'],
-                                          ).toString().substring(0, 10),
-                                        ),
+                                      if (dobText != null)
+                                        _buildInfoRow('🎂 Ngày sinh', dobText),
                                       if (userData['height'] != null)
                                         _buildInfoRow(
                                           '📏 Chiều cao',
@@ -682,30 +706,20 @@ class AdminPanelScreen extends StatelessWidget {
                                           '📞 SĐT khẩn cấp',
                                           userData['emergencyPhone'],
                                         ),
-                                      if (userData['allergies'] != null &&
-                                          (userData['allergies'] as List)
-                                              .isNotEmpty)
+                                      if (allergies.isNotEmpty)
                                         _buildInfoRow(
                                           '⚠️ Dị ứng',
-                                          (userData['allergies'] as List).join(
-                                            ', ',
-                                          ),
+                                          allergies.join(', '),
                                         ),
-                                      if (userData['chronicDiseases'] != null &&
-                                          (userData['chronicDiseases'] as List)
-                                              .isNotEmpty)
+                                      if (chronicDiseases.isNotEmpty)
                                         _buildInfoRow(
                                           '🏥 Bệnh mãn',
-                                          (userData['chronicDiseases'] as List)
-                                              .join(', '),
+                                          chronicDiseases.join(', '),
                                         ),
-                                      if (userData['medications'] != null &&
-                                          (userData['medications'] as List)
-                                              .isNotEmpty)
+                                      if (medications.isNotEmpty)
                                         _buildInfoRow(
                                           '💊 Trị liệu',
-                                          (userData['medications'] as List)
-                                              .join(', '),
+                                          medications.join(', '),
                                         ),
                                     ],
                                   ),
@@ -790,7 +804,45 @@ class AdminPanelScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  String _displayText(Object? value, {String fallback = 'Chưa cập nhật'}) {
+    if (value == null) return fallback;
+    final text = value.toString().trim();
+    if (text.isEmpty || text.toLowerCase() == 'null') {
+      return fallback;
+    }
+    return text;
+  }
+
+  String? _formatDateOfBirth(Object? rawValue) {
+    if (rawValue == null) return null;
+
+    DateTime? date;
+    if (rawValue is Timestamp) {
+      date = rawValue.toDate();
+    } else if (rawValue is DateTime) {
+      date = rawValue;
+    } else {
+      date = DateTime.tryParse(rawValue.toString());
+    }
+
+    if (date == null) return null;
+    final yyyy = date.year.toString().padLeft(4, '0');
+    final mm = date.month.toString().padLeft(2, '0');
+    final dd = date.day.toString().padLeft(2, '0');
+    return '$yyyy-$mm-$dd';
+  }
+
+  List<String> _toStringList(Object? rawValue) {
+    if (rawValue is! List) return const [];
+    return rawValue
+        .map((e) => e?.toString().trim() ?? '')
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
+  Widget _buildInfoRow(String label, Object? value) {
+    final text = _displayText(value, fallback: '-');
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -809,7 +861,7 @@ class AdminPanelScreen extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value,
+              text,
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),

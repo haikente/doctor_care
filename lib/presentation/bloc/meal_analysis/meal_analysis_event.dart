@@ -53,3 +53,13 @@ class UpdateMealAnalysisEvent extends MealAnalysisEvent {
   @override
   List<Object?> get props => [mealAnalysis];
 }
+
+/// Event to request AI meal suggestion based on health data
+class SuggestMealEvent extends MealAnalysisEvent {
+  final String? mealType;
+
+  const SuggestMealEvent({this.mealType});
+
+  @override
+  List<Object?> get props => [mealType];
+}

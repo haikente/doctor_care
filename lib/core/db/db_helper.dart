@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:doctor_care/domain/entities/spO2heartrate.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
 
 class DbHelper {
   static final DbHelper instance = DbHelper._internal();
@@ -8,6 +10,8 @@ class DbHelper {
 
   static const _dbName = 'doctor_care.db';
   static const _dbVersion = 28;
+  static const dbName = _dbName;
+  static const dbVersion = _dbVersion;
 
   Database? _database;
 
@@ -947,7 +951,110 @@ class DbHelper {
     print('✅ Database recreated successfully');
   }
 
+  /// Lấy version hiện tại của database
+  int getDatabaseVersion() => _dbVersion;
+
+  /// Lấy thống kê số bản ghi của tất cả các bảng
+  Future<Map<String, int>> getTableStats() async {
+    final db = await database;
+    final stats = <String, int>{};
+
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
+    );
+
+    for (final table in tables) {
+      final tableName = table['name'] as String;
+      try {
+        final countResult = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName');
+        final count = Sqflite.firstIntValue(countResult) ?? 0;
+        stats[tableName] = count;
+      } catch (e) {
+        stats[tableName] = -1;
+      }
+    }
+
+    return stats;
+  }
+
+  /// Export toàn bộ database ra JSON string
+  Future<String> exportDatabaseToJson() async {
+    final db = await database;
+    final export = <String, dynamic>{};
+
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
+    );
+
+    for (final table in tables) {
+      final tableName = table['name'] as String;
+      try {
+        final data = await db.query(tableName);
+        export[tableName] = data;
+      } catch (e) {
+        export[tableName] = {'error': e.toString()};
+      }
+    }
+
+    return const JsonEncoder.withIndent('  ').convert(export);
+  }
+
+  /// Xóa dữ liệu cũ hơn X ngày trong các bảng có timestamp
+  Future<Map<String, int>> clearOldData(int days) async {
+    final db = await database;
+    final cutoff = DateTime.now().subtract(Duration(days: days)).toIso8601String();
+    final deletedCounts = <String, int>{};
+
+    // Các bảng có cột timestamp
+    final tablesWithTimestamp = [
+      'blood_pressure',
+      'temperature',
+      'spo2heartrate',
+      'bmi_weight',
+      'water_intake',
+      'blood_sugar',
+      'sleep_record',
+      'step_count',
+      'cholesterol',
+      'creatinine',
+      'hba1c',
+      'menstrual_cycle',
+    ];
+
+    for (final table in tablesWithTimestamp) {
+      try {
+        int deleted = 0;
+        if (table == 'hba1c') {
+          deleted = await db.delete(
+            table,
+            where: 'date < ?',
+            whereArgs: [cutoff],
+          );
+        } else if (table == 'menstrual_cycle') {
+          deleted = await db.delete(
+            table,
+            where: 'startDate < ?',
+            whereArgs: [cutoff],
+          );
+        } else {
+          deleted = await db.delete(
+            table,
+            where: 'timestamp < ?',
+            whereArgs: [cutoff],
+          );
+        }
+        deletedCounts[table] = deleted;
+      } catch (e) {
+        print('⚠️ Error clearing old data from $table: $e');
+        deletedCounts[table] = 0;
+      }
+    }
+
+    return deletedCounts;
+  }
+
   Future<void> updateSpo2HeartRate(SpO2HeartRate record) async {}
+
 
   Future<void> _ensureMealTablesExist(Database db) async {
     // Check if meal_analysis table exists

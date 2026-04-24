@@ -9,11 +9,96 @@ import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AdminBackupService {
+  static const _requiredTablesForBackup = <String>{
+    'hba1c',
+    'blood_pressure',
+    'step_count',
+    'family_profile',
+  };
+
+  static String _timestampForFileName() {
+    return DateTime.now().toIso8601String().replaceAll(':', '').split('.')[0];
+  }
+
+  static String _databasePath(String dbFolder) {
+    return join(dbFolder, DbHelper.dbName);
+  }
+
+  static Future<String?> _validateDoctorCareDatabase(
+    Database db, {
+    required int maxSupportedVersion,
+  }) async {
+    final dbVersion = await db.getVersion();
+    if (dbVersion > maxSupportedVersion) {
+      return 'File backup thuộc phiên bản mới hơn ứng dụng hiện tại '
+          '(v$dbVersion > v$maxSupportedVersion).';
+    }
+
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' "
+      "AND name NOT LIKE 'sqlite_%'",
+    );
+    final tableNames = tables
+        .map((row) => '${row['name'] ?? ''}'.toLowerCase())
+        .toSet();
+
+    final missing = _requiredTablesForBackup
+        .where((table) => !tableNames.contains(table))
+        .toList();
+    if (missing.isNotEmpty) {
+      return 'File backup không đúng định dạng Doctor Care '
+          '(thiếu bảng: ${missing.join(', ')}).';
+    }
+
+    final integrity = await db.rawQuery('PRAGMA integrity_check');
+    final integrityResult = integrity.isNotEmpty
+        ? '${integrity.first.values.first ?? ''}'.toLowerCase()
+        : '';
+    if (integrityResult != 'ok') {
+      return 'File backup bị lỗi integrity_check ($integrityResult).';
+    }
+
+    return null;
+  }
+
+  static Future<String?> _validateBackupFile(
+    String filePath, {
+    required int maxSupportedVersion,
+  }) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      return 'Không tìm thấy file sao lưu đã chọn.';
+    }
+    if (await file.length() == 0) {
+      return 'File sao lưu trống hoặc hỏng!';
+    }
+
+    Database? readOnlyDb;
+    try {
+      readOnlyDb = await openDatabase(
+        filePath,
+        readOnly: true,
+        singleInstance: false,
+      );
+
+      return _validateDoctorCareDatabase(
+        readOnlyDb,
+        maxSupportedVersion: maxSupportedVersion,
+      );
+    } on DatabaseException {
+      return 'File đã chọn không phải cơ sở dữ liệu SQLite hợp lệ.';
+    } finally {
+      if (readOnlyDb != null && readOnlyDb.isOpen) {
+        await readOnlyDb.close();
+      }
+    }
+  }
+
   static Future<void> exportDatabase(BuildContext context) async {
     try {
       // 1. Lấy đường dẫn của DB hiện tại
       final dbFolder = await getDatabasesPath();
-      final sourcePath = join(dbFolder, 'doctor_care.db');
+      final sourcePath = _databasePath(dbFolder);
       final sourceFile = File(sourcePath);
 
       if (!await sourceFile.exists()) {
@@ -28,19 +113,16 @@ class AdminBackupService {
         return;
       }
 
-      // 2. Tạo bản copy sang thư mục tạm để Share (Share plugin yêu cầu file phải ở Cache/Temp)
+      await DbHelper.instance.closeDatabase();
+
       final tempDir = await getTemporaryDirectory();
-      // Đặt tên có kèm timestamp để dễ phân biệt
-      final timestamp = DateTime.now()
-          .toIso8601String()
-          .replaceAll(':', '')
-          .split('.')[0];
+      final timestamp = _timestampForFileName();
       final backupFileName = 'doctor_care_backup_$timestamp.db';
       final tempBackupPath = join(tempDir.path, backupFileName);
 
       await sourceFile.copy(tempBackupPath);
 
-      // 3. Sử dụng Share Plus để xuất file ra ngoài
+
       if (context.mounted) {
         final box = context.findRenderObject() as RenderBox?;
         await Share.shareXFiles(
@@ -61,15 +143,19 @@ class AdminBackupService {
           ),
         );
       }
+    } finally {
+      try {
+        await DbHelper.instance.database;
+      } catch (_) {}
     }
   }
 
   static Future<bool> importDatabase(BuildContext context) async {
     try {
-      // 1. Cho phép người dùng chọn file backup
+
       FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType
-            .any, // Ở Android đôi khi FileType.custom không hoạt động tốt với .db
+            .any,
         allowMultiple: false,
       );
 
@@ -77,17 +163,17 @@ class AdminBackupService {
         final filePath = result.files.single.path!;
         final sourceFile = File(filePath);
 
-        // Kiểm tra cơ bản xem file có vẻ hợp lệ không (đuôi .db hoặc dung lượng > 0)
-        if (!filePath.endsWith('.db') && !filePath.endsWith('.bak')) {
-          // Chỉ cảnh báo, vẫn cho qua vì người dùng có thể đổi tên file
-          print('Cảnh báo: File không có đuôi .db chuẩn.');
-        }
+        final currentVersion = DbHelper.dbVersion;
 
-        if (await sourceFile.length() == 0) {
+        final validationError = await _validateBackupFile(
+          filePath,
+          maxSupportedVersion: currentVersion,
+        );
+        if (validationError != null) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('File sao lưu trống hoặc hỏng!'),
+              SnackBar(
+                content: Text(validationError),
                 backgroundColor: Colors.red,
               ),
             );
@@ -95,28 +181,83 @@ class AdminBackupService {
           return false;
         }
 
-        // 2. Lấy đường dẫn DB gốc
+        // 2. Lấy đường dẫn DB gốc + chuẩn bị rollback file
         final dbFolder = await getDatabasesPath();
-        final targetPath = join(dbFolder, 'doctor_care.db');
+        final targetPath = _databasePath(dbFolder);
+        final rollbackPath = join(
+          dbFolder,
+          'doctor_care_before_restore_${_timestampForFileName()}.db',
+        );
+        final targetFile = File(targetPath);
+        final rollbackFile = File(rollbackPath);
+        var rollbackReady = false;
 
-        // 3. Ngắt kết nối DB hiện tại an toàn
-        await DbHelper.instance.closeDatabase();
+        try {
+          // 3. Ngắt kết nối DB hiện tại an toàn
+          await DbHelper.instance.closeDatabase();
 
-        // 4. Ghi đè file
-        await sourceFile.copy(targetPath);
+          // 4. Tạo rollback point trước khi ghi đè
+          if (await targetFile.exists()) {
+            await targetFile.copy(rollbackPath);
+            rollbackReady = true;
+            await targetFile.delete();
+          }
 
-        // 5. Khởi tạo lại kết nối (khi gọi .database sẽ tự open lại)
-        await DbHelper.instance.database;
+          // 5. Ghi đè file
+          await sourceFile.copy(targetPath);
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Khôi phục dữ liệu cục bộ thành công!'),
-              backgroundColor: Colors.green,
-            ),
+          // 6. Khởi tạo lại kết nối và verify sau restore
+          final restoredDb = await DbHelper.instance.database;
+          final postRestoreError = await _validateDoctorCareDatabase(
+            restoredDb,
+            maxSupportedVersion: currentVersion,
           );
+          if (postRestoreError != null) {
+            throw Exception(postRestoreError);
+          }
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Khôi phục dữ liệu cục bộ thành công!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+          return true;
+        } catch (restoreError) {
+          // 7. Tự động rollback nếu restore thất bại
+          try {
+            await DbHelper.instance.closeDatabase();
+
+            if (rollbackReady && await rollbackFile.exists()) {
+              if (await targetFile.exists()) {
+                await targetFile.delete();
+              }
+              await rollbackFile.copy(targetPath);
+            }
+
+            await DbHelper.instance.database;
+          } catch (_) {}
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Khôi phục thất bại và đã rollback dữ liệu cũ: $restoreError',
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return false;
+        } finally {
+          if (await rollbackFile.exists()) {
+            try {
+              await rollbackFile.delete();
+            } catch (_) {}
+          }
         }
-        return true;
       }
     } catch (e) {
       if (context.mounted) {
@@ -191,13 +332,13 @@ class AdminBackupService {
       var fileBytes = excel.save();
       if (fileBytes != null) {
         final tempDir = await getTemporaryDirectory();
-        final timestamp = DateTime.now().toIso8601String().replaceAll(':', '').split('.')[0];
+        final timestamp = _timestampForFileName();
         final excelFileName = 'doctor_care_report_$timestamp.xlsx';
         final tempExcelPath = join(tempDir.path, excelFileName);
 
-        File(tempExcelPath)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(fileBytes);
+        final outFile = File(tempExcelPath);
+        await outFile.create(recursive: true);
+        await outFile.writeAsBytes(fileBytes, flush: true);
 
         if (context.mounted) {
           final box = context.findRenderObject() as RenderBox?;

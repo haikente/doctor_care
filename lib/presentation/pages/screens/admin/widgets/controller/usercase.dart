@@ -482,6 +482,50 @@ class Usercase {
                       return const Center(child: Text('Không có dữ liệu.'));
                     }
 
+                    final collectionIcons = <String, IconData>{
+                      'step_count': Icons.directions_walk,
+                      'water_intake': Icons.water_drop,
+                      'spo2heartrate': Icons.monitor_heart,
+                      'temperature': Icons.thermostat,
+                      'sleep_record': Icons.bedtime,
+                      'blood_pressure': Icons.favorite,
+                      'blood_sugar': Icons.bloodtype,
+                      'bmi_weight': Icons.monitor_weight,
+                      'cholesterol': Icons.science,
+                      'creatinine': Icons.biotech,
+                      'hba1c': Icons.opacity,
+                      'menstrual_cycle': Icons.calendar_month,
+                    };
+
+                    final collectionColors = <String, Color>{
+                      'step_count': Colors.blue,
+                      'water_intake': Colors.lightBlue,
+                      'spo2heartrate': Colors.red,
+                      'temperature': Colors.orange,
+                      'sleep_record': Colors.indigo,
+                      'blood_pressure': Colors.pink,
+                      'blood_sugar': Colors.teal,
+                      'bmi_weight': Colors.deepOrange,
+                      'cholesterol': Colors.amber,
+                      'creatinine': Colors.cyan,
+                      'hba1c': Colors.green,
+                      'menstrual_cycle': Colors.purple,
+                    };
+
+                    final detailRows = kAdminHealthCollections
+                        .map(
+                          (collection) => AdminStatsWidgets.modernCollectionRow(
+                            theme,
+                            label: collection.label,
+                            value: stats.docsOf(collection.key),
+                            icon: collectionIcons[collection.key] ??
+                                Icons.folder,
+                            color: collectionColors[collection.key] ??
+                                Colors.blueGrey,
+                          ),
+                        )
+                        .toList();
+
                     return SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       child: Column(
@@ -529,11 +573,7 @@ class Usercase {
                                 theme,
                                 icon: Icons.storage,
                                 title: 'Dữ liệu y tế',
-                                value: (stats.stepCountDocs +
-                                        stats.waterIntakeDocs +
-                                        stats.spo2Docs +
-                                        stats.temperatureDocs)
-                                    .toString(),
+                                value: stats.totalHealthDocs.toString(),
                                 gradientColors: [
                                   Colors.orange.shade400,
                                   Colors.orange.shade800,
@@ -551,35 +591,7 @@ class Usercase {
                             ),
                           ),
                           const Gap(12),
-
-                          AdminStatsWidgets.modernCollectionRow(
-                            theme,
-                            label: 'Dữ liệu Bước chân',
-                            value: stats.stepCountDocs,
-                            icon: Icons.directions_walk,
-                            color: Colors.blue,
-                          ),
-                          AdminStatsWidgets.modernCollectionRow(
-                            theme,
-                            label: 'Lượng nước uống',
-                            value: stats.waterIntakeDocs,
-                            icon: Icons.water_drop,
-                            color: Colors.lightBlue,
-                          ),
-                          AdminStatsWidgets.modernCollectionRow(
-                            theme,
-                            label: 'Nhịp tim & SpO2',
-                            value: stats.spo2Docs,
-                            icon: Icons.monitor_heart,
-                            color: Colors.red,
-                          ),
-                          AdminStatsWidgets.modernCollectionRow(
-                            theme,
-                            label: 'Nhiệt độ cơ thể',
-                            value: stats.temperatureDocs,
-                            icon: Icons.thermostat,
-                            color: Colors.orange,
-                          ),
+                          ...detailRows,
 
                           const Gap(24),
                           Text(
@@ -664,164 +676,256 @@ class Usercase {
   }
 
   void showBackupDialog(BuildContext context) {
+    var isProcessing = false;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 16, 16),
-              child: Column(
-                children: [
-                  Center(
-                    child: Container(
-                      width: 48,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const Gap(16),
-                  Row(
+      builder: (context) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          Future<void> runWithLock(Future<void> Function() task) async {
+            if (isProcessing) return;
+            setSheetState(() => isProcessing = true);
+            try {
+              await task();
+            } finally {
+              if (sheetContext.mounted) {
+                setSheetState(() => isProcessing = false);
+              }
+            }
+          }
+
+          return Container(
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Theme.of(sheetContext).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 16, 16),
+                  child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.teal.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.backup_rounded,
-                          color: Colors.teal,
-                          size: 26,
-                        ),
-                      ),
-                      const Gap(16),
-                      const Expanded(
-                        child: Text(
-                          'Sao lưu & Khôi phục',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
+                      Center(
+                        child: Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close_rounded),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.grey.shade100,
+                      const Gap(16),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.backup_rounded,
+                              color: Colors.teal,
+                              size: 26,
+                            ),
+                          ),
+                          const Gap(16),
+                          const Expanded(
+                            child: Text(
+                              'Sao lưu & Khôi phục',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: isProcessing
+                                ? null
+                                : () => Navigator.pop(sheetContext),
+                            icon: const Icon(Icons.close_rounded),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.grey.shade100,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    'Lưu ý: Bạn có thể trích xuất Database ra file (.db), hoặc khôi phục từ file chọn trong máy. Sau khi khôi phục, bạn cần khởi động lại ứng dụng.',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                if (isProcessing)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: const [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        Gap(10),
+                        Expanded(
+                          child: Text(
+                            'Đang xử lý, vui lòng chờ...',
+                            style: TextStyle(fontSize: 12.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const Gap(16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: isProcessing
+                              ? null
+                              : () async {
+                                  await runWithLock(() async {
+                                    await AdminBackupService.exportDatabase(
+                                      sheetContext,
+                                    );
+                                  });
+                                },
+                          icon: const Icon(Icons.ios_share_rounded),
+                          label: const Text('Trích xuất (Export)'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Colors.blue.shade50,
+                            foregroundColor: Colors.blue.shade700,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Text(
-                'Lưu ý: Bạn có thể trích xuất Database ra file (.db), hoặc khôi phục từ file chọn trong máy. Sau khi khôi phục, bạn cần khởi động lại ứng dụng.',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 13,
-                  height: 1.4,
                 ),
-              ),
-            ),
-            const Gap(16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        await AdminBackupService.exportDatabase(context);
-                      },
-                      icon: const Icon(Icons.ios_share_rounded),
-                      label: const Text('Trích xuất (Export)'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.blue.shade50,
-                        foregroundColor: Colors.blue.shade700,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                const Gap(12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: isProcessing
+                              ? null
+                              : () async {
+                                  final confirmed = await showDialog<bool>(
+                                    context: sheetContext,
+                                    builder: (dialogContext) => AlertDialog(
+                                      title: const Text('Xác nhận khôi phục'),
+                                      content: const Text(
+                                        'Khôi phục sẽ ghi đè dữ liệu cục bộ hiện tại trên thiết bị này. Bạn có chắc chắn muốn tiếp tục?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(
+                                            dialogContext,
+                                            false,
+                                          ),
+                                          child: const Text('Huỷ'),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () => Navigator.pop(
+                                            dialogContext,
+                                            true,
+                                          ),
+                                          child: const Text('Khôi phục'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirmed != true) return;
+
+                                  await runWithLock(() async {
+                                    final success =
+                                        await AdminBackupService.importDatabase(
+                                      sheetContext,
+                                    );
+                                    if (success && sheetContext.mounted) {
+                                      Navigator.pop(sheetContext);
+                                    }
+                                  });
+                                },
+                          icon: const Icon(Icons.file_download_rounded),
+                          label: const Text('Phục hồi (Import)'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Colors.orange.shade50,
+                            foregroundColor: Colors.orange.shade700,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            const Gap(12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        final success = await AdminBackupService.importDatabase(context);
-                        if (success && context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      icon: const Icon(Icons.file_download_rounded),
-                      label: const Text('Phục hồi (Import)'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.orange.shade50,
-                        foregroundColor: Colors.orange.shade700,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                ),
+                const Gap(12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: isProcessing
+                              ? null
+                              : () async {
+                                  await runWithLock(() async {
+                                    await AdminBackupService.exportToExcel(
+                                      sheetContext,
+                                    );
+                                  });
+                                },
+                          icon: const Icon(Icons.table_chart_rounded),
+                          label: const Text('Xuất báo cáo Excel (.xlsx)'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Colors.green.shade50,
+                            foregroundColor: Colors.green.shade700,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Gap(12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        await AdminBackupService.exportToExcel(context);
-                      },
-                      icon: const Icon(Icons.table_chart_rounded),
-                      label: const Text('Xuất báo cáo Excel (.xlsx)'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.green.shade50,
-                        foregroundColor: Colors.green.shade700,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
