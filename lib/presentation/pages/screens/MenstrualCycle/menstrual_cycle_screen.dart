@@ -504,17 +504,17 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                 Row(
                   children: [
                     Icon(
-                      Icons.calendar_today,
-                      size: 18,
-                      color: Colors.grey.shade700,
+                      Icons.circle,
+                      size: 8,
+                      color: Colors.redAccent.shade400,
                     ),
                     Gap(6),
                     Text(
                       formatDate(cycle.startDate),
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: Colors.grey[800],
                       ),
                     ),
                     if (cycle.endDate != null) ...[
@@ -524,7 +524,7 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                       Text(
                         formatDate(cycle.endDate!),
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey[800],
                         ),
@@ -539,7 +539,7 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                       'Ngày hành kinh: ${cycle.actualPeriodLength} ngày',
                       style: TextStyle(
                         color: Colors.grey.shade600,
-                        fontSize: 13,
+                        fontSize: 12,
                       ),
                     ),
                   ],

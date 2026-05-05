@@ -5,11 +5,29 @@ class HbA1c {
   final double value;
   final DateTime date;
 
+  // Valid HbA1c range: 2-20%
+  static const double minValidValue = 2.0;
+  static const double maxValidValue = 20.0;
+
   HbA1c({
     this.id,
     required this.value,
     required this.date,
   });
+
+  /// Validates if the HbA1c value is within the acceptable range (2-20%)
+  bool get isValid => value >= minValidValue && value <= maxValidValue;
+
+  /// Returns validation error message if invalid, null if valid
+  String? get validationError {
+    if (value < minValidValue) {
+      return 'Giá trị HbA1c phải ít nhất là $minValidValue%';
+    }
+    if (value > maxValidValue) {
+      return 'Giá trị HbA1c không được vượt quá $maxValidValue%';
+    }
+    return null;
+  }
 
 
    //kiểm tra theo WHO

@@ -1017,7 +1017,6 @@ class MockGoogleSignIn extends _i1.Mock implements _i8.GoogleSignIn {
 /// A class which mocks [GoogleSignInAccount].
 ///
 /// See the documentation for Mockito's code generation for more information.
-
 class MockGoogleSignInAccount extends _i1.Mock
     implements _i8.GoogleSignInAccount {
   MockGoogleSignInAccount() {
@@ -1403,9 +1402,8 @@ class MockUser extends _i1.Mock implements _i4.User {
 }
 
 /// A class which mocks [CollectionReference].
-/// 
+///
 /// See the documentation for Mockito's code generation for more information.
-
 class MockCollectionReference<T extends Object?> extends _i1.Mock
     implements _i6.CollectionReference<T> {
   MockCollectionReference() {
@@ -1817,7 +1815,6 @@ class MockCollectionReference<T extends Object?> extends _i1.Mock
 /// A class which mocks [DocumentReference].
 ///
 /// See the documentation for Mockito's code generation for more information.
-
 class MockDocumentReference<T extends Object?> extends _i1.Mock
     implements _i6.DocumentReference<T> {
   MockDocumentReference() {

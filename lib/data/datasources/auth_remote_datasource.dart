@@ -8,7 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 abstract class AuthRemoteDataSource {
   Future<UserModel> signIn(String email, String password);
   Future<UserModel> signInWithGoogle();
-  Future<UserModel> signUp(String email, String password);
+  Future<UserModel> signUp(String fullName, String email, String password);
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
   Future<void> resetPassword(String email);
@@ -139,8 +139,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signUp(String email, String password) async {
+  Future<UserModel> signUp(
+    String fullName,
+    String email,
+    String password,
+  ) async {
     try {
+      final normalizedFullName = fullName.trim();
       final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -155,6 +160,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         uid: user.uid,
         email: user.email ?? "",
         role: 'patient',
+        fullName: normalizedFullName.isEmpty ? null : normalizedFullName,
       );
 
       await firestore.collection('users').doc(user.uid).set(userModel.toMap());

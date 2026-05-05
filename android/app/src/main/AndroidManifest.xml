@@ -18,9 +18,13 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- ✅ Permissions for Health Connect (Step Counter) -->
+    <!-- ✅ Permissions for Health Connect -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION"/>
+    <uses-permission android:name="android.permission.health.WRITE_OXYGEN_SATURATION"/>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>    
     <application
         android:label="doctor_care"

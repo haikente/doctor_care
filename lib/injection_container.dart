@@ -53,6 +53,9 @@ import 'package:doctor_care/domain/usecase/auth/sign_in_with_google_usecase.dart
 import 'package:doctor_care/domain/usecase/auth/sign_up_usecase.dart';
 import 'package:doctor_care/domain/usecase/auth/sign_out_usecase.dart';
 import 'package:doctor_care/domain/usecase/auth/reset_password_usecase.dart';
+import 'package:doctor_care/data/datasources/notification_remote_datasource.dart';
+import 'package:doctor_care/data/repositories/notification_repository_impl.dart';
+import 'package:doctor_care/domain/repositories/notification_repository.dart';
 
 // Meal Analysis Imports
 import 'package:doctor_care/core/services/gemini_ai_service.dart';
@@ -241,6 +244,9 @@ class InjectionContainer {
   CheckAuthStatusUseCase? _checkAuthStatusUseCase;
   ResetPasswordUseCase? _resetPasswordUseCase;
 
+  // Notification fields
+  NotificationRepository? _notificationRepository;
+
   // Repository Getters
   Hba1cRepositoryimpl get hba1cRepository => _hba1cRepository!;
   BloodPressureRepositoryImpl get bloodPressureRepository =>
@@ -341,6 +347,9 @@ class InjectionContainer {
   CheckAuthStatusUseCase get checkAuthStatusUseCase => _checkAuthStatusUseCase!;
   ResetPasswordUseCase get resetPasswordUseCase => _resetPasswordUseCase!;
 
+  // Notification Repository Getter
+  NotificationRepository get notificationRepository => _notificationRepository!;
+
   // DbHelper instance for direct database access
   late final DbHelper dbHelper = DbHelper.instance;
 
@@ -359,6 +368,13 @@ class InjectionContainer {
     _signOutUseCase = SignOutUseCase(_authRepository!);
     _checkAuthStatusUseCase = CheckAuthStatusUseCase(_authRepository!);
     _resetPasswordUseCase = ResetPasswordUseCase(_authRepository!);
+
+    final notificationRemoteDataSource = NotificationRemoteDataSourceImpl(
+      firestore: firestore,
+      auth: firebaseAuth,
+    );
+    _notificationRepository =
+        NotificationRepositoryImpl(notificationRemoteDataSource);
 
     //theo dõi HbA1c
     final hba1DataSources = Hba1cDataSourcesImpl();

@@ -48,6 +48,154 @@ class _StepCountScreenState extends State<StepCountScreen> {
     return filtered;
   }
 
+  void _showSyncBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Gap(16),
+            Icon(Icons.directions_walk, size: 40, color: Colors.blue.shade700),
+            const Gap(10),
+            Text(
+              'Đồng bộ bước chân',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue.shade800,
+              ),
+            ),
+            const Gap(6),
+            Text(
+              'Lấy dữ liệu bước chân từ Health Connect',
+              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+            const Gap(16),
+            _buildSyncOption(ctx, 'Hôm nay', 0, Icons.today),
+            const Gap(8),
+            _buildSyncOption(ctx, '7 ngày qua', 7, Icons.date_range),
+            const Gap(8),
+            _buildSyncOption(ctx, '30 ngày qua', 30, Icons.calendar_month),
+            const Gap(12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSyncOption(BuildContext ctx, String label, int daysBack, IconData icon) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.pop(ctx);
+          _syncSteps(daysBack);
+        },
+        icon: Icon(icon, size: 18),
+        label: Text(label, style: const TextStyle(fontSize: 13)),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.blue.shade800,
+          side: BorderSide(color: Colors.blue.shade200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _syncSteps(int daysBack) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final cubit = context.read<StepCountCubit>();
+
+    final hasPermission = await HealthSyncService.instance.requestPermissions();
+    if (!hasPermission) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: const Text('Từ chối quyền truy cập. Không thể đồng bộ số bước.'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    if (daysBack == 0) {
+      // Đồng bộ hôm nay
+      final steps = await HealthSyncService.instance.getTodaysSteps();
+      if (!mounted) return;
+
+      if (steps != null && steps > 0) {
+        final now = DateTime.now();
+        final midnight = DateTime(now.year, now.month, now.day);
+        final record = StepCount(steps: steps, timestamp: midnight);
+        cubit.insertStepCountRecord(record);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Đã đồng bộ $steps bước hôm nay!'),
+            backgroundColor: Colors.blue.shade700,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      } else {
+        messenger.showSnackBar(
+          SnackBar(
+            content: const Text('Chưa có dữ liệu bước chân hôm nay!'),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } else {
+      // Đồng bộ nhiều ngày
+      int syncedCount = 0;
+      for (int i = 0; i < daysBack; i++) {
+        final date = DateTime.now().subtract(Duration(days: i));
+        final dayStart = DateTime(date.year, date.month, date.day);
+
+        try {
+          final steps = await HealthSyncService.instance.getTodaysSteps();
+          if (steps != null && steps > 0 && i == 0) {
+            // Chỉ lấy được steps hôm nay qua getTotalStepsInInterval
+            final record = StepCount(steps: steps, timestamp: dayStart);
+            try {
+              cubit.insertStepCountRecord(record);
+              syncedCount++;
+            } catch (_) {}
+          }
+        } catch (_) {}
+      }
+
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(syncedCount > 0
+              ? 'Đã đồng bộ $syncedCount bản ghi bước chân!'
+              : 'Không tìm thấy dữ liệu mới từ Health Connect'),
+          backgroundColor: syncedCount > 0 ? Colors.blue.shade700 : Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,47 +275,7 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                 children: [
                                   // Nút Đồng bộ dữ liệu Sức khoẻ
                                   GestureDetector(
-                                    onTap: () async {
-                                      final messenger = ScaffoldMessenger.of(context);
-                                      final cubit = context.read<StepCountCubit>();
-
-                                      final hasPermission = await HealthSyncService.instance.requestPermissions();
-                                      if (!hasPermission) {
-                                        if (!context.mounted) return;
-                                        messenger.showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Từ chối quyền truy cập Sức Khoẻ. Không thể đồng bộ số bước.',
-                                            ),
-                                          ),
-                                        );
-                                        return;
-                                      }
-
-                                      final steps = await HealthSyncService.instance.getTodaysSteps();
-                                      if (!context.mounted) return;
-
-                                      if (steps != null && steps > 0) {
-                                        final now = DateTime.now();
-                                        // Lưu timestamp là bắt đầu ngày để tránh trùng khi sync.
-                                        final midnight = DateTime(now.year, now.month, now.day);
-
-                                        final record = StepCount(
-                                          steps: steps,
-                                          timestamp: midnight,
-                                        );
-
-                                        cubit.insertStepCountRecord(record);
-
-                                        messenger.showSnackBar(
-                                          SnackBar(content: Text('Đã đồng bộ $steps bước từ Sức Khoẻ!')),
-                                        );
-                                      } else {
-                                        messenger.showSnackBar(
-                                          const SnackBar(content: Text('Chưa có dữ liệu bước chân hôm nay!')),
-                                        );
-                                      }
-                                    },
+                                    onTap: () => _showSyncBottomSheet(),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(

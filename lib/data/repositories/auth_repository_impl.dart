@@ -38,11 +38,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> signUp(
+    String fullName,
     String email,
     String password,
   ) async {
     try {
-      final user = await remoteDataSource.signUp(email, password);
+      final user = await remoteDataSource.signUp(fullName, email, password);
       return Right(user);
     } on Failure catch (e) {
       return Left(e);

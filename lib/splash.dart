@@ -4,6 +4,7 @@ import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -60,13 +61,14 @@ class _SplashState extends State<Splash> {
             child: SizedBox(
               height: 130,
               width: 130,
-              child: Image.asset(Images.logo, fit: BoxFit.cover,))),
-            const Text(
+              child: Image.asset(Images.splashBackground, fit: BoxFit.cover,))),
+              Gap(20),
+            Text(
               "Doctor Care",
               style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: Colors.blue.shade400,
             ),
           ),
         ],

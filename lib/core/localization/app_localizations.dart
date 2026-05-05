@@ -444,6 +444,14 @@ class AppLocalizations {
       'add_note': 'Thêm ghi chú',
       'not_yet_updated': 'Chưa cập nhật',
 
+       //notifications
+      "no_read_notifications": "Không có thông báo đã đọc",
+      "no_notifications": "Chưa có thông báo nào",
+      "just_now": "Vừa xong",
+      "minutes_ago": "{count} phút trước",
+      "hours_ago": "{count} giờ trước",
+      "days_ago": "{count} ngày trước",
+
       // ── Menstrual Cycle ──
       'menstrual_cycle': 'Chu kỳ kinh nguyệt',
       'menstrual_cycle_subtitle': 'ngày/chu kỳ',
@@ -887,6 +895,17 @@ class AppLocalizations {
       'note_list': 'Note List',
       'add_note': 'Add Note',
       'not_yet_updated': 'Not updated',
+
+     
+      // English (en.json) - cần thêm
+      "no_read_notifications": "No read notifications",
+      "no_notifications": "No notifications yet",
+      "just_now": "Just now",
+      "minutes_ago": "{count} minutes ago",
+      "hours_ago": "{count} hours ago",
+      "days_ago": "{count} days ago",
+
+  
 
       // ── Menstrual Cycle ──
       'menstrual_cycle': 'Menstrual Cycle',

@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// Nguồn dữ liệu SpO2/Heart Rate
+enum SpO2Source {
+  manual,       // Nhập tay
+  healthConnect, // Đồng bộ từ Health Connect (thiết bị đeo)
+}
+
 class SpO2HeartRate {
   final int? id;
   final int spo2;
   final int heartRate;
   final DateTime timestamp;
   final String? note;
+  final SpO2Source source;
 
   SpO2HeartRate({
     this.id,
@@ -13,7 +20,38 @@ class SpO2HeartRate {
     required this.heartRate,
     required this.timestamp,
     this.note,
+    this.source = SpO2Source.manual,
   });
+
+  /// Label hiển thị nguồn dữ liệu
+  String get sourceLabel {
+    switch (source) {
+      case SpO2Source.manual:
+        return 'Nhập tay';
+      case SpO2Source.healthConnect:
+        return 'Health Connect';
+    }
+  }
+
+  /// Icon nguồn dữ liệu
+  IconData get sourceIcon {
+    switch (source) {
+      case SpO2Source.manual:
+        return Icons.edit_note;
+      case SpO2Source.healthConnect:
+        return Icons.watch;
+    }
+  }
+
+  /// Màu nguồn dữ liệu
+  Color get sourceColor {
+    switch (source) {
+      case SpO2Source.manual:
+        return Colors.blueGrey;
+      case SpO2Source.healthConnect:
+        return Colors.teal;
+    }
+  }
 
   String get spo2Status {
     if (spo2 >= 95) {

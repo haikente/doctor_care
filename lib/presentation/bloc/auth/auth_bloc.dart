@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/db/db_helper.dart';
 import 'package:doctor_care/core/services/session_service.dart';
 import 'package:doctor_care/domain/entities/user_entity.dart';
 import 'package:doctor_care/domain/usecase/auth/check_auth_status_usecase.dart';
@@ -53,7 +54,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       ifLeft: (failure) async => emit(Unauthenticated()),
       ifRight: (user) async {
-        // Khôi phục token local và bắt đầu lắng nghe session conflict
+        await DbHelper.instance.setCurrentUser(user.uid);
         await SessionService.instance.restoreLocalToken();
         _startSessionListener();
         final role = await RoleService.getCurrentUserRole();
@@ -68,6 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       ifLeft: (failure) async => emit(AuthError(failure.message)),
       ifRight: (user) async {
+        await DbHelper.instance.setCurrentUser(user.uid);
         _startSessionListener();
         final role = await RoleService.getCurrentUserRole();
         emit(Authenticated(user, role: role));
@@ -79,15 +81,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     SessionService.instance.stopListening();
     await signOutUseCase();
+    await DbHelper.instance.setCurrentUser(null);
     emit(Unauthenticated());
   }
 
   Future<void> _onSignUp(SignUpEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final result = await signUpUseCase(event.email, event.password);
+    final result = await signUpUseCase(
+      event.fullName,
+      event.email,
+      event.password,
+    );
     await result.fold(
       ifLeft: (failure) async => emit(AuthError(failure.message)),
       ifRight: (user) async {
+        await DbHelper.instance.setCurrentUser(user.uid);
         final role = await RoleService.getCurrentUserRole();
         emit(Authenticated(user, role: role));
       },
@@ -103,6 +111,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       ifLeft: (failure) async => emit(AuthError(failure.message)),
       ifRight: (user) async {
+        await DbHelper.instance.setCurrentUser(user.uid);
         _startSessionListener();
         final role = await RoleService.getCurrentUserRole();
         emit(Authenticated(user, role: role));
@@ -116,6 +125,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     SessionService.instance.stopListening();
     await signOutUseCase();
+    await DbHelper.instance.setCurrentUser(null);
     emit(SessionConflict());
   }
 

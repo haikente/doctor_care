@@ -1,0 +1,61 @@
+import 'dart:async';
+
+import 'package:doctor_care/domain/entities/notification_entity.dart';
+import 'package:doctor_care/domain/repositories/notification_repository.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+part 'notification_state.dart';
+
+class NotificationCubit extends Cubit<NotificationState> {
+  NotificationCubit(this.repository) : super(const NotificationInitial());
+
+  final NotificationRepository repository;
+  StreamSubscription<List<NotificationEntity>>? _subscription;
+
+  void startListening() {
+    _subscription?.cancel();
+    emit(const NotificationLoading());
+
+    _subscription = repository.watchNotifications().listen(
+      (items) {
+        final unreadCount = items.where((n) => !n.isRead).length;
+        emit(NotificationLoaded(items, unreadCount: unreadCount));
+      },
+      onError: (_) => emit(const NotificationError('Tải thông báo thất bại')),
+    );
+  }
+
+  Future<void> refresh() async {
+    try {
+      emit(const NotificationLoading());
+      final items = await repository.getNotifications();
+      final unreadCount = items.where((n) => !n.isRead).length;
+      emit(NotificationLoaded(items, unreadCount: unreadCount));
+    } catch (_) {
+      emit(const NotificationError('Tải thông báo thất bại'));
+    }
+  }
+
+  Future<void> markAsRead(String notificationId) async {
+    await repository.markAsRead(notificationId);
+  }
+
+  Future<void> markAllAsRead() async {
+    await repository.markAllAsRead();
+  }
+
+  Future<void> deleteNotification(String notificationId) async {
+    await repository.deleteNotification(notificationId);
+  }
+
+  Future<void> deleteAllNotifications() async {
+    await repository.deleteAllNotifications();
+  }
+
+  @override
+  Future<void> close() async {
+    await _subscription?.cancel();
+    return super.close();
+  }
+}

@@ -290,6 +290,16 @@ class AdminPanelScreen extends StatelessWidget {
                           Usercase().showSettings(context);
                         },
                       ),
+
+                      _buildAdminCard(
+                        context,
+                        theme,
+                        icon: Icons.notifications_active, 
+                        title: "Gửi thông báo",
+                        subtitle: "Gửi thông báo người dùng",
+                        color: Colors.indigo,
+                        onTap: () => Usercase().showSendNotificationDialog(context),
+                      )
                     ],
                   ),
                 ),

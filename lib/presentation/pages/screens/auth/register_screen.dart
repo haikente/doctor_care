@@ -12,6 +12,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -25,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
+    _fullNameController.addListener(_onInputChanged);
     _emailController.addListener(_onInputChanged);
     _passwordController.addListener(_onInputChanged);
     _confirmPasswordController.addListener(_onInputChanged);
@@ -35,11 +37,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   bool get _isFormValid {
+    final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    return emailRegex.hasMatch(email) &&
+    return fullName.isNotEmpty &&
+      emailRegex.hasMatch(email) &&
         password.length >= 6 &&
         confirmPassword == password &&
         _agreeToTerms;
@@ -47,9 +51,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _fullNameController.removeListener(_onInputChanged);
     _emailController.removeListener(_onInputChanged);
     _passwordController.removeListener(_onInputChanged);
     _confirmPasswordController.removeListener(_onInputChanged);
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -204,6 +210,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Full Name Field
+                              TextFormField(
+                                controller: _fullNameController,
+                                textCapitalization: TextCapitalization.words,
+                                decoration: InputDecoration(
+                                  labelText: l10n.translate('full_name'),
+                                  labelStyle: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 14,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.person_outline,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: theme.colorScheme.outline
+                                          .withOpacity(0.3),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: theme.colorScheme.primary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  filled: true,
+                                  fillColor: theme.colorScheme.surface,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return l10n.translate(
+                                      'please_enter_full_name',
+                                    );
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              const Gap(20),
+
                               // Email Field
                               TextFormField(
                                 controller: _emailController,
@@ -604,6 +656,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                               .validate()) {
                                             context.read<AuthBloc>().add(
                                               SignUpEvent(
+                                                _fullNameController.text.trim(),
                                                 _emailController.text.trim(),
                                                 _passwordController.text.trim(),
                                               ),

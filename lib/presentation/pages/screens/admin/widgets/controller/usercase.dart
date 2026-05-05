@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/admin_stats.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/admin_stats_widgets.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/widgets/controller/admin_backup_service.dart';
+import 'package:doctor_care/domain/entities/notification_entity.dart';
+import 'package:doctor_care/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/admin_settings_screen.dart';
@@ -674,6 +676,205 @@ class Usercase {
       MaterialPageRoute(builder: (_) => const AdminSettingsScreen()),
     );
   }
+
+  void showSendNotificationDialog(BuildContext context) {
+    final rootContext = context;
+    final titleController = TextEditingController();
+    final bodyController = TextEditingController();
+    NotificationType selectedType = NotificationType.info;
+    var isSending = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text('Gửi thông báo cho tất cả', style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'Tiêu đề',
+                      labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                      prefixIcon: Icon(Icons.title, color: Colors.blue,),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const Gap(12),
+                  TextField(
+                    controller: bodyController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                      labelText: 'Nội dung',
+                      labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                      alignLabelWithHint: true,
+                      prefixIcon: Icon(Icons.message, color: Colors.blue),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const Gap(12),
+                  DropdownButtonFormField<NotificationType>(
+                    value: selectedType,
+                    decoration: const InputDecoration(
+                      labelText: 'Loại thông báo',
+                      labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                      prefixIcon: Icon(Icons.category, color: Colors.blue),
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: NotificationType.info,
+                        child: Text('Thông tin'),
+                      ),
+                      DropdownMenuItem(
+                        value: NotificationType.warning,
+                        child: Text('Cảnh báo'),
+                      ),
+                      DropdownMenuItem(
+                        value: NotificationType.error,
+                        child: Text('Lỗi'),
+                      ),
+                      DropdownMenuItem(
+                        value: NotificationType.success,
+                        child: Text('Thành công'),
+                      ),
+                      DropdownMenuItem(
+                        value: NotificationType.promotion,
+                        child: Text('Khuyến mãi'),
+                      ),
+                      DropdownMenuItem(
+                        value: NotificationType.system,
+                        child: Text('Hệ thống'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        selectedType = value;
+                      });
+                    },
+                  ),
+                  const Gap(8),
+                  Text(
+                    'Thông báo sẽ được lưu vào tất cả người dùng.',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSending
+                  ? null
+                  : () {
+                      titleController.dispose();
+                      bodyController.dispose();
+                      Navigator.pop(dialogContext);
+                    },
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: isSending
+                  ? null
+                  : () async {
+                      final title = titleController.text.trim();
+                      final body = bodyController.text.trim();
+
+                      if (title.isEmpty || body.isEmpty) {
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(
+                            content: Text('Vui lòng nhập đủ tiêu đề và nội dung.'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                        return;
+                      }
+
+                      setState(() => isSending = true);
+
+                      try {
+                        final usersSnap = await FirebaseFirestore.instance
+                            .collection('users')
+                            .get();
+                        final userIds = usersSnap.docs
+                            .map((doc) => doc.id.trim())
+                            .where((id) => id.isNotEmpty)
+                            .toList();
+
+                        if (userIds.isEmpty) {
+                          if (!dialogContext.mounted) return;
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            const SnackBar(
+                              content: Text('Không có người dùng để gửi.'),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+
+                        await InjectionContainer()
+                            .notificationRepository
+                            .sendNotification(
+                              title: title,
+                              body: body,
+                              type: selectedType,
+                              userIds: userIds,
+                            );
+
+                        if (!dialogContext.mounted) return;
+                        titleController.dispose();
+                        bodyController.dispose();
+                        Navigator.pop(dialogContext);
+
+                        ScaffoldMessenger.of(rootContext).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '✅ Đã gửi thông báo cho ${userIds.length} người dùng.',
+                            ),
+                            backgroundColor: Colors.green,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      } catch (e) {
+                        if (!dialogContext.mounted) return;
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          SnackBar(
+                            content: Text('❌ Lỗi: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 5),
+                          ),
+                        );
+                      } finally {
+                        if (dialogContext.mounted) {
+                          setState(() => isSending = false);
+                        }
+                      }
+                    },
+              child: isSending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Gửi'),
+            ),
+          ],
+        ),
+      ),
+    );
+ }
 
   void showBackupDialog(BuildContext context) {
     var isProcessing = false;

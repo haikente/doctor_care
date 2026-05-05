@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:doctor_care/domain/entities/spO2heartrate.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -8,12 +7,23 @@ class DbHelper {
   static final DbHelper instance = DbHelper._internal();
   DbHelper._internal();
 
-  static const _dbName = 'doctor_care.db';
-  static const _dbVersion = 28;
-  static const dbName = _dbName;
+  static const _defaultDbName = 'doctor_care.db';
+  static const _dbVersion = 29;
+  static String get dbName => instance.currentDbName;
   static const dbVersion = _dbVersion;
 
+  String? _currentUserId;
+
   Database? _database;
+
+  String get currentDbName => _dbNameForUser(_currentUserId);
+
+  Future<void> setCurrentUser(String? userId) async {
+    final normalized = _normalizeUserId(userId);
+    if (normalized == _currentUserId) return;
+    await closeDatabase();
+    _currentUserId = normalized;
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -23,7 +33,7 @@ class DbHelper {
 
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, _dbName);
+    final path = join(dbPath, currentDbName);
 
     final db = await openDatabase(
       path,
@@ -87,6 +97,7 @@ class DbHelper {
         heartRate INTEGER NOT NULL CHECK(heartRate >= 30 AND heartRate <= 250),
         timestamp TEXT NOT NULL,
         note TEXT,
+        source TEXT NOT NULL DEFAULT 'manual',
         profileId INTEGER
       )
     ''');
@@ -242,7 +253,7 @@ class DbHelper {
       )
     ''');
 
-    // Ensure deduplicates by (profileId, timestamp) for all health tables
+    // Tạo unique index cho các bảng có profileId và timestamp/date
     try {
       await db.execute(
         'CREATE UNIQUE INDEX IF NOT EXISTS idx_step_count_profile_timestamp ON step_count(profileId, timestamp)',
@@ -880,15 +891,49 @@ class DbHelper {
       }
     }
 
+    // ✅ Version 29: Add `source` column to spo2heartrate
+    if (oldVersion < 29) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(spo2heartrate)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('source')) {
+          await db.execute(
+            "ALTER TABLE spo2heartrate ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'",
+          );
+          print('✅ Added source column to spo2heartrate table (v29)');
+        }
+      } catch (e) {
+        print('Error in v29 migration: $e');
+      }
+    }
+
     print('Nâng cấp cơ sở dữ liệu đã hoàn tất');
   }
 
   Future<void> deleteDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, _dbName);
+    final path = join(dbPath, currentDbName);
     await databaseFactory.deleteDatabase(path);
     _database = null;
     print('🗑️ Database deleted');
+  }
+
+  String _dbNameForUser(String? userId) {
+    if (userId == null || userId.isEmpty) return _defaultDbName;
+    final safeId = _sanitizeUserId(userId);
+    return 'doctor_care_$safeId.db';
+  }
+
+  String? _normalizeUserId(String? userId) {
+    final trimmed = userId?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
+  String _sanitizeUserId(String userId) {
+    return userId.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
   }
 
   Future<void> checkSchema() async {
@@ -1053,7 +1098,7 @@ class DbHelper {
     return deletedCounts;
   }
 
-  Future<void> updateSpo2HeartRate(SpO2HeartRate record) async {}
+
 
 
   Future<void> _ensureMealTablesExist(Database db) async {

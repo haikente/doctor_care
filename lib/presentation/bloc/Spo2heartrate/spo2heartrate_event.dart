@@ -35,3 +35,13 @@ class DeleteSpo2HeartRateRecord extends Spo2heartrateEvent {
   @override
   List<Object> get props => [id];
 }
+
+/// Event đồng bộ dữ liệu từ Health Connect
+class SyncFromHealthConnect extends Spo2heartrateEvent {
+  final int daysBack;
+
+  const SyncFromHealthConnect({this.daysBack = 7});
+
+  @override
+  List<Object> get props => [daysBack];
+}

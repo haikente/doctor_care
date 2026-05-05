@@ -6,6 +6,7 @@ import 'package:doctor_care/presentation/bloc/blood_pressure/blood_pressure_cubi
 import 'package:doctor_care/presentation/bloc/hba1c/hba1c_cubit.dart';
 import 'package:doctor_care/presentation/bloc/locale/locale_cubit.dart';
 import 'package:doctor_care/presentation/bloc/locale/locale_state.dart';
+import 'package:doctor_care/presentation/bloc/notification/notification_cubit.dart';
 import 'package:doctor_care/presentation/bloc/temperature/temperature_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_cubit.dart';
 import 'package:doctor_care/presentation/bloc/themestate/themestate_state.dart';
@@ -91,6 +92,11 @@ class MyApp extends StatelessWidget {
             checkAuthStatusUseCase: di.checkAuthStatusUseCase,
             resetPasswordUseCase: di.resetPasswordUseCase,
           ),
+        ),
+
+        BlocProvider(
+          create: (context) =>
+              NotificationCubit(di.notificationRepository)..startListening(),
         ),
 
         // HbA1c
@@ -265,7 +271,12 @@ class MyApp extends StatelessWidget {
                 builder: (context, child) {
                   return BlocListener<AuthBloc, AuthState>(
                     listener: (context, state) {
+                      if (state is Authenticated) {
+                        context.read<FamilyProfileCubit>().loadProfiles();
+                        context.read<NotificationCubit>().startListening();
+                      }
                       if (state is Unauthenticated) {
+                        context.read<NotificationCubit>().startListening();
                         navigatorKey.currentState?.pushNamedAndRemoveUntil(
                           '/',
                           (route) => false,

@@ -26,6 +26,8 @@ class Spo2heartrateRepositotyImpl implements Spo2heartrateRepository{
         spo2: spO2HeartRate.spo2,
         heartRate: spO2HeartRate.heartRate,
         timestamp: spO2HeartRate.timestamp,
+        note: spO2HeartRate.note,
+        source: spO2HeartRate.source,
       )
     );
   }
@@ -38,6 +40,8 @@ class Spo2heartrateRepositotyImpl implements Spo2heartrateRepository{
         spo2: spO2HeartRate.spo2,
         heartRate: spO2HeartRate.heartRate,
         timestamp: spO2HeartRate.timestamp,
+        note: spO2HeartRate.note,
+        source: spO2HeartRate.source,
       )
     );
   }

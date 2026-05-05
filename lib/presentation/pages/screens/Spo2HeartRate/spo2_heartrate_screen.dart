@@ -68,6 +68,80 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
         "${date.year}";
   }
 
+  void _showSyncBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Gap(16),
+            Icon(Icons.watch, size: 48, color: Colors.blue[600]),
+            const Gap(12),
+            const Text(
+              'Đồng bộ Health Connect',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const Gap(8),
+            Text(
+              'Lấy dữ liệu SpO2 & Nhịp tim từ thiết bị đeo qua Health Connect',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            const Gap(20),
+            _buildSyncOption(ctx, 'Hôm nay', 1, Icons.today),
+            const Gap(10),
+            _buildSyncOption(ctx, '7 ngày qua', 7, Icons.date_range),
+            const Gap(10),
+            _buildSyncOption(ctx, '30 ngày qua', 30, Icons.calendar_month),
+            const Gap(16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSyncOption(
+    BuildContext ctx,
+    String label,
+    int days,
+    IconData icon,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.pop(ctx);
+          context.read<Spo2heartrateBloc>().add(
+            SyncFromHealthConnect(daysBack: days),
+          );
+        },
+        icon: Icon(icon, size: 20),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.blue[700],
+          side: BorderSide(color: Colors.blue[300]!),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,9 +163,29 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
       ),
       body: BlocConsumer<Spo2heartrateBloc, Spo2heartrateState>(
         listener: (context, state) {
-          // Reload data khi quay lại từ insert/edit screen
-          if (state is Spo2heartrateLoaded) {
-            // Data refreshed
+          if (state is Spo2heartrateSyncResult) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    Icon(
+                      state.syncedCount > 0 ? Icons.check_circle : Icons.info,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const Gap(8),
+                    Expanded(child: Text(state.message)),
+                  ],
+                ),
+                backgroundColor: state.syncedCount > 0
+                    ? Colors.blue
+                    : Colors.orange,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -99,32 +193,34 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
             return Center(
               child: CircularProgressIndicator(color: Colors.blue[600]),
             );
+          } else if (state is Spo2heartrateSyncing) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.blue[600]),
+                  const Gap(20),
+                  Text(
+                    'Đang đồng bộ từ Health Connect...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Gap(8),
+                  Text(
+                    'Vui lòng chờ trong giây lát',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            );
           } else if (state is Spo2heartrateLoaded) {
             final records = state.records;
 
             if (records.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.favorite_outline, size: 80, color: Colors.grey),
-                    Gap(20),
-                    Text(
-                      'Chưa có dữ liệu SPO2 & Nhịp tim',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Gap(10),
-                    Text(
-                      'Nhấn nút + để thêm bản ghi mới',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              );
+              return _buildEmptyState();
             }
 
             final filteredRecords = filterByStatus(records);
@@ -132,6 +228,9 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
             return SingleChildScrollView(
               child: Column(
                 children: [
+                  // Sync banner
+                  _buildSyncBanner(),
+
                   Padding(
                     padding: const EdgeInsets.all(15),
                     child: Row(
@@ -192,88 +291,21 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          // Chip ngày
                           if (startDate != null && endDate != null)
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.purple[50],
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Colors.purple.shade900,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "${formatDate(startDate!)} - ${formatDate(endDate!)}",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.5,
-                                      color: Colors.purple.shade900,
-                                    ),
-                                  ),
-                                  Gap(6),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        startDate = null;
-                                        endDate = null;
-                                      });
-                                    },
-                                    child: Icon(
-                                      Icons.clear,
-                                      size: 14,
-                                      color: Colors.purple.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _buildFilterChip(
+                              "${formatDate(startDate!)} - ${formatDate(endDate!)}",
+                              () => setState(() {
+                                startDate = null;
+                                endDate = null;
+                              }),
                             ),
-
-                          // Chip trạng thái
                           if (selectedStatus.isNotEmpty &&
                               selectedStatus != "Tất cả")
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.purple[50],
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Colors.purple.shade900,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    selectedStatus,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.5,
-                                      color: Colors.purple.shade900,
-                                    ),
-                                  ),
-                                  Gap(6),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedStatus = "";
-                                      });
-                                    },
-                                    child: Icon(
-                                      Icons.clear,
-                                      size: 14,
-                                      color: Colors.purple.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _buildFilterChip(
+                              selectedStatus,
+                              () => setState(() {
+                                selectedStatus = "";
+                              }),
                             ),
                         ],
                       ),
@@ -293,7 +325,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               size: 64,
                               color: Colors.grey.shade400,
                             ),
-                            Gap(16),
+                            const Gap(16),
                             Text(
                               'Không tìm thấy kết quả',
                               style: TextStyle(
@@ -302,7 +334,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Gap(8),
+                            const Gap(8),
                             Text(
                               'Thử thay đổi bộ lọc của bạn',
                               style: TextStyle(
@@ -310,7 +342,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 color: Colors.grey.shade500,
                               ),
                             ),
-                            Gap(20),
+                            const Gap(20),
                             TextButton.icon(
                               onPressed: () {
                                 setState(() {
@@ -319,8 +351,8 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                   selectedStatus = "";
                                 });
                               },
-                              icon: Icon(Icons.refresh),
-                              label: Text('Xóa bộ lọc'),
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Xóa bộ lọc'),
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.purple,
                               ),
@@ -334,7 +366,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                   if (filteredRecords.isNotEmpty)
                     ListView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: filteredRecords.length,
                       itemBuilder: (context, index) {
                         final record = filteredRecords[index];
@@ -356,7 +388,6 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                       context: context,
                                       onConfirm: () {
                                         if (!mounted) return;
-
                                         final id = record.id;
                                         if (id != null) {
                                           bloc.add(
@@ -376,7 +407,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                   foregroundColor: Colors.white,
                                   icon: Icons.delete,
                                   label: 'Xóa',
-                                  borderRadius: BorderRadius.horizontal(
+                                  borderRadius: const BorderRadius.horizontal(
                                     right: Radius.circular(12),
                                   ),
                                 ),
@@ -395,31 +426,164 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  Gap(16),
-                  Text(
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const Gap(16),
+                  const Text(
                     'Đã xảy ra lỗi',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
-                  Gap(8),
+                  const Gap(8),
                   Text(
                     state.message,
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
             );
           }
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildSyncBanner() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade50, Colors.cyan.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.blue.shade200, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.watch, color: Colors.blue[700], size: 24),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Health Connect',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[800],
+                  ),
+                ),
+                const Gap(2),
+                Text(
+                  'Đồng bộ SpO2 & nhịp tim từ thiết bị đeo',
+                  style: TextStyle(fontSize: 12, color: Colors.blue[600]),
+                ),
+              ],
+            ),
+          ),
+          const Gap(8),
+          ElevatedButton.icon(
+            onPressed: _showSyncBottomSheet,
+            icon: const Icon(Icons.sync, size: 16),
+            label: const Text('Đồng bộ', style: TextStyle(fontSize: 12)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.favorite_outline, size: 80, color: Colors.grey),
+          const Gap(20),
+          const Text(
+            'Chưa có dữ liệu SPO2 & Nhịp tim',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Gap(10),
+          const Text(
+            'Nhấn nút + để nhập tay hoặc đồng bộ từ thiết bị',
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+          const Gap(24),
+          OutlinedButton.icon(
+            onPressed: _showSyncBottomSheet,
+            icon: const Icon(Icons.watch, size: 18),
+            label: const Text('Đồng bộ từ Health Connect'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.blue[700],
+              side: BorderSide(color: Colors.blue[300]!),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String text, VoidCallback onClear) {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: Colors.purple[50],
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.purple.shade900, width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
+              color: Colors.purple.shade900,
+            ),
+          ),
+          const Gap(6),
+          GestureDetector(
+            onTap: onClear,
+            child: Icon(Icons.clear, size: 14, color: Colors.purple.shade900),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildRecordCard(SpO2HeartRate record) {
     final statusColor = record.combinedColor;
-    final statusIcon = record.spo2Icon; // Dùng icon SPO2 làm icon chính
+    final statusIcon = record.spo2Icon;
 
     return GestureDetector(
       onTap: () {
@@ -439,7 +603,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -448,30 +612,59 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: Date & Status
+              // Header: Date, Source Badge & Status
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      Gap(6),
-                      Text(
-                        formatDate(record.timestamp),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ],
+                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  const Gap(6),
+                  Text(
+                    formatDate(record.timestamp),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
                   ),
+                  const Gap(8),
+                  // Source badge
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: record.sourceColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: record.sourceColor.withOpacity(0.4),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          record.sourceIcon,
+                          size: 10,
+                          color: record.sourceColor,
+                        ),
+                        const Gap(3),
+                        Text(
+                          record.sourceLabel,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: record.sourceColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -481,7 +674,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(statusIcon, size: 14, color: statusColor),
-                        Gap(4),
+                        const Gap(4),
                         Text(
                           record.combinedStatus,
                           style: TextStyle(
@@ -496,7 +689,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                 ],
               ),
 
-              Gap(12),
+              const Gap(12),
 
               // SPO2 & Heart Rate values
               Row(
@@ -504,7 +697,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                   // SPO2
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.blue[50],
                         borderRadius: BorderRadius.circular(10),
@@ -520,7 +713,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 size: 16,
                                 color: Colors.blue[700],
                               ),
-                              Gap(4),
+                              const Gap(4),
                               Text(
                                 'SPO2',
                                 style: TextStyle(
@@ -531,7 +724,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               ),
                             ],
                           ),
-                          Gap(6),
+                          const Gap(6),
                           Text(
                             '${record.spo2}%',
                             style: TextStyle(
@@ -545,12 +738,12 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                     ),
                   ),
 
-                  Gap(12),
+                  const Gap(12),
 
                   // Heart Rate
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.red[50],
                         borderRadius: BorderRadius.circular(10),
@@ -566,7 +759,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 size: 16,
                                 color: Colors.red[700],
                               ),
-                              Gap(4),
+                              const Gap(4),
                               Text(
                                 'Nhịp tim',
                                 style: TextStyle(
@@ -577,7 +770,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               ),
                             ],
                           ),
-                          Gap(6),
+                          const Gap(6),
                           Row(
                             children: [
                               Text(
@@ -588,7 +781,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                   color: Colors.red[700],
                                 ),
                               ),
-                              Gap(4),
+                              const Gap(4),
                               Text(
                                 'bpm',
                                 style: TextStyle(

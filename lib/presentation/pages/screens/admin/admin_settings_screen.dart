@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/db/db_helper.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/services/admin_audit_service.dart';
 import 'package:doctor_care/core/services/cache_manager.dart';
 import 'package:doctor_care/core/services/system_config_service.dart';
@@ -609,25 +610,9 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                         const Gap(12),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _isBusy ? null : _saveConfig,
-                            icon: _isSavingConfig
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.save_outlined),
-                            label: Text(
-                              _isSavingConfig
-                                  ? 'Đang lưu...'
-                                  : 'Lưu cấu hình hệ thống',
-                            ),
-                          ),
-                        ),
+                          child: CustomButton(
+                            text: "Lưu cấu hình hệ thống", 
+                            onPressed: _isBusy ? null : _saveConfig)),
                       ],
                     ),
                   ),

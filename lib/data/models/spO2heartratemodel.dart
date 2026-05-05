@@ -7,6 +7,8 @@ class Spo2heartratemodel extends SpO2HeartRate {
     required super.spo2,
     required super.heartRate,
     required super.timestamp,
+    super.note,
+    super.source,
     this.profileId,
   });
 
@@ -17,6 +19,8 @@ class Spo2heartratemodel extends SpO2HeartRate {
       'spo2': spo2,
       'heartRate': heartRate,
       'timestamp': timestamp.toIso8601String(),
+      'note': note,
+      'source': source.name,
     };
   }
 
@@ -27,6 +31,13 @@ class Spo2heartratemodel extends SpO2HeartRate {
       spo2: map['spo2'],
       heartRate: map['heartRate'],
       timestamp: DateTime.parse(map['timestamp']),
+      note: map['note'] as String?,
+      source: _parseSource(map['source'] as String?),
     );
+  }
+
+  static SpO2Source _parseSource(String? value) {
+    if (value == 'healthConnect') return SpO2Source.healthConnect;
+    return SpO2Source.manual;
   }
 }

@@ -1,7 +1,10 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
+import 'package:doctor_care/domain/entities/notification_entity.dart';
+import 'package:doctor_care/presentation/bloc/notification/notification_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
@@ -13,86 +16,37 @@ class Notificationpage extends StatefulWidget {
 }
 
 class _NotificationpageState extends State<Notificationpage> {
-  // Mock data - Replace with actual data from Bloc/Cubit
-  final List<NotificationModel> notifications = [
-    NotificationModel(
-      id: '1',
-      type: NotificationType.reminder,
-      title: 'Nhắc nhở đo huyết áp',
-      message: 'Đã đến giờ đo huyết áp buổi sáng. Hãy đo và ghi lại kết quả.',
-      timestamp: DateTime.now().subtract(Duration(minutes: 5)),
-      isRead: false,
-    ),
-    NotificationModel(
-      id: '2',
-      type: NotificationType.warning,
-      title: 'Cảnh báo HbA1c cao',
-      message:
-          'Chỉ số HbA1c của bạn đang ở mức 7.2%. Cần điều chỉnh chế độ ăn uống.',
-      timestamp: DateTime.now().subtract(Duration(hours: 2)),
-      isRead: false,
-    ),
-    NotificationModel(
-      id: '3',
-      type: NotificationType.achievement,
-      title: 'Hoàn thành mục tiêu',
-      message: 'Chúc mừng! Bạn đã duy trì đo huyết áp đều đặn trong 7 ngày.',
-      timestamp: DateTime.now().subtract(Duration(hours: 5)),
-      isRead: true,
-    ),
-    NotificationModel(
-      id: '4',
-      type: NotificationType.info,
-      title: 'Cập nhật hệ thống',
-      message: 'Ứng dụng đã được cập nhật với tính năng theo dõi SpO2 mới.',
-      timestamp: DateTime.now().subtract(Duration(days: 1)),
-      isRead: true,
-    ),
-    NotificationModel(
-      id: '5',
-      type: NotificationType.alert,
-      title: 'Nhiệt độ cao bất thường',
-      message: 'Nhiệt độ của bạn đạt 38.5°C. Nên nghỉ ngơi và theo dõi.',
-      timestamp: DateTime.now().subtract(Duration(days: 2)),
-      isRead: true,
-    ),
-  ];
-
   String selectedFilter = 'all';
   final List<String> filterOptions = ['all', 'unread', 'read'];
 
-  List<NotificationModel> get filteredNotifications {
-    if (selectedFilter == 'unread') {
-      return notifications.where((n) => !n.isRead).toList();
-    } else if (selectedFilter == 'read') {
-      return notifications.where((n) => n.isRead).toList();
-    }
-    return notifications;
+  @override
+  void initState() {
+    super.initState();
+    context.read<NotificationCubit>().startListening();
   }
 
-  int get unreadCount => notifications.where((n) => !n.isRead).length;
+  List<NotificationEntity> _applyFilter(
+    List<NotificationEntity> items,
+  ) {
+    if (selectedFilter == 'unread') {
+      return items.where((n) => !n.isRead).toList();
+    }
+    if (selectedFilter == 'read') {
+      return items.where((n) => n.isRead).toList();
+    }
+    return items;
+  }
 
   void markAsRead(String id) {
-    setState(() {
-      final index = notifications.indexWhere((n) => n.id == id);
-      if (index != -1) {
-        notifications[index] = notifications[index].copyWith(isRead: true);
-      }
-    });
+    context.read<NotificationCubit>().markAsRead(id);
   }
 
   void markAllAsRead() {
-    setState(() {
-      for (int i = 0; i < notifications.length; i++) {
-        notifications[i] = notifications[i].copyWith(isRead: true);
-      }
-    });
+    context.read<NotificationCubit>().markAllAsRead();
   }
 
   void deleteNotification(String id) {
-    setState(() {
-      notifications.removeWhere((n) => n.id == id);
-    });
+    context.read<NotificationCubit>().deleteNotification(id);
   }
 
   @override
@@ -105,141 +59,163 @@ class _NotificationpageState extends State<Notificationpage> {
         centerTitle: true,
         onBack: () => Navigator.pop(context),
       ),
-      body: Column(
-        children: [
-          // ========== HEADER WITH STATS & ACTION ==========
-          Container(
-            color: theme.colorScheme.surface,
-            padding: EdgeInsets.all(15),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: BlocBuilder<NotificationCubit, NotificationState>(
+        builder: (context, state) {
+          if (state is NotificationLoading || state is NotificationInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is NotificationError) {
+            return _buildErrorState(state.message);
+          }
+
+          final notifications = state is NotificationLoaded
+              ? state.notifications
+              : <NotificationEntity>[];
+          final unreadCount =
+              state is NotificationLoaded ? state.unreadCount : 0;
+          final filteredNotifications = _applyFilter(notifications);
+
+          return Column(
+            children: [
+              Container(
+                color: theme.colorScheme.surface,
+                padding: EdgeInsets.all(15),
+                child: Column(
                   children: [
-                    // Unread count
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.notifications_active,
-                          color: Colors.blue.shade700,
-                          size: 20,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.notifications_active,
+                              color: Colors.blue.shade700,
+                              size: 20,
+                            ),
+                            Gap(8),
+                            Text(
+                              context.tr(
+                                'unread_count',
+                                params: {'count': unreadCount.toString()},
+                              ),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                          ],
                         ),
-                        Gap(8),
-                        Text(
-                          context.tr(
-                            'unread_count',
-                            params: {'count': unreadCount.toString()},
+
+                        // Mark all as read button
+                        if (unreadCount > 0)
+                          TextButton.icon(
+                            onPressed: markAllAsRead,
+                            icon: Icon(Icons.done_all, size: 18),
+                            label: Text(context.tr('mark_all')),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.blue.shade700,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
                           ),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
                       ],
                     ),
 
-                    // Mark all as read button
-                    if (unreadCount > 0)
-                      TextButton.icon(
-                        onPressed: markAllAsRead,
-                        icon: Icon(Icons.done_all, size: 18),
-                        label: Text(context.tr('mark_all')),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.blue.shade700,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
+                    Gap(12),
+
+                    // Filter chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: filterOptions.map((filter) {
+                          final isSelected = selectedFilter == filter;
+                          final label = switch (filter) {
+                            'all' => context.tr('all'),
+                            'unread' => context.tr('filter_unread'),
+                            'read' => context.tr('filter_read'),
+                            _ => filter,
+                          };
+                          return Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(label),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  selectedFilter = filter;
+                                });
+                              },
+                              backgroundColor: theme.brightness == Brightness.dark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade100,
+                              selectedColor: theme.primaryColor.withOpacity(0.1),
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? theme.primaryColor
+                                    : AppColor.textSecondary(context),
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                              side: BorderSide(
+                                color: isSelected
+                                    ? theme.primaryColor
+                                    : AppColor.divider(context),
+                                width: 1.5,
+                              ),
+                              checkmarkColor: theme.primaryColor,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
+                    ),
                   ],
                 ),
+              ),
 
-                Gap(12),
+              Divider(height: 1, color: AppColor.divider(context)),
 
-                // Filter chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: filterOptions.map((filter) {
-                      final isSelected = selectedFilter == filter;
-                      final label = switch (filter) {
-                        'all' => context.tr('all'),
-                        'unread' => context.tr('filter_unread'),
-                        'read' => context.tr('filter_read'),
-                        _ => filter,
-                      };
-                      return Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(label),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              selectedFilter = filter;
-                            });
+              // ========== NOTIFICATION LIST ==========
+              Expanded(
+                child: filteredNotifications.isEmpty
+                    ? _buildEmptyState()
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          context.read<NotificationCubit>().startListening();
+                        },
+                        child: ListView.separated(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          itemCount: filteredNotifications.length,
+                          separatorBuilder: (context, index) => Divider(
+                            height: 1,
+                            color: AppColor.divider(context),
+                            indent: 70,
+                          ),
+                          itemBuilder: (context, index) {
+                            final notification = filteredNotifications[index];
+                            return _buildNotificationItem(notification);
                           },
-                          backgroundColor: theme.brightness == Brightness.dark
-                              ? Colors.grey.shade800
-                              : Colors.grey.shade100,
-                          selectedColor: theme.primaryColor.withOpacity(0.1),
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? theme.primaryColor
-                                : AppColor.textSecondary(context),
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                            fontSize: 13,
-                          ),
-                          side: BorderSide(
-                            color: isSelected
-                                ? theme.primaryColor
-                                : AppColor.divider(context),
-                            width: 1.5,
-                          ),
-                          checkmarkColor: theme.primaryColor,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Divider(height: 1, color: AppColor.divider(context)),
-
-          // ========== NOTIFICATION LIST ==========
-          Expanded(
-            child: filteredNotifications.isEmpty
-                ? _buildEmptyState()
-                : ListView.separated(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    itemCount: filteredNotifications.length,
-                    separatorBuilder: (context, index) => Divider(
-                      height: 1,
-                      color: Colors.grey.shade200,
-                      indent: 70,
-                    ),
-                    itemBuilder: (context, index) {
-                      final notification = filteredNotifications[index];
-                      return _buildNotificationItem(notification);
-                    },
-                  ),
-          ),
-        ],
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   // ========== NOTIFICATION ITEM ==========
-  Widget _buildNotificationItem(NotificationModel notification) {
+  Widget _buildNotificationItem(NotificationEntity notification) {
     return Dismissible(
       key: Key(notification.id),
       direction: DismissDirection.endToStart,
@@ -264,7 +240,6 @@ class _NotificationpageState extends State<Notificationpage> {
           if (!notification.isRead) {
             markAsRead(notification.id);
           }
-          // TODO: Navigate to detail or related screen
         },
         child: Container(
           color: notification.isRead
@@ -327,7 +302,7 @@ class _NotificationpageState extends State<Notificationpage> {
                     Gap(4),
 
                     Text(
-                      notification.message,
+                      notification.body,
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColor.textSecondary(context),
@@ -348,7 +323,7 @@ class _NotificationpageState extends State<Notificationpage> {
                         ),
                         Gap(4),
                         Text(
-                          _formatTimestamp(notification.timestamp),
+                          _formatTimestamp(notification.createdAt),
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColor.textSecondary(context),
@@ -372,14 +347,14 @@ class _NotificationpageState extends State<Notificationpage> {
     String message;
     IconData icon;
 
-    if (selectedFilter == 'Chưa đọc') {
+    if (selectedFilter == 'unread') {
       message = context.tr('no_unread_notifications');
       icon = Icons.check_circle_outline;
-    } else if (selectedFilter == 'Đã đọc') {
-      message = 'Không có thông báo đã đọc';
+    } else if (selectedFilter == 'read') {
+      message = context.tr('no_read_notifications');
       icon = Icons.notifications_none;
     } else {
-      message = 'Chưa có thông báo nào';
+      message = context.tr('no_notifications');
       icon = Icons.notifications_off_outlined;
     }
 
@@ -406,97 +381,86 @@ class _NotificationpageState extends State<Notificationpage> {
     );
   }
 
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: AppColor.textSecondary(context).withOpacity(0.6),
+          ),
+          Gap(12),
+          Text(
+            context.tr(message),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColor.textSecondary(context),
+            ),
+          ),
+          Gap(12),
+          ElevatedButton(
+            onPressed: () =>
+                context.read<NotificationCubit>().startListening(),
+            child: Text(context.tr('retry')),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ========== FORMAT TIMESTAMP ==========
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
 
     if (difference.inMinutes < 1) {
-      return 'Vừa xong';
+      return context.tr('just_now');
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} phút trước';
+      return context.tr('minutes_ago', params: {'count': difference.inMinutes.toString()});
     } else if (difference.inHours < 24) {
-      return '${difference.inHours} giờ trước';
+      return context.tr('hours_ago', params: {'count': difference.inHours.toString()});
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} ngày trước';
+      return context.tr('days_ago', params: {'count': difference.inDays.toString()});
     } else {
       return DateFormat('dd/MM/yyyy').format(timestamp);
     }
   }
 }
 
-// ========== NOTIFICATION MODEL ==========
-class NotificationModel {
-  final String id;
-  final NotificationType type;
-  final String title;
-  final String message;
-  final DateTime timestamp;
-  final bool isRead;
-
-  NotificationModel({
-    required this.id,
-    required this.type,
-    required this.title,
-    required this.message,
-    required this.timestamp,
-    this.isRead = false,
-  });
-
-  NotificationModel copyWith({
-    String? id,
-    NotificationType? type,
-    String? title,
-    String? message,
-    DateTime? timestamp,
-    bool? isRead,
-  }) {
-    return NotificationModel(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      title: title ?? this.title,
-      message: message ?? this.message,
-      timestamp: timestamp ?? this.timestamp,
-      isRead: isRead ?? this.isRead,
-    );
-  }
-}
-
-// ========== NOTIFICATION TYPES ==========
-enum NotificationType {
-  reminder,
-  warning,
-  alert,
-  info,
-  achievement;
-
+extension NotificationTypeUi on NotificationType {
   IconData get icon {
     switch (this) {
-      case NotificationType.reminder:
-        return Icons.access_alarm;
-      case NotificationType.warning:
-        return Icons.warning_amber_rounded;
-      case NotificationType.alert:
-        return Icons.error_outline;
       case NotificationType.info:
         return Icons.info_outline;
-      case NotificationType.achievement:
-        return Icons.emoji_events_outlined;
+      case NotificationType.warning:
+        return Icons.warning_amber_rounded;
+      case NotificationType.error:
+        return Icons.error_outline;
+      case NotificationType.success:
+        return Icons.check_circle_outline;
+      case NotificationType.promotion:
+        return Icons.local_offer_outlined;
+      case NotificationType.system:
+        return Icons.settings_outlined;
     }
   }
 
   Color get color {
     switch (this) {
-      case NotificationType.reminder:
-        return Colors.blue;
-      case NotificationType.warning:
-        return Colors.orange;
-      case NotificationType.alert:
-        return Colors.red;
       case NotificationType.info:
         return Colors.teal;
-      case NotificationType.achievement:
-        return Colors.amber;
+      case NotificationType.warning:
+        return Colors.orange;
+      case NotificationType.error:
+        return Colors.red;
+      case NotificationType.success:
+        return Colors.green;
+      case NotificationType.promotion:
+        return Colors.purple;
+      case NotificationType.system:
+        return Colors.blueGrey;
     }
   }
 }

@@ -3,5 +3,9 @@
     <array name="health_permissions">
         <item>android.permission.health.READ_STEPS</item>
         <item>android.permission.health.WRITE_STEPS</item>
+        <item>android.permission.health.READ_HEART_RATE</item>
+        <item>android.permission.health.WRITE_HEART_RATE</item>
+        <item>android.permission.health.READ_OXYGEN_SATURATION</item>
+        <item>android.permission.health.WRITE_OXYGEN_SATURATION</item>
     </array>
 </resources>

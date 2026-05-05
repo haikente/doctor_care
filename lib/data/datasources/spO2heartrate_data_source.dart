@@ -48,6 +48,8 @@ class Spo2heartrateDataSourceImpl implements Spo2heartrateDataSource {
       'timestamp': record.timestamp.toIso8601String(),
       'spo2': record.spo2,
       'heartRate': record.heartRate,
+      'note': record.note,
+      'source': record.source.name,
       'profileId': record.profileId,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -74,6 +76,8 @@ class Spo2heartrateDataSourceImpl implements Spo2heartrateDataSource {
           timestamp: spO2heartrate.timestamp,
           spo2: spO2heartrate.spo2,
           heartRate: spO2heartrate.heartRate,
+          note: spO2heartrate.note,
+          source: spO2heartrate.source,
           profileId: activeProfileId,
         ),
       );
@@ -106,6 +110,8 @@ class Spo2heartrateDataSourceImpl implements Spo2heartrateDataSource {
         'timestamp': timestampRaw,
         'spo2': data['spo2'],
         'heartRate': data['heartRate'],
+        'note': data['note'],
+        'source': data['source'] ?? 'manual',
         'profileId': profileId,
       };
 
@@ -170,6 +176,8 @@ class Spo2heartrateDataSourceImpl implements Spo2heartrateDataSource {
           timestamp: spO2heartrate.timestamp,
           spo2: spO2heartrate.spo2,
           heartRate: spO2heartrate.heartRate,
+          note: spO2heartrate.note,
+          source: spO2heartrate.source,
           profileId: activeProfileId ?? spO2heartrate.profileId,
         ),
       );

@@ -21,13 +21,14 @@ class SignInEvent extends AuthEvent {
 class SignOutEvent extends AuthEvent {}
 
 class SignUpEvent extends AuthEvent {
+  final String fullName;
   final String email;
   final String password;
 
-  const SignUpEvent(this.email, this.password);
+  const SignUpEvent(this.fullName, this.email, this.password);
 
   @override
-  List<Object> get props => [email, password];
+  List<Object> get props => [fullName, email, password];
 }
 
 class SignInWithGoogleEvent extends AuthEvent {}

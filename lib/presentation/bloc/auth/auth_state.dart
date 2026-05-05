@@ -15,7 +15,7 @@ class Authenticated extends AuthState {
   final UserEntity user;
   final String role;
 
-  const Authenticated(this.user, {this.role = 'patient'});
+  const Authenticated(this.user, {this.role = 'user'});
 
   @override
   List<Object> get props => [user, role];
