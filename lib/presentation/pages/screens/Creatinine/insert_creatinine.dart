@@ -156,7 +156,6 @@ class _InsertCreatinineState extends State<InsertCreatinine> {
                         widget.creatinine!.id.toString(),
                       );
                       Navigator.pop(context);
-                      Navigator.pop(context);
                     }
                   },
                 );

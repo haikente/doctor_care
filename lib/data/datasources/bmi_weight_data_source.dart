@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/db/db_helper.dart';
 import 'package:doctor_care/data/models/bmi_weight_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -73,6 +73,7 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
           : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
 
       final map = <String, dynamic>{
+        if (data['id'] != null) 'id': data['id'],
         'timestamp': timestampRaw,
         'weight': data['weight'],
         'height': data['height'],
@@ -168,3 +169,4 @@ class BMIWeightDataSourceImpl implements BMIWeightDataSource {
     } catch (_) {}
   }
 }
+

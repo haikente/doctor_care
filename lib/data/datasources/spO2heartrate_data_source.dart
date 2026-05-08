@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/db/db_helper.dart';
 import 'package:doctor_care/data/models/spO2heartratemodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -107,6 +107,7 @@ class Spo2heartrateDataSourceImpl implements Spo2heartrateDataSource {
           : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
 
       final map = <String, dynamic>{
+        if (data['id'] != null) 'id': data['id'],
         'timestamp': timestampRaw,
         'spo2': data['spo2'],
         'heartRate': data['heartRate'],
@@ -184,3 +185,4 @@ class Spo2heartrateDataSourceImpl implements Spo2heartrateDataSource {
     } catch (_) {}
   }
 }
+

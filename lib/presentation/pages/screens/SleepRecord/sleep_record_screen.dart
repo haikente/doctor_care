@@ -103,6 +103,16 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
           } else if (state is SleepRecordLoaded) {
             final records = state.records;
 
+            if (records.isNotEmpty &&
+                (_startDate == null || _endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _startDate = records.first.timestamp;
+                  _endDate = DateTime.now();
+                });
+              });
+            }
+
             if (records.isEmpty) {
               return Center(
                 child: Column(
@@ -202,14 +212,16 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                                 label: Text(
                                   "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue.shade800,
+                                    fontSize: 11,
+                                    color: Colors.blue.shade900,
+                                    letterSpacing: 0.5,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 deleteIcon: Icon(
                                   Icons.close,
-                                  size: 16,
-                                  color: Colors.blue.shade800,
+                                  size: 14,
+                                  color: Colors.blue.shade900,
                                 ),
                                 onDeleted: () {
                                   setState(() {
@@ -219,8 +231,8 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(color: Colors.blue.shade800),
+                                  borderRadius: BorderRadius.circular(6),
+                                  side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),
                             if (_selectedDurationStatus != null)
@@ -228,14 +240,16 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                                 label: Text(
                                   _selectedDurationStatus!,
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue.shade800,
+                                    fontSize: 11,
+                                    color: Colors.blue.shade900,
+                                    letterSpacing: 0.5,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 deleteIcon: Icon(
                                   Icons.close,
-                                  size: 16,
-                                  color: Colors.blue.shade800,
+                                  size: 14,
+                                  color: Colors.blue.shade900,
                                 ),
                                 onDeleted: () {
                                   setState(
@@ -244,8 +258,8 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(color: Colors.blue.shade800),
+                                  borderRadius: BorderRadius.circular(6),
+                                  side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),
                             if (_selectedQuality != null)
@@ -253,22 +267,22 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                                 label: Text(
                                   _getQualityLabel(_selectedQuality!),
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue.shade800,
+                                    fontSize: 11,
+                                    color: Colors.blue.shade900,
                                   ),
                                 ),
                                 deleteIcon: Icon(
                                   Icons.close,
-                                  size: 16,
-                                  color: Colors.blue.shade800,
+                                  size: 14,
+                                  color: Colors.blue.shade900,
                                 ),
                                 onDeleted: () {
                                   setState(() => _selectedQuality = null);
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(color: Colors.blue.shade800),
+                                  borderRadius: BorderRadius.circular(6),
+                                  side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),
                           ],

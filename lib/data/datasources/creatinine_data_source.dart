@@ -83,6 +83,7 @@ class CreatinineDataSourceImpl implements CreatinineDataSource {
           : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
 
       final map = <String, dynamic>{
+        if (data['id'] != null) 'id': data['id'],
         'timestamp': timestampRaw,
         'value': data['value'],
         'note': data['note'],

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/db/db_helper.dart';
 import 'package:doctor_care/data/models/blood_sugar_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -79,6 +79,7 @@ class BloodSugarDataSourceImpl implements BloodSugarDataSource {
           : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
 
       final map = <String, dynamic>{
+        if (data['id'] != null) 'id': data['id'],
         'timestamp': timestampRaw,
         'value': data['value'],
         'mealStatus': data['mealStatus'],
@@ -169,3 +170,4 @@ class BloodSugarDataSourceImpl implements BloodSugarDataSource {
     } catch (_) {}
   }
 }
+

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:doctor_care/core/localization/app_localizations.dart';
+import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
@@ -7,6 +8,7 @@ import 'package:doctor_care/domain/entities/food_item.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
+import 'package:gap/gap.dart';
 
 /// Screen displaying AI analysis results with edit capability
 class MealAnalysisResultScreen extends StatefulWidget {
@@ -120,9 +122,10 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.tr('meal_analysis_result_title')),
+      appBar: CustomStackAppBar(
+        title: context.tr('meal_analysis_result_title'),
         centerTitle: true,
+        onBack: () => Navigator.pop(context),
       ),
       body: BlocListener<MealAnalysisBloc, MealAnalysisState>(
         listener: (context, state) {
@@ -159,31 +162,33 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                 child: Image.file(
                   File(widget.imagePath),
                   width: double.infinity,
-                  height: 200,
+                  height: 220,
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 24),
-
+              Gap(20),
               // Dish Name Input
               TextField(
                 controller: _dishNameController,
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Colors.black54,
                 ),
                 decoration: InputDecoration(
                   labelText: context.tr('dish_name_label'),
+                  labelStyle: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
                   hintText: context.tr('dish_name_hint'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  prefixIcon: const Icon(Icons.restaurant),
+                  prefixIcon: Icon(Icons.restaurant, color: Colors.blue, size: 20,),
                 ),
               ),
-              const SizedBox(height: 24),
-
+              Gap(20),
               // Summary card
               Card(
                 elevation: 2,
@@ -192,12 +197,25 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        context.tr('overview'),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade400,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const Gap(10),
+                          Text(
+                            context.tr('overview'),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -231,12 +249,21 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
 
               // Food items list
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Gap(10),
                   Text(
                     context.tr('food_items'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
+                  const Spacer(),
                   Text(
                     context.tr('tap_to_edit'),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
@@ -307,9 +334,22 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
               const SizedBox(height: 24),
 
               // Notes section
-              Text(
-                context.tr('notes'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const Gap(10),
+                  Text(
+                    context.tr('notes'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               TextField(

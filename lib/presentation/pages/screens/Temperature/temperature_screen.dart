@@ -20,10 +20,9 @@ class TemperatureScreen extends StatefulWidget {
 }
 
 class _TemperatureScreenState extends State<TemperatureScreen> {
-
-  String selectedStatus = ""; 
-  DateTime? startDate; 
-  DateTime? endDate; 
+  String selectedStatus = "";
+  DateTime? startDate;
+  DateTime? endDate;
 
   @override
   void initState() {
@@ -31,89 +30,129 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
     context.read<TemperatureCubit>().loadTemperatureRecords();
   }
 
-    // Lọc dữ liệu theo trạng thái và thời gian (cho danh sách card)
+  // Lọc dữ liệu theo trạng thái và thời gian (cho danh sách card)
   List<Temperature> filterByStatus(List<Temperature> records) {
     List<Temperature> filtered = records;
 
     // Lọc theo thời gian
     if (startDate != null && endDate != null) {
       filtered = filtered.where((record) {
-        final recordDate = DateTime(record.timestamp.year, record.timestamp.month, record.timestamp.day);
-        final start = DateTime(startDate!.year, startDate!.month, startDate!.day);
+        final recordDate = DateTime(
+          record.timestamp.year,
+          record.timestamp.month,
+          record.timestamp.day,
+        );
+        final start = DateTime(
+          startDate!.year,
+          startDate!.month,
+          startDate!.day,
+        );
         final end = DateTime(endDate!.year, endDate!.month, endDate!.day);
-        return (recordDate.isAtSameMomentAs(start) || recordDate.isAfter(start)) &&
-               (recordDate.isAtSameMomentAs(end) || recordDate.isBefore(end));
+        return (recordDate.isAtSameMomentAs(start) ||
+                recordDate.isAfter(start)) &&
+            (recordDate.isAtSameMomentAs(end) || recordDate.isBefore(end));
       }).toList();
     }
     // Lọc theo trạng thái (chỉ khi có chọn trạng thái cụ thể)
     if (selectedStatus.isNotEmpty && selectedStatus != "Tất cả") {
-      filtered = filtered.where((record) => record.getStatus == selectedStatus).toList();
-    } 
+      filtered = filtered
+          .where((record) => record.getStatus == selectedStatus)
+          .toList();
+    }
 
     return filtered;
   }
-  
 
-
-   String formatDate(DateTime date) {
+  String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
-   }
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomStackAppBar(
-        onBack:() => Navigator.pop(context),
-         title: "Theo dõi nhiệt độ",
-         centerTitle: true,
-         icon: const Icon(Icons.add_circle_outline_outlined, color: Colors.white, size: 20,),
-         onInfo: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => InsertTemperature(),));
-      },
-     ), 
-     body: BlocBuilder<TemperatureCubit, TemperatureState>(
-      builder: (context, state) {
-        if (state is TemperatureLoading) {
-          return Center(
-            child: CircularProgressIndicator(
-              color: Colors.blue[600],
-            ));
-        } else if (state is TemperatureLoaded) {
-          final temperature = state.temperatures;
-
-          if (temperature.isEmpty) {
+        onBack: () => Navigator.pop(context),
+        title: "Theo dõi nhiệt độ",
+        centerTitle: true,
+        icon: const Icon(
+          Icons.add_circle_outline_outlined,
+          color: Colors.white,
+          size: 20,
+        ),
+        onInfo: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => InsertTemperature()),
+          );
+        },
+      ),
+      body: BlocBuilder<TemperatureCubit, TemperatureState>(
+        builder: (context, state) {
+          if (state is TemperatureLoading) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.medical_information_outlined, size: 80, color: Colors.grey),
-                  Gap(20),
-                  Text(
-                    'Chưa có dữ liệu nhiệt độ',
-                    style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w500),
-                  ),
-                  Gap(10),
-                  Text(
-                    'Nhấn nút + để thêm bản ghi mới',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
+              child: CircularProgressIndicator(color: Colors.blue[600]),
             );
-          }
+          } else if (state is TemperatureLoaded) {
+            final temperature = state.temperatures;
 
-           final filteredRecords = filterByStatus(temperature); 
+            if (temperature.isNotEmpty &&
+                (startDate == null || endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  startDate = temperature.first.timestamp;
+                  endDate = DateTime.now();
+                });
+              });
+            }
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
+            if (temperature.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.medical_information_outlined,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
+                    Gap(20),
+                    Text(
+                      'Chưa có dữ liệu nhiệt độ',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Gap(10),
+                    Text(
+                      'Nhấn nút + để thêm bản ghi mới',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final filteredRecords = filterByStatus(temperature);
+
+            return SingleChildScrollView(
+              child: Column(
+                children: [
                   Padding(
                     padding: const EdgeInsets.all(15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("${filteredRecords.length} bản ghi", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),),
+                        Text(
+                          "${filteredRecords.length} bản ghi",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         GestureDetector(
                           onTap: () {
                             AppDialog.showCustomBottomSheet(
@@ -144,12 +183,15 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.science_outlined, color: AppColor.textSecondary(context),),
-                        )
+                          child: Icon(
+                            Icons.science_outlined,
+                            color: AppColor.textSecondary(context),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  
+
                   Padding(
                     padding: const EdgeInsets.only(left: 15, top: 8),
                     child: Align(
@@ -160,65 +202,93 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                         children: [
                           // Chip ngày - luôn hiển thị khoảng thời gian hiện tại
                           if (startDate != null && endDate != null)
-                          Container(
-                           padding: EdgeInsets.all(5),
-                           decoration: BoxDecoration(
-                           color: Colors.blue[50],
-                           borderRadius: BorderRadius.circular(6),
-                           border: Border.all(color: Colors.blue.shade900, width: 1.5),
-                           ),
-                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "${formatDate(startDate!)} - ${formatDate(endDate!)}",
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.5, color: Colors.blue.shade900),                     
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: Colors.blue.shade900,
+                                  width: 1.5,
+                                ),
                               ),
-                              Gap(6),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    startDate = null;
-                                    endDate = null;
-                                  });
-                                },
-                                child: Icon(Icons.clear, size: 14, color: Colors.blue.shade900,))
-                            ],
-                           ),
-                          ),
-                          
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "${formatDate(startDate!)} - ${formatDate(endDate!)}",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.5,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                  Gap(6),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        startDate = null;
+                                        endDate = null;
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.clear,
+                                      size: 14,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
                           // Chip trạng thái - hiện khi có chọn trạng thái cụ thể
-                          if (selectedStatus.isNotEmpty && selectedStatus != "Tất cả")
-                          Container(
-                           padding: EdgeInsets.all(5),
-                           decoration: BoxDecoration(
-                           color: Colors.blue[50],
-                           borderRadius: BorderRadius.circular(6),
-                           border: Border.all(color: Colors.blue.shade900, width: 1.5),
-                           ),
-                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                selectedStatus,
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.5, color: Colors.blue.shade900),                     
+                          if (selectedStatus.isNotEmpty &&
+                              selectedStatus != "Tất cả")
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: Colors.blue.shade900,
+                                  width: 1.5,
+                                ),
                               ),
-                              Gap(6),
-                              GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedStatus = ""; // Reset filter trạng thái
-                                  });
-                                },
-                                child: Icon(Icons.clear, size: 14, color: Colors.blue.shade900,))
-                            ],
-                           ),
-                          ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    selectedStatus,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.5,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                  Gap(6),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedStatus =
+                                            ""; // Reset filter trạng thái
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.clear,
+                                      size: 14,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ),
                   ),
-                  
+
                   // Empty state khi filter không có kết quả
                   if (filteredRecords.isEmpty)
                     Padding(
@@ -227,7 +297,11 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey.shade400,
+                            ),
                             Gap(16),
                             Text(
                               context.tr('no_results_found'),
@@ -264,158 +338,203 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                         ),
                       ),
                     ),
-                  
+
                   // List view
                   if (filteredRecords.isNotEmpty)
-                  ListView.builder(
-                    shrinkWrap: true, //dùng trong column
-                    physics: const NeverScrollableScrollPhysics(), // không cuộn riêng
-                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                    itemCount: filteredRecords.length,
-                    itemBuilder: (context, index) {
-                      final data = filteredRecords[filteredRecords.length - 1 - index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 13),  // Giống với margin của card
-                        child: Slidable(
-                          key: ValueKey(data.id),
-                          endActionPane: ActionPane(
-                            motion: StretchMotion(),
-                            extentRatio: 0.25,
-                            children: [
-                              CustomSlidableAction(
-                                onPressed: (_) {
-                                  AppDialog.showDeleteConfirm(
-                                    context: context,
-                                    onConfirm: () {
-                                      // Xóa bản ghi từ database
-                                      if (data.id != null) {
-                                      context.read<TemperatureCubit>().deleteTemperatureRecord(data.id.toString());
-                                    }
-                                    // Hiển thị snackbar
-                                    AppSnackBar.show(
+                    ListView.builder(
+                      shrinkWrap: true, //dùng trong column
+                      physics:
+                          const NeverScrollableScrollPhysics(), // không cuộn riêng
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 15,
+                      ),
+                      itemCount: filteredRecords.length,
+                      itemBuilder: (context, index) {
+                        final data =
+                            filteredRecords[filteredRecords.length - 1 - index];
+                        return Container(
+                          margin: const EdgeInsets.only(
+                            bottom: 13,
+                          ), // Giống với margin của card
+                          child: Slidable(
+                            key: ValueKey(data.id),
+                            endActionPane: ActionPane(
+                              motion: StretchMotion(),
+                              extentRatio: 0.25,
+                              children: [
+                                CustomSlidableAction(
+                                  onPressed: (_) {
+                                    AppDialog.showDeleteConfirm(
                                       context: context,
-                                      type: SnackBarType.delete,
+                                      onConfirm: () {
+                                        // Xóa bản ghi từ database
+                                        if (data.id != null) {
+                                          context
+                                              .read<TemperatureCubit>()
+                                              .deleteTemperatureRecord(
+                                                data.id.toString(),
+                                              );
+                                        }
+                                        // Hiển thị snackbar
+                                        AppSnackBar.show(
+                                          context: context,
+                                          type: SnackBarType.delete,
+                                        );
+                                      },
                                     );
-                                  }
+                                  },
+                                  backgroundColor: Colors.redAccent,
+                                  foregroundColor: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  padding: EdgeInsets.zero,
+                                  autoClose: true,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.delete_forever_outlined,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      Gap(2),
+                                      Text(
+                                        context.tr('delete'),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        InsertTemperature(temperature: data),
+                                  ),
                                 );
                               },
-                                backgroundColor: Colors.redAccent,
-                                foregroundColor: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                padding: EdgeInsets.zero,
-                                autoClose: true,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.delete_forever_outlined, color: Colors.white, size: 20),
-                                    Gap(2),
-                                    Text(
-                                      context.tr('delete'),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                              child: _buildDataCard(data),
+                            ),
                           ),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (context) => InsertTemperature(temperature: data),
-                              ));
-                            },
-                          child: _buildDataCard(data),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-
-
-              ],
-            ),
-          );
-        } else if (state is TemperatureError) {
-          return Center(child: Text(state.message));
-        } else {
-          return Center(child: Text(context.tr('no_data')));
-        }
-      },
-        ),
-      );
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          } else if (state is TemperatureError) {
+            return Center(child: Text(state.message));
+          } else {
+            return Center(child: Text(context.tr('no_data')));
+          }
+        },
+      ),
+    );
   }
 
   Widget _buildDataCard(Temperature temperature) {
     return Container(
       constraints: BoxConstraints(minHeight: 88),
       decoration: BoxDecoration(
-      gradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [
-        Colors.blue.shade500,   // đoạn màu xanh
-        Colors.blue.shade300,   // giữ nguyên xanh đến điểm stops
-        Colors.white,  // phần còn lại màu trắng
-        Colors.white,
-      ],
-      stops: [
-        0.0,  // bắt đầu
-        0.2,  // xanh hết 0%
-        0.3,  // từ đây chuyển sang trắng
-        1.0,  // hết container
-      ]
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.blue.shade500, // đoạn màu xanh
+            Colors.blue.shade300, // giữ nguyên xanh đến điểm stops
+            Colors.white, // phần còn lại màu trắng
+            Colors.white,
+          ],
+          stops: [
+            0.0, // bắt đầu
+            0.2, // xanh hết 0%
+            0.3, // từ đây chuyển sang trắng
+            1.0, // hết container
+          ],
+        ),
+        color: Colors.white10,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blue.shade200, width: 1.5),
       ),
-    color: Colors.white10,
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: Colors.blue.shade200, width: 1.5),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-          Row(
-            children: [
-              Text('${temperature.value}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),),
-              Gap(5),
-              Text('°C', style: TextStyle(color: AppColor.textSecondary(context), fontSize: 24),),
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '${temperature.value}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                    Gap(5),
+                    Text(
+                      '°C',
+                      style: TextStyle(
+                        color: AppColor.textSecondary(context),
+                        fontSize: 24,
+                      ),
+                    ),
+                  ],
+                ),
 
-          Row(
-            children: [
-              Text('${temperature.timestamp.day.toString().padLeft(2,"0")}/${temperature.timestamp.month}/${temperature.timestamp.year}',
-                style: TextStyle(color: Colors.grey.shade600,  fontSize: 12),),
-              Gap(5),
-              Text('${temperature.timestamp.hour}:${temperature.timestamp.minute.toString().padLeft(2, '0')}',
-                style: TextStyle(color: Colors.grey.shade600,  fontSize: 12))
-                ],
+                Row(
+                  children: [
+                    Text(
+                      '${temperature.timestamp.day.toString().padLeft(2, "0")}/${temperature.timestamp.month}/${temperature.timestamp.year}',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    Gap(5),
+                    Text(
+                      '${temperature.timestamp.hour}:${temperature.timestamp.minute.toString().padLeft(2, '0')}',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Spacer(),
+            Container(
+              padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: temperature.getBackgroundColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: temperature.getColor),
               ),
-            ],
-          ),
-
-          Spacer(),
-          Container(
-            padding: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-            color: temperature.getBackgroundColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: temperature.getColor)
-          ),
-            child: Text(temperature.getStatus.toString(),
-            style: TextStyle(fontSize: 11, color: temperature.getColor, fontWeight: FontWeight.bold),)
-          )
-        ],
+              child: Text(
+                temperature.getStatus.toString(),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: temperature.getColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 }

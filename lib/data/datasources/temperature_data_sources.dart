@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_care/core/db/db_helper.dart';
 import 'package:doctor_care/data/models/temperature_model.dart';
 import 'package:doctor_care/domain/entities/temperature.dart';
@@ -56,7 +56,7 @@ class TemperatureDataSourceImpl implements TemperatureDataSource {
     await collection.doc(_docIdFromLocalId(localId)).delete();
   }
 
-  //cấp nguồn cục bộ từ đám mây
+  //cáº¥p nguá»“n cá»¥c bá»™ tá»« Ä‘Ã¡m mÃ¢y
   Future<void> _syncDownFromCloud(Database db) async {
     final collection = _temperatureCollection;
     if (collection == null) return;
@@ -80,6 +80,7 @@ class TemperatureDataSourceImpl implements TemperatureDataSource {
           : (int.tryParse('${profileIdRaw ?? ''}') ?? activeProfileId);
 
       final map = <String, dynamic>{
+        if (data['id'] != null) 'id': data['id'],
         'timestamp': timestampRaw,
         'value': data['value'],
         'profileId': profileId,
@@ -167,3 +168,4 @@ class TemperatureDataSourceImpl implements TemperatureDataSource {
     return result.map((e) => TemperatureModel.fromMap(e)).toList();
   }
 }
+

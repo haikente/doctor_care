@@ -78,6 +78,16 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
           } else if (state is CreatinineLoaded) {
             final records = state.records;
 
+            if (records.isNotEmpty &&
+                (_startDate == null || _endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _startDate = records.first.timestamp;
+                  _endDate = DateTime.now();
+                });
+              });
+            }
+
             if (records.isEmpty) {
               return Center(
                 child: Column(
@@ -107,7 +117,6 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
 
             return Column(
               children: [
-                // Info card (vẫn hiển thị mới nhất từ records gốc)
                 _buildInfoCard(records),
                 const Gap(10),
                 Padding(
@@ -165,7 +174,7 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 15,
-                      vertical: 4,
+                      vertical: 2,
                     ),
                     child: Wrap(
                       spacing: 8,
@@ -175,19 +184,21 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
                           Chip(
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(6),
                               side: BorderSide(color: Colors.blue.shade900),
                             ),
                             label: Text(
                               "${formatDate(_startDate!)} - ${formatDate(_endDate!)}",
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
                               ),
                             ),
                             deleteIcon: Icon(
                               Icons.close,
-                              size: 16,
+                              size: 14,
                               color: Colors.blue.shade900,
                             ),
                             onDeleted: () {
@@ -201,19 +212,21 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
                           Chip(
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(6),
                               side: BorderSide(color: Colors.blue.shade900),
                             ),
                             label: Text(
                               _selectedStatus!,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
                               ),
                             ),
                             deleteIcon: Icon(
                               Icons.close,
-                              size: 16,
+                              size: 14,
                               color: Colors.blue.shade900,
                             ),
                             onDeleted: () {

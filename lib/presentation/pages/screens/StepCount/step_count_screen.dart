@@ -36,7 +36,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
 
     if (_startDate != null && _endDate != null) {
       filtered = filtered.where((r) {
-        return r.timestamp.isAfter(_startDate!.subtract(const Duration(days: 1))) &&
+        return r.timestamp.isAfter(
+              _startDate!.subtract(const Duration(days: 1)),
+            ) &&
             r.timestamp.isBefore(_endDate!.add(const Duration(days: 1)));
       }).toList();
     }
@@ -96,7 +98,12 @@ class _StepCountScreenState extends State<StepCountScreen> {
     );
   }
 
-  Widget _buildSyncOption(BuildContext ctx, String label, int daysBack, IconData icon) {
+  Widget _buildSyncOption(
+    BuildContext ctx,
+    String label,
+    int daysBack,
+    IconData icon,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -110,7 +117,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
           foregroundColor: Colors.blue.shade800,
           side: BorderSide(color: Colors.blue.shade200),
           padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       ),
     );
@@ -125,10 +134,14 @@ class _StepCountScreenState extends State<StepCountScreen> {
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: const Text('Từ chối quyền truy cập. Không thể đồng bộ số bước.'),
+          content: const Text(
+            'Từ chối quyền truy cập. Không thể đồng bộ số bước.',
+          ),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
       return;
@@ -149,7 +162,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
             content: Text('Đã đồng bộ $steps bước hôm nay!'),
             backgroundColor: Colors.blue.shade700,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       } else {
@@ -158,7 +173,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
             content: const Text('Chưa có dữ liệu bước chân hôm nay!'),
             backgroundColor: Colors.orange,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -185,12 +202,18 @@ class _StepCountScreenState extends State<StepCountScreen> {
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text(syncedCount > 0
-              ? 'Đã đồng bộ $syncedCount bản ghi bước chân!'
-              : 'Không tìm thấy dữ liệu mới từ Health Connect'),
-          backgroundColor: syncedCount > 0 ? Colors.blue.shade700 : Colors.orange,
+          content: Text(
+            syncedCount > 0
+                ? 'Đã đồng bộ $syncedCount bản ghi bước chân!'
+                : 'Không tìm thấy dữ liệu mới từ Health Connect',
+          ),
+          backgroundColor: syncedCount > 0
+              ? Colors.blue.shade700
+              : Colors.orange,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }
@@ -223,6 +246,17 @@ class _StepCountScreenState extends State<StepCountScreen> {
 
           if (state is StepCountLoaded) {
             final records = state.records;
+
+            if (records.isNotEmpty &&
+                (_startDate == null || _endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _startDate = records.first.timestamp;
+                  _endDate = DateTime.now();
+                });
+              });
+            }
+
             if (records.isEmpty) {
               return Center(
                 child: Column(
@@ -277,15 +311,24 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                   GestureDetector(
                                     onTap: () => _showSyncBottomSheet(),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.blue.shade50,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: Colors.blue.shade200),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: Colors.blue.shade200,
+                                        ),
                                       ),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.sync, size: 16, color: Colors.blue.shade800),
+                                          Icon(
+                                            Icons.sync,
+                                            size: 16,
+                                            color: Colors.blue.shade800,
+                                          ),
                                           const Gap(4),
                                           Text(
                                             "Đồng bộ",
@@ -323,7 +366,10 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                         },
                                       );
                                     },
-                                    child: const Icon(Icons.science_outlined, color: Colors.black54),
+                                    child: const Icon(
+                                      Icons.science_outlined,
+                                      color: Colors.black54,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -331,7 +377,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
                           ),
 
                           // Filter chips
-                          if (_startDate != null || _endDate != null || _selectedStatus != null)
+                          if (_startDate != null ||
+                              _endDate != null ||
+                              _selectedStatus != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Wrap(
@@ -342,9 +390,17 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                     Chip(
                                       label: Text(
                                         "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
-                                        style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.blue.shade900,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                      deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                      deleteIcon: Icon(
+                                        Icons.close,
+                                        size: 14,
+                                        color: Colors.blue.shade900,
+                                      ),
                                       onDeleted: () {
                                         setState(() {
                                           _startDate = null;
@@ -353,24 +409,35 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                       },
                                       backgroundColor: Colors.blue.shade50,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        side: BorderSide(color: Colors.blue.shade800),
+                                        borderRadius: BorderRadius.circular(6),
+                                        side: BorderSide(
+                                          color: Colors.blue.shade900,
+                                        ),
                                       ),
                                     ),
                                   if (_selectedStatus != null)
                                     Chip(
                                       label: Text(
                                         _selectedStatus!,
-                                        style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.blue.shade900,
+                                        ),
                                       ),
-                                      deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                                      deleteIcon: Icon(
+                                        Icons.close,
+                                        size: 14,
+                                        color: Colors.blue.shade900,
+                                      ),
                                       onDeleted: () {
                                         setState(() => _selectedStatus = null);
                                       },
                                       backgroundColor: Colors.blue.shade50,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        side: BorderSide(color: Colors.blue.shade800),
+                                        borderRadius: BorderRadius.circular(6),
+                                        side: BorderSide(
+                                          color: Colors.blue.shade900,
+                                        ),
                                       ),
                                     ),
                                 ],
@@ -383,7 +450,10 @@ class _StepCountScreenState extends State<StepCountScreen> {
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: filteredRecords.length,
                             itemBuilder: (context, index) {
-                              final data = filteredRecords[filteredRecords.length - 1 - index];
+                              final data =
+                                  filteredRecords[filteredRecords.length -
+                                      1 -
+                                      index];
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 13),
                                 child: Slidable(
@@ -400,7 +470,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                               if (data.id != null) {
                                                 context
                                                     .read<StepCountCubit>()
-                                                    .deleteStepCountRecord(data.id.toString());
+                                                    .deleteStepCountRecord(
+                                                      data.id.toString(),
+                                                    );
                                               }
                                             },
                                           );
@@ -411,7 +483,8 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                         padding: EdgeInsets.zero,
                                         autoClose: true,
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             const Icon(
                                               Icons.delete_forever_outlined,
@@ -436,7 +509,8 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => InsertStepCount(stepCount: data),
+                                        builder: (context) =>
+                                            InsertStepCount(stepCount: data),
                                       ),
                                     ),
                                     child: _buildDataCard(data),

@@ -91,6 +91,16 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
           } else if (state is BloodSugarLoaded) {
             final records = state.records;
 
+            if (records.isNotEmpty &&
+                (_startDate == null || _endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _startDate = records.first.timestamp;
+                  _endDate = DateTime.now();
+                });
+              });
+            }
+
             if (records.isEmpty) {
               return Center(
                 child: Column(
@@ -197,14 +207,16 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                             label: Text(
                               "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade800,
+                                fontSize: 11,
+                                color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             deleteIcon: Icon(
                               Icons.close,
-                              size: 16,
-                              color: Colors.blue.shade800,
+                              size: 14,
+                              color: Colors.blue.shade900,
                             ),
                             onDeleted: () {
                               setState(() {
@@ -214,8 +226,8 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                             },
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: Colors.blue.shade800),
+                              borderRadius: BorderRadius.circular(6),
+                              side: BorderSide(color: Colors.blue.shade900),
                             ),
                           ),
                         if (_selectedStatus != null)
@@ -223,22 +235,24 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                             label: Text(
                               _selectedStatus!,
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade800,
+                                fontSize: 11,
+                                color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             deleteIcon: Icon(
                               Icons.close,
-                              size: 16,
-                              color: Colors.blue.shade800,
+                              size: 14,
+                              color: Colors.blue.shade900,
                             ),
                             onDeleted: () {
                               setState(() => _selectedStatus = null);
                             },
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: Colors.blue.shade800),
+                              borderRadius: BorderRadius.circular(6),
+                              side: BorderSide(color: Colors.blue.shade900),
                             ),
                           ),
                         if (_selectedMealStatus != null)
@@ -246,22 +260,24 @@ class _BloodSugarScreenState extends State<BloodSugarScreen> {
                             label: Text(
                               _getMealStatusLabel(_selectedMealStatus!),
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade800,
+                                fontSize: 11,
+                                color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             deleteIcon: Icon(
                               Icons.close,
-                              size: 16,
-                              color: Colors.blue.shade800,
+                              size: 14,
+                              color: Colors.blue.shade900,
                             ),
                             onDeleted: () {
                               setState(() => _selectedMealStatus = null);
                             },
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: Colors.blue.shade800),
+                              borderRadius: BorderRadius.circular(5),
+                              side: BorderSide(color: Colors.blue.shade900),
                             ),
                           ),
                       ],

@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/images/images.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
@@ -26,12 +27,10 @@ class Profilepage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ═══════════ HEADER ═══════════
             _buildHeader(context, theme, isDarkMode),
 
-            // ═══════════ CONTENT ═══════════
             Transform.translate(
-              offset: const Offset(0, -30),
+              offset: const Offset(0, -40),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -42,7 +41,7 @@ class Profilepage extends StatelessWidget {
                     const Gap(24),
 
                     // ── Cài đặt Section ──
-                    _buildSectionTitle(context.tr('settings'), theme),
+                    _buildSectionTitle(context, context.tr('settings'), theme),
                     const Gap(10),
                     _buildMenuCard(theme, [
                       _buildMenuItem(
@@ -97,7 +96,11 @@ class Profilepage extends StatelessWidget {
                     const Gap(24),
 
                     // ── Tùy chọn Section ──
-                    _buildSectionTitle(context.tr('preferences'), theme),
+                    _buildSectionTitle(
+                      context,
+                      context.tr('preferences'),
+                      theme,
+                    ),
                     const Gap(10),
                     _buildMenuCard(theme, [
                       _buildMenuItem(
@@ -121,7 +124,9 @@ class Profilepage extends StatelessWidget {
                             : Icons.light_mode_rounded,
                         iconColor: isDarkMode ? Colors.indigo : Colors.amber,
                         title: context.tr('dark_mode'),
-                        subtitle: isDarkMode ? context.tr('dark_mode_on') : context.tr('dark_mode_off'),
+                        subtitle: isDarkMode
+                            ? context.tr('dark_mode_on')
+                            : context.tr('dark_mode_off'),
                         trailing: Switch(
                           value: isDarkMode,
                           onChanged: (value) {
@@ -137,7 +142,9 @@ class Profilepage extends StatelessWidget {
                         icon: Icons.translate_rounded,
                         iconColor: Colors.green,
                         title: context.tr('language'),
-                        subtitle: context.read<LocaleCubit>().currentLanguageName,
+                        subtitle: context
+                            .read<LocaleCubit>()
+                            .currentLanguageName,
                         onTap: () => _showLanguageDialog(context, theme),
                       ),
                     ]),
@@ -145,7 +152,7 @@ class Profilepage extends StatelessWidget {
                     const Gap(24),
 
                     // ── Hỗ trợ Section ──
-                    _buildSectionTitle(context.tr('support'), theme),
+                    _buildSectionTitle(context, context.tr('support'), theme),
                     const Gap(10),
                     _buildMenuCard(theme, [
                       _buildMenuItem(
@@ -182,175 +189,202 @@ class Profilepage extends StatelessWidget {
     );
   }
 
-
   Widget _buildHeader(BuildContext context, ThemeData theme, bool isDarkMode) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(bottom: 50),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDarkMode
-              ? [const Color(0xFF1E1E2E), const Color(0xFF121218)]
-              : [AppColor.background, AppColor.background.withOpacity(0.7)],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const Gap(20),
-
-            // ── Row: Settings icon right ──
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    context.tr('profile'),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.settings_outlined,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
+    return Stack(
+      children: [
+        Positioned.fill(child: Image.asset(Images.profile, fit: BoxFit.cover)),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.2),
+                  Colors.black.withOpacity(0.2),
                 ],
               ),
             ),
-
-            const Gap(24),
-
-            // ── Avatar ──
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                final String? photoUrl =
-                    state is Authenticated ? state.user.profilePhotoUrl : null;
-
-                return GestureDetector(
-                  onTap: () => _showPhotoOptions(context, state),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.4),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 48,
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          backgroundImage: photoUrl != null
-                              ? NetworkImage(photoUrl)
-                              : null,
-                          child: photoUrl == null
-                              ? const Icon(Icons.person_rounded,
-                                  size: 44, color: Colors.white70)
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
-                                  blurRadius: 6,
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.camera_alt_rounded,
-                              size: 16,
-                              color: theme.primaryColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            const Gap(16),
-
-            // ── Name + Info ──
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is Authenticated) {
-                  return Column(
+          ),
+        ),
+        SafeArea(
+          bottom: false,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 60),
+            child: Column(
+              children: [
+                const Gap(16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        state.user.fullName ?? context.tr('user'),
+                        context.tr('profile'),
                         style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 23,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.settings_outlined,
+                          color: Colors.white,
+                          size: 20,
                         ),
                       ),
                     ],
-                  );
-                }
-                return Column(
-                  children: [
-                    Text(
-                      context.tr('user'),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                  ),
+                ),
+
+                const Gap(28),
+
+                // ── Avatar ──
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    final String? photoUrl = state is Authenticated
+                        ? state.user.profilePhotoUrl
+                        : null;
+
+                    return GestureDetector(
+                      onTap: () => _showPhotoOptions(context, state),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.6),
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.25),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 52,
+                              backgroundColor: Colors.white.withOpacity(0.3),
+                              backgroundImage: photoUrl != null
+                                  ? NetworkImage(photoUrl)
+                                  : null,
+                              child: photoUrl == null
+                                  ? const Icon(
+                                      Icons.person_rounded,
+                                      size: 50,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.primaryColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const Gap(6),
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white.withOpacity(0.7),
-                      ),
-                    ),
-                  ],
-                );
-              },
+                    );
+                  },
+                ),
+
+                const Gap(20),
+
+                // ── Name + Info ──
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is Authenticated) {
+                      return Column(
+                        children: [
+                          Text(
+                            state.user.fullName ?? context.tr('user'),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return Column(
+                      children: [
+                        Text(
+                          context.tr('user'),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const Gap(10),
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  // ═══════════════════════════════════════════
-  // QUICK STATS CARD
-  // ═══════════════════════════════════════════
   Widget _buildQuickStatsCard(BuildContext context, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -416,18 +450,12 @@ class Profilepage extends StatelessWidget {
           const Gap(8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
           const Gap(2),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -442,27 +470,37 @@ class Profilepage extends StatelessWidget {
     );
   }
 
-  // ═══════════════════════════════════════════
-  // SECTION TITLE
-  // ═══════════════════════════════════════════
-  Widget _buildSectionTitle(String title, ThemeData theme) {
+  Widget _buildSectionTitle(
+    BuildContext context,
+    String title,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w700,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-          letterSpacing: 0.3,
-        ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.blue.shade400,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const Gap(10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColor.textPrimary(context),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // ═══════════════════════════════════════════
-  // MENU CARD
-  // ═══════════════════════════════════════════
   Widget _buildMenuCard(ThemeData theme, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
@@ -492,9 +530,6 @@ class Profilepage extends StatelessWidget {
     );
   }
 
-  // ═══════════════════════════════════════════
-  // MENU ITEM
-  // ═══════════════════════════════════════════
   Widget _buildMenuItem({
     required ThemeData theme,
     required IconData icon,
@@ -559,9 +594,6 @@ class Profilepage extends StatelessWidget {
     );
   }
 
-  // ═══════════════════════════════════════════
-  // LOGOUT BUTTON
-  // ═══════════════════════════════════════════
   Widget _buildLogoutButton(BuildContext context, ThemeData theme) {
     return Container(
       width: double.infinity,
@@ -598,9 +630,6 @@ class Profilepage extends StatelessWidget {
     );
   }
 
-  // ═══════════════════════════════════════════
-  // DIALOGS
-  // ═══════════════════════════════════════════
   void _showLogoutDialog(BuildContext context, ThemeData theme) {
     final tr = AppLocalizations.of(context).translate;
     showDialog(
@@ -616,7 +645,11 @@ class Profilepage extends StatelessWidget {
                 color: Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Colors.red,
+                size: 20,
+              ),
             ),
             const Gap(12),
             Text(

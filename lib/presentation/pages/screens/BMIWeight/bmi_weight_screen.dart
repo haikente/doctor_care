@@ -37,7 +37,9 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
     // Filter by date range
     if (_startDate != null && _endDate != null) {
       filteredRecords = filteredRecords.where((record) {
-        return record.timestamp.isAfter(_startDate!.subtract(const Duration(days: 1))) &&
+        return record.timestamp.isAfter(
+              _startDate!.subtract(const Duration(days: 1)),
+            ) &&
             record.timestamp.isBefore(_endDate!.add(const Duration(days: 1)));
       }).toList();
     }
@@ -59,20 +61,24 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
         onBack: () => Navigator.pop(context),
         title: "Chỉ số BMI & Cân nặng",
         centerTitle: true,
-        icon: const Icon(Icons.add_circle_outline_outlined, color: Colors.white, size: 20),
+        icon: const Icon(
+          Icons.add_circle_outline_outlined,
+          color: Colors.white,
+          size: 20,
+        ),
         onInfo: () {
           Navigator.push(
-            context, 
+            context,
             MaterialPageRoute(builder: (_) => InsertBmiWeight()),
           );
         },
-      ), 
+      ),
       body: BlocConsumer<BMIWeightBloc, BMIWeightState>(
         listener: (context, state) {
           if (state is BMIWeightError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -83,57 +89,76 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
           if (state is BMIWeightLoaded) {
             final filteredRecords = filterByStatus(state.records);
 
+            if (filteredRecords.isNotEmpty &&
+                (_startDate == null || _endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _startDate = filteredRecords.first.timestamp;
+                  _endDate = DateTime.now();
+                });
+              });
+            }
+
             return Column(
               children: [
                 // Biểu đồ BMI/Cân nặng
                 BmiChartWidget(records: state.records),
 
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
                   child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "${filteredRecords.length} bản ghi", 
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              FilterBottomSheetBMI.show(
-                                context: context,
-                                initialStartDate: _startDate,
-                                initialEndDate: _endDate,
-                                initialStatus: _selectedStatus,
-                                onApply: (startDate, endDate, status) {
-                                  setState(() {
-                                    _startDate = startDate;
-                                    _endDate = endDate;
-                                    _selectedStatus = status;
-                                  });
-                                },
-                                onReset: () {
-                                  setState(() {
-                                    _startDate = null;
-                                    _endDate = null;
-                                    _selectedStatus = null;
-                                  });
-                                },
-                              );
-                            },
-                            child: Icon(Icons.science_outlined, color: AppColor.textSecondary(context)),
-                          )
-                        ],
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${filteredRecords.length} bản ghi",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      GestureDetector(
+                        onTap: () {
+                          FilterBottomSheetBMI.show(
+                            context: context,
+                            initialStartDate: _startDate,
+                            initialEndDate: _endDate,
+                            initialStatus: _selectedStatus,
+                            onApply: (startDate, endDate, status) {
+                              setState(() {
+                                _startDate = startDate;
+                                _endDate = endDate;
+                                _selectedStatus = status;
+                              });
+                            },
+                            onReset: () {
+                              setState(() {
+                                _startDate = null;
+                                _endDate = null;
+                                _selectedStatus = null;
+                              });
+                            },
+                          );
+                        },
+                        child: Icon(
+                          Icons.science_outlined,
+                          color: AppColor.textSecondary(context),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                
+
                 // Filter chips
-                if (_startDate != null || _endDate != null || _selectedStatus != null)
+                if (_startDate != null ||
+                    _endDate != null ||
+                    _selectedStatus != null)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
+                    decoration: BoxDecoration(color: Colors.white),
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 4,
@@ -142,34 +167,53 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                           Chip(
                             label: Text(
                               "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
-                              style: TextStyle(fontSize: 11, color: Colors.blue.shade900),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                            deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade900),
+                            deleteIcon: Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.blue.shade900,
+                            ),
                             onDeleted: () {
                               setState(() {
                                 _startDate = null;
                                 _endDate = null;
                               });
                             },
-                            backgroundColor: Colors.blue.shade100,
+                            backgroundColor: Colors.blue.shade50,
                             side: BorderSide(color: Colors.blue.shade900),
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                           ),
-                        if (_selectedStatus != null && _selectedStatus != "Tất cả")
+                        if (_selectedStatus != null &&
+                            _selectedStatus != "Tất cả")
                           Chip(
                             label: Text(
                               _selectedStatus!,
-                              style: const TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue.shade900,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                            deleteIcon: const Icon(Icons.close, size: 16),
+                            deleteIcon: Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.blue.shade900,
+                            ),
                             onDeleted: () {
                               setState(() {
                                 _selectedStatus = null;
                               });
                             },
-                            backgroundColor: Colors.white,
-                            side: BorderSide(color: Colors.blue.shade200),
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            backgroundColor: Colors.blue.shade50,
+                            side: BorderSide(color: Colors.blue.shade900),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                           ),
                       ],
                     ),
@@ -182,13 +226,20 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.monitor_weight_outlined, size: 80, color: Colors.grey.shade400),
+                              Icon(
+                                Icons.monitor_weight_outlined,
+                                size: 80,
+                                color: Colors.grey.shade400,
+                              ),
                               const Gap(16),
                               Text(
                                 _startDate != null || _selectedStatus != null
                                     ? context.tr('no_data_matching_filter')
                                     : context.tr('no_data'),
-                                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey.shade600,
+                                ),
                               ),
                             ],
                           ),
@@ -209,21 +260,27 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                                       onPressed: (_) {
                                         AppDialog.showDeleteConfirm(
                                           context: context,
-                                          content: "Bạn có chắc chắn muốn xoá bản ghi này không?",
+                                          content:
+                                              "Bạn có chắc chắn muốn xoá bản ghi này không?",
                                           onConfirm: () {
                                             if (record.id != null) {
                                               context.read<BMIWeightBloc>().add(
-                                                    DeleteBMIWeightRecord(record.id!.toString()),
-                                                  );
+                                                DeleteBMIWeightRecord(
+                                                  record.id!.toString(),
+                                                ),
+                                              );
                                             }
                                           },
                                         );
                                       },
-                                      backgroundColor: Colors.red,
+                                      backgroundColor: Colors.redAccent,
                                       foregroundColor: Colors.white,
                                       icon: Icons.delete,
                                       label: 'Xóa',
-                                      borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                                      borderRadius:
+                                          const BorderRadius.horizontal(
+                                            right: Radius.circular(16),
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -232,7 +289,8 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => InsertBmiWeight(record: record),
+                                        builder: (_) =>
+                                            InsertBmiWeight(record: record),
                                       ),
                                     );
                                   },
@@ -268,10 +326,10 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade100),
       ),
       child: Column(
         children: [
-          // Header: Date and Status Badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
@@ -283,15 +341,26 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade600),
+                Icon(
+                  Icons.calendar_today,
+                  size: 12,
+                  color: Colors.grey.shade500,
+                ),
                 const Gap(8),
                 Text(
                   DateFormat('HH:mm dd/MM/yyyy').format(record.timestamp),
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: record.bmiBackgroundColor,
                     borderRadius: BorderRadius.circular(20),
@@ -300,11 +369,15 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(record.bmiIcon, size: 16, color: record.bmiColor),
+                      Icon(record.bmiIcon, size: 14, color: record.bmiColor),
                       const Gap(6),
                       Text(
                         record.bmiStatus,
-                        style: TextStyle(fontSize: 12, color: record.bmiColor, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: record.bmiColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -313,9 +386,8 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
             ),
           ),
 
-          // Body: BMI, Weight, Height
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16, bottom: 16, right: 16),
             child: Row(
               children: [
                 // BMI
@@ -325,16 +397,22 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                     decoration: BoxDecoration(
                       color: record.bmiBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: record.bmiColor.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: record.bmiColor.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.analytics_outlined, size: 24, color: record.bmiColor),
+                        Icon(
+                          Icons.analytics_outlined,
+                          size: 20,
+                          color: record.bmiColor,
+                        ),
                         const Gap(8),
                         Text(
                           record.bmi.toStringAsFixed(1),
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: record.bmiColor,
                           ),
@@ -342,7 +420,10 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                         const Gap(4),
                         Text(
                           "BMI",
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),
@@ -361,12 +442,16 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.monitor_weight, size: 24, color: Colors.purple.shade700),
+                        Icon(
+                          Icons.monitor_weight,
+                          size: 20,
+                          color: Colors.purple.shade700,
+                        ),
                         const Gap(8),
                         Text(
                           record.weight.toStringAsFixed(1),
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.purple.shade700,
                           ),
@@ -374,7 +459,10 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                         const Gap(4),
                         Text(
                           "kg",
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),
@@ -393,12 +481,16 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.height, size: 24, color: Colors.teal.shade700),
+                        Icon(
+                          Icons.height,
+                          size: 20,
+                          color: Colors.teal.shade700,
+                        ),
                         const Gap(8),
                         Text(
                           record.height.toStringAsFixed(0),
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.teal.shade700,
                           ),
@@ -406,7 +498,10 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                         const Gap(4),
                         Text(
                           "cm",
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),

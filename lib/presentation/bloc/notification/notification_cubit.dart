@@ -22,7 +22,11 @@ class NotificationCubit extends Cubit<NotificationState> {
         final unreadCount = items.where((n) => !n.isRead).length;
         emit(NotificationLoaded(items, unreadCount: unreadCount));
       },
-      onError: (_) => emit(const NotificationError('Tải thông báo thất bại')),
+      onError: (e, stack) {
+        print('Lỗi tải thông báo: ');
+        print(stack);
+        emit(NotificationError('Tải thông báo thất bại: '));
+      },
     );
   }
 

@@ -262,7 +262,7 @@ class Usercase {
               onPressed: () async {
                 try {
                   print('🔄 Bắt đầu cập nhật user: $docId');
-                  
+
                   // Prepare update data
                   final updateData = <String, dynamic>{
                     'fullName': fullNameController.text.trim(),
@@ -298,7 +298,7 @@ class Usercase {
                       .collection('users')
                       .doc(docId)
                       .update(updateData);
-                  
+
                   print('✅ Firestore updated successfully!');
 
                   // Dispose controllers
@@ -309,14 +309,13 @@ class Usercase {
                   weightController.dispose();
                   emergencyContactController.dispose();
                   emergencyPhoneController.dispose();
-                  
+
                   if (!dialogContext.mounted) {
-                    
                     return;
                   }
 
                   Navigator.pop(dialogContext);
-                  
+
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                     const SnackBar(
                       content: Text('✅ Cập nhật thành công!'),
@@ -324,12 +323,12 @@ class Usercase {
                       duration: Duration(seconds: 3),
                     ),
                   );
-                  
+
                   print('✅ Success message shown!');
                 } catch (e, stackTrace) {
                   print('❌ ERROR: $e');
                   print('📍 Stack trace: $stackTrace');
-                  
+
                   if (dialogContext.mounted) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(
                       SnackBar(
@@ -418,22 +417,22 @@ class Usercase {
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
                 child: Center(
-                   child: Container(
-                   width: 48,
+                  child: Container(
+                    width: 48,
                     height: 5,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(10),
-                      ),
                     ),
                   ),
+                ),
               ),
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Icon(Icons.analytics, color: Colors.blue.shade500,),
+                    Icon(Icons.analytics, color: Colors.blue.shade500),
                     const Gap(8),
                     Text(
                       'Thống kê',
@@ -520,9 +519,10 @@ class Usercase {
                             theme,
                             label: collection.label,
                             value: stats.docsOf(collection.key),
-                            icon: collectionIcons[collection.key] ??
-                                Icons.folder,
-                            color: collectionColors[collection.key] ??
+                            icon:
+                                collectionIcons[collection.key] ?? Icons.folder,
+                            color:
+                                collectionColors[collection.key] ??
                                 Colors.blueGrey,
                           ),
                         )
@@ -684,197 +684,463 @@ class Usercase {
     NotificationType selectedType = NotificationType.info;
     var isSending = false;
 
+    IconData getNotificationIcon(NotificationType type) {
+      switch (type) {
+        case NotificationType.info:
+          return Icons.info_outline;
+        case NotificationType.warning:
+          return Icons.warning_amber_rounded;
+        case NotificationType.error:
+          return Icons.error_outline_rounded;
+        case NotificationType.success:
+          return Icons.check_circle_outline_rounded;
+        case NotificationType.promotion:
+          return Icons.local_offer_outlined;
+        case NotificationType.system:
+          return Icons.settings_outlined;
+      }
+    }
+
+    Color getNotificationColor(NotificationType type) {
+      switch (type) {
+        case NotificationType.info:
+          return Colors.blue;
+        case NotificationType.warning:
+          return Colors.orange;
+        case NotificationType.error:
+          return Colors.red;
+        case NotificationType.success:
+          return Colors.green;
+        case NotificationType.promotion:
+          return Colors.purple;
+        case NotificationType.system:
+          return Colors.grey;
+      }
+    }
+
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text('Gửi thông báo cho tất cả', style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),),
-          content: SingleChildScrollView(
-            child: SizedBox(
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            backgroundColor: theme.colorScheme.surface,
+            elevation: 0,
+            child: Container(
+              padding: const EdgeInsets.all(24),
               width: MediaQuery.of(context).size.width * 0.9,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: titleController,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Tiêu đề',
-                      labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                      prefixIcon: Icon(Icons.title, color: Colors.blue,),
-                      border: OutlineInputBorder(),
+              constraints: const BoxConstraints(maxWidth: 450),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.campaign_rounded,
+                            color: Colors.blue,
+                            size: 28,
+                          ),
+                        ),
+                        const Gap(16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Gửi thông báo',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                'Gửi đến tất cả người dùng',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.grey.withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const Gap(12),
-                  TextField(
-                    controller: bodyController,
-                    maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Nội dung',
-                      labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                      alignLabelWithHint: true,
-                      prefixIcon: Icon(Icons.message, color: Colors.blue),
-                      border: OutlineInputBorder(),
+                    const Gap(24),
+
+                    // Tiêu đề
+                    Text(
+                      'Tiêu đề',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const Gap(12),
-                  DropdownButtonFormField<NotificationType>(
-                    value: selectedType,
-                    decoration: const InputDecoration(
-                      labelText: 'Loại thông báo',
-                      labelStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                      prefixIcon: Icon(Icons.category, color: Colors.blue),
-                      border: OutlineInputBorder(),
+                    const Gap(8),
+                    TextField(
+                      controller: titleController,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        hintText: 'Nhập tiêu đề thông báo...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withOpacity(0.5),
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.title,
+                          color: Colors.grey.withOpacity(0.6),
+                        ),
+                        filled: true,
+                        fillColor: theme.colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                      ),
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: NotificationType.info,
-                        child: Text('Thông tin'),
+                    const Gap(16),
+
+                    // Nội dung
+                    Text(
+                      'Nội dung',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      DropdownMenuItem(
-                        value: NotificationType.warning,
-                        child: Text('Cảnh báo'),
-                      ),
-                      DropdownMenuItem(
-                        value: NotificationType.error,
-                        child: Text('Lỗi'),
-                      ),
-                      DropdownMenuItem(
-                        value: NotificationType.success,
-                        child: Text('Thành công'),
-                      ),
-                      DropdownMenuItem(
-                        value: NotificationType.promotion,
-                        child: Text('Khuyến mãi'),
-                      ),
-                      DropdownMenuItem(
-                        value: NotificationType.system,
-                        child: Text('Hệ thống'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setState(() {
-                        selectedType = value;
-                      });
-                    },
-                  ),
-                  const Gap(8),
-                  Text(
-                    'Thông báo sẽ được lưu vào tất cả người dùng.',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
                     ),
-                  ),
-                ],
+                    const Gap(8),
+                    TextField(
+                      controller: bodyController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Nhập nội dung chi tiết...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withOpacity(0.5),
+                          fontSize: 14,
+                        ),
+                        alignLabelWithHint: true,
+                        filled: true,
+                        fillColor: theme.colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                    const Gap(16),
+
+                    // Loại thông báo
+                    Text(
+                      'Loại thông báo',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Gap(8),
+                    DropdownButtonFormField<NotificationType>(
+                      value: selectedType,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey.withOpacity(0.6),
+                      ),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: theme.colorScheme.surface,
+                        prefixIcon: Icon(
+                          getNotificationIcon(selectedType),
+                          color: getNotificationColor(selectedType),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: NotificationType.info,
+                          child: Text(
+                            'Thông tin',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: NotificationType.warning,
+                          child: Text(
+                            'Cảnh báo',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: NotificationType.error,
+                          child: Text(
+                            'Lỗi',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: NotificationType.success,
+                          child: Text(
+                            'Thành công',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: NotificationType.promotion,
+                          child: Text(
+                            'Khuyến mãi',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: NotificationType.system,
+                          child: Text(
+                            'Hệ thống',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => selectedType = value);
+                        }
+                      },
+                    ),
+                    const Gap(24),
+
+                    // Actions
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: isSending
+                                ? null
+                                : () {
+                                    titleController.dispose();
+                                    bodyController.dispose();
+                                    Navigator.pop(dialogContext);
+                                  },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              side: BorderSide(
+                                color: Colors.grey.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Text(
+                              'Hủy',
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.7,
+                                ),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Gap(16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isSending
+                                ? null
+                                : () async {
+                                    final title = titleController.text.trim();
+                                    final body = bodyController.text.trim();
+
+                                    if (title.isEmpty || body.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        dialogContext,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Vui lòng nhập đủ tiêu đề và nội dung.',
+                                          ),
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    setState(() => isSending = true);
+
+                                    try {
+                                      final usersSnap = await FirebaseFirestore
+                                          .instance
+                                          .collection('users')
+                                          .get();
+                                      final userIds = usersSnap.docs
+                                          .map((doc) => doc.id.trim())
+                                          .where((id) => id.isNotEmpty)
+                                          .toList();
+
+                                      if (userIds.isEmpty) {
+                                        if (!dialogContext.mounted) return;
+                                        ScaffoldMessenger.of(
+                                          dialogContext,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Không có người dùng để gửi.',
+                                            ),
+                                            backgroundColor: Colors.orange,
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      await InjectionContainer()
+                                          .notificationRepository
+                                          .sendNotification(
+                                            title: title,
+                                            body: body,
+                                            type: selectedType,
+                                            userIds: userIds,
+                                          );
+
+                                      if (!dialogContext.mounted) return;
+                                      titleController.dispose();
+                                      bodyController.dispose();
+                                      Navigator.pop(dialogContext);
+
+                                      ScaffoldMessenger.of(rootContext).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '✅ Đã gửi thông báo cho ${userIds.length} người dùng.',
+                                          ),
+                                          backgroundColor: Colors.green,
+                                          duration: const Duration(seconds: 3),
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      if (!dialogContext.mounted) return;
+                                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                        SnackBar(
+                                          content: Text('❌ Lỗi: ${e.toString()}'),
+                                          backgroundColor: Colors.red,
+                                          duration: const Duration(seconds: 5),
+                                        ),
+                                      );
+                                    } finally {
+                                      if (dialogContext.mounted) {
+                                        setState(() => isSending = false);
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: isSending
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Gửi ngay',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: isSending
-                  ? null
-                  : () {
-                      titleController.dispose();
-                      bodyController.dispose();
-                      Navigator.pop(dialogContext);
-                    },
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: isSending
-                  ? null
-                  : () async {
-                      final title = titleController.text.trim();
-                      final body = bodyController.text.trim();
-
-                      if (title.isEmpty || body.isEmpty) {
-                        ScaffoldMessenger.of(dialogContext).showSnackBar(
-                          const SnackBar(
-                            content: Text('Vui lòng nhập đủ tiêu đề và nội dung.'),
-                            backgroundColor: Colors.orange,
-                          ),
-                        );
-                        return;
-                      }
-
-                      setState(() => isSending = true);
-
-                      try {
-                        final usersSnap = await FirebaseFirestore.instance
-                            .collection('users')
-                            .get();
-                        final userIds = usersSnap.docs
-                            .map((doc) => doc.id.trim())
-                            .where((id) => id.isNotEmpty)
-                            .toList();
-
-                        if (userIds.isEmpty) {
-                          if (!dialogContext.mounted) return;
-                          ScaffoldMessenger.of(dialogContext).showSnackBar(
-                            const SnackBar(
-                              content: Text('Không có người dùng để gửi.'),
-                              backgroundColor: Colors.orange,
-                            ),
-                          );
-                          return;
-                        }
-
-                        await InjectionContainer()
-                            .notificationRepository
-                            .sendNotification(
-                              title: title,
-                              body: body,
-                              type: selectedType,
-                              userIds: userIds,
-                            );
-
-                        if (!dialogContext.mounted) return;
-                        titleController.dispose();
-                        bodyController.dispose();
-                        Navigator.pop(dialogContext);
-
-                        ScaffoldMessenger.of(rootContext).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '✅ Đã gửi thông báo cho ${userIds.length} người dùng.',
-                            ),
-                            backgroundColor: Colors.green,
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                      } catch (e) {
-                        if (!dialogContext.mounted) return;
-                        ScaffoldMessenger.of(dialogContext).showSnackBar(
-                          SnackBar(
-                            content: Text('❌ Lỗi: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                            duration: const Duration(seconds: 5),
-                          ),
-                        );
-                      } finally {
-                        if (dialogContext.mounted) {
-                          setState(() => isSending = false);
-                        }
-                      }
-                    },
-              child: isSending
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Gửi'),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
- }
+  }
 
   void showBackupDialog(BuildContext context) {
     var isProcessing = false;
@@ -1068,8 +1334,8 @@ class Usercase {
                                   await runWithLock(() async {
                                     final success =
                                         await AdminBackupService.importDatabase(
-                                      sheetContext,
-                                    );
+                                          sheetContext,
+                                        );
                                     if (success && sheetContext.mounted) {
                                       Navigator.pop(sheetContext);
                                     }

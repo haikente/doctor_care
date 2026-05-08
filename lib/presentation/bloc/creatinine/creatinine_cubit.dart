@@ -55,7 +55,7 @@ class CreatinineCubit extends Cubit<CreatinineState> {
     emit(CreatinineLoading());
     try {
       await deleteCreatinine(id);
-      emit(CreatinineLoaded(await getCreatinine()));
+      await loadCreatinineRecords();
     } catch (e) {
       emit(CreatinineError('Không thể xóa dữ liệu Creatinine'));
     }

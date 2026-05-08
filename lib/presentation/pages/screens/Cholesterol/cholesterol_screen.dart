@@ -79,6 +79,15 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
           }
           if (state is CholesterolLoaded) {
             final records = state.records;
+            if (records.isNotEmpty &&
+                (_startDate == null || _endDate == null)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _startDate = records.first.timestamp;
+                  _endDate = DateTime.now();
+                });
+              });
+            }
             if (records.isEmpty) {
               return Center(
                 child: Column(
@@ -166,13 +175,15 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                                 label: Text(
                                   "${DateFormat('dd/MM/yyyy').format(_startDate!)} - ${DateFormat('dd/MM/yyyy').format(_endDate!)}",
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     color: Colors.blue.shade900,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                                 deleteIcon: Icon(
                                   Icons.close,
-                                  size: 16,
+                                  size: 14,
                                   color: Colors.blue.shade900,
                                 ),
                                 onDeleted: () {
@@ -183,7 +194,7 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(6),
                                   side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),
@@ -192,13 +203,15 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                                 label: Text(
                                   _selectedStatus!,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     color: Colors.blue.shade900,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                                 deleteIcon: Icon(
                                   Icons.close,
-                                  size: 16,
+                                  size: 14,
                                   color: Colors.blue.shade900,
                                 ),
                                 onDeleted: () {
@@ -206,7 +219,7 @@ class _CholesterolScreenState extends State<CholesterolScreen> {
                                 },
                                 backgroundColor: Colors.blue.shade50,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(6),
                                   side: BorderSide(color: Colors.blue.shade900),
                                 ),
                               ),

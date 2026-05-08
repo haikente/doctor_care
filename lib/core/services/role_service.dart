@@ -13,15 +13,15 @@ class RoleService {
 
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      
+
       if (!doc.exists) {
-        return 'patient'; // Mặc định là patient
+        return 'users'; // Mặc định là patient
       }
-      
+
       final data = doc.data();
-      return data?['role'] ?? 'patient';
+      return data?['role'] ?? 'users';
     } catch (e) {
-      return 'patient';
+      return 'users';
     }
   }
 
@@ -40,7 +40,7 @@ class RoleService {
   /// Kiểm tra user hiện tại có phải patient không
   static Future<bool> isPatient() async {
     final role = await getCurrentUserRole();
-    return role == 'patient';
+    return role == 'users';
   }
 
   /// Stream để theo dõi role thay đổi real-time
@@ -48,14 +48,10 @@ class RoleService {
     final user = _auth.currentUser;
     if (user == null) return Stream.value('guest');
 
-    return _firestore
-        .collection('users')
-        .doc(user.uid)
-        .snapshots()
-        .map((doc) {
-          if (!doc.exists) return 'patient';
-          return doc.data()?['role'] ?? 'patient';
-        });
+    return _firestore.collection('users').doc(user.uid).snapshots().map((doc) {
+      if (!doc.exists) return 'users';
+      return doc.data()?['role'] ?? 'users';
+    });
   }
 
   /// Update role của user (chỉ admin mới được gọi)
@@ -74,7 +70,7 @@ class RoleService {
       }
 
       // Validate role
-      if (!['admin', 'doctor', 'patient'].contains(newRole)) {
+      if (!['admin', 'doctor', 'users'].contains(newRole)) {
         return false;
       }
 
@@ -99,10 +95,7 @@ class RoleService {
           .get();
 
       return snapshot.docs
-          .map((doc) => {
-                ...doc.data(),
-                'docId': doc.id,
-              })
+          .map((doc) => {...doc.data(), 'docId': doc.id})
           .toList();
     } catch (e) {
       return [];
@@ -113,7 +106,7 @@ class RoleService {
   static Future<Map<String, int>> countUsersByRole() async {
     try {
       final snapshot = await _firestore.collection('users').get();
-      
+
       int adminCount = 0;
       int doctorCount = 0;
       int patientCount = 0;
@@ -141,12 +134,7 @@ class RoleService {
         'total': snapshot.docs.length,
       };
     } catch (e) {
-      return {
-        'admin': 0,
-        'doctor': 0,
-        'patient': 0,
-        'total': 0,
-      };
+      return {'admin': 0, 'doctor': 0, 'patient': 0, 'total': 0};
     }
   }
 
