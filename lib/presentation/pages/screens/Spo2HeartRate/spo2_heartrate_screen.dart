@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/core/ui/snackbar_helper.dart';
@@ -18,6 +19,7 @@ class Spo2HeartRateScreen extends StatefulWidget {
 }
 
 class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
+  String selectedClassify = "";
   String selectedStatus = "";
   DateTime? startDate;
   DateTime? endDate;
@@ -52,10 +54,16 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
       }).toList();
     }
 
-    // Lọc theo trạng thái (chỉ khi có chọn trạng thái cụ thể)
-    if (selectedStatus.isNotEmpty && selectedStatus != "Tất cả") {
+    // Lọc theo phân loại và trạng thái khi có lựa chọn cụ thể.
+    if (selectedClassify.isNotEmpty) {
       filtered = filtered
-          .where((record) => record.combinedStatus == selectedStatus)
+          .where((record) => _sourceCode(record) == selectedClassify)
+          .toList();
+    }
+
+    if (selectedStatus.isNotEmpty) {
+      filtered = filtered
+          .where((record) => _combinedStatusCode(record) == selectedStatus)
           .toList();
     }
 
@@ -90,22 +98,32 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
             const Gap(16),
             Icon(Icons.watch, size: 48, color: Colors.blue[600]),
             const Gap(12),
-            const Text(
-              'Đồng bộ Health Connect',
+            Text(
+              context.tr('health_connect_sync_title'),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Gap(8),
             Text(
-              'Lấy dữ liệu SpO2 & Nhịp tim từ thiết bị đeo qua Health Connect',
+              context.tr('health_connect_sync_desc'),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
             const Gap(20),
-            _buildSyncOption(ctx, 'Hôm nay', 1, Icons.today),
+            _buildSyncOption(ctx, context.tr('today'), 1, Icons.today),
             const Gap(10),
-            _buildSyncOption(ctx, '7 ngày qua', 7, Icons.date_range),
+            _buildSyncOption(
+              ctx,
+              context.tr('last_7_days'),
+              7,
+              Icons.date_range,
+            ),
             const Gap(10),
-            _buildSyncOption(ctx, '30 ngày qua', 30, Icons.calendar_month),
+            _buildSyncOption(
+              ctx,
+              context.tr('last_30_days'),
+              30,
+              Icons.calendar_month,
+            ),
             const Gap(16),
           ],
         ),
@@ -147,7 +165,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "SPO2 & Nhịp tim",
+        title: context.tr('spo2_heart_rate'),
         centerTitle: true,
         icon: const Icon(
           Icons.add_circle_outline_outlined,
@@ -174,7 +192,14 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                       size: 20,
                     ),
                     const Gap(8),
-                    Expanded(child: Text(state.message)),
+                    Expanded(
+                      child: Text(
+                        context.tr(
+                          'sync_success_count',
+                          params: {'count': '${state.syncedCount}'},
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 backgroundColor: state.syncedCount > 0
@@ -201,7 +226,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                   CircularProgressIndicator(color: Colors.blue[600]),
                   const Gap(20),
                   Text(
-                    'Đang đồng bộ từ Health Connect...',
+                    context.tr('syncing_health_connect'),
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.blue[700],
@@ -210,7 +235,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                   ),
                   const Gap(8),
                   Text(
-                    'Vui lòng chờ trong giây lát',
+                    context.tr('please_wait_moment'),
                     style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                   ),
                 ],
@@ -246,7 +271,10 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${filteredRecords.length} bản ghi",
+                          context.tr(
+                            'record_count',
+                            params: {'count': '${filteredRecords.length}'},
+                          ),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -260,19 +288,28 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 initialStartDate: startDate,
                                 initialEndDate: endDate,
                                 initialStatus: selectedStatus,
+                                initialClassify: selectedClassify,
                                 firstAvailableDate: records.first.timestamp,
                                 lastAvailableDate: records.last.timestamp,
-                                onApply: (newStartDate, newEndDate, newStatus) {
-                                  setState(() {
-                                    startDate = newStartDate;
-                                    endDate = newEndDate;
-                                    selectedStatus = newStatus;
-                                  });
-                                },
+                                onApply:
+                                    (
+                                      newStartDate,
+                                      newEndDate,
+                                      newClassify,
+                                      newStatus,
+                                    ) {
+                                      setState(() {
+                                        startDate = newStartDate;
+                                        endDate = newEndDate;
+                                        selectedClassify = newClassify;
+                                        selectedStatus = newStatus;
+                                      });
+                                    },
                                 onReset: () {
                                   setState(() {
                                     startDate = null;
                                     endDate = null;
+                                    selectedClassify = "";
                                     selectedStatus = "";
                                   });
                                 },
@@ -308,10 +345,16 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 endDate = null;
                               }),
                             ),
-                          if (selectedStatus.isNotEmpty &&
-                              selectedStatus != "Tất cả")
+                          if (selectedClassify.isNotEmpty)
                             _buildFilterChip(
-                              selectedStatus,
+                              _sourceLabel(selectedClassify),
+                              () => setState(() {
+                                selectedClassify = "";
+                              }),
+                            ),
+                          if (selectedStatus.isNotEmpty)
+                            _buildFilterChip(
+                              _combinedStatusLabel(selectedStatus),
                               () => setState(() {
                                 selectedStatus = "";
                               }),
@@ -336,7 +379,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                             ),
                             const Gap(16),
                             Text(
-                              'Không tìm thấy kết quả',
+                              context.tr('no_results_found'),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey.shade600,
@@ -345,7 +388,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                             ),
                             const Gap(8),
                             Text(
-                              'Thử thay đổi bộ lọc của bạn',
+                              context.tr('try_change_filters'),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade500,
@@ -357,11 +400,12 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                 setState(() {
                                   startDate = null;
                                   endDate = null;
+                                  selectedClassify = "";
                                   selectedStatus = "";
                                 });
                               },
                               icon: const Icon(Icons.refresh),
-                              label: const Text('Xóa bộ lọc'),
+                              label: Text(context.tr('clear_filter')),
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.blue,
                               ),
@@ -414,7 +458,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                                   backgroundColor: Colors.redAccent,
                                   foregroundColor: Colors.white,
                                   icon: Icons.delete,
-                                  label: 'Xóa',
+                                  label: context.tr('delete'),
                                   borderRadius: const BorderRadius.horizontal(
                                     right: Radius.circular(16),
                                   ),
@@ -436,8 +480,8 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const Gap(16),
-                  const Text(
-                    'Đã xảy ra lỗi',
+                  Text(
+                    context.tr('error_occurred'),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                   const Gap(8),
@@ -494,7 +538,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                 ),
                 const Gap(2),
                 Text(
-                  'Đồng bộ SpO2 & nhịp tim từ thiết bị đeo',
+                  context.tr('sync_spo2_banner_desc'),
                   style: TextStyle(fontSize: 12, color: Colors.blue[600]),
                 ),
               ],
@@ -504,7 +548,10 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
           ElevatedButton.icon(
             onPressed: _showSyncBottomSheet,
             icon: const Icon(Icons.sync, size: 16),
-            label: const Text('Đồng bộ', style: TextStyle(fontSize: 12)),
+            label: Text(
+              context.tr('sync'),
+              style: const TextStyle(fontSize: 12),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue[600],
               foregroundColor: Colors.white,
@@ -527,8 +574,8 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
         children: [
           const Icon(Icons.favorite_outline, size: 80, color: Colors.grey),
           const Gap(20),
-          const Text(
-            'Chưa có dữ liệu SPO2 & Nhịp tim',
+          Text(
+            context.tr('no_spo2_heart_rate_records'),
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey,
@@ -536,15 +583,15 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
             ),
           ),
           const Gap(10),
-          const Text(
-            'Nhấn nút + để nhập tay hoặc đồng bộ từ thiết bị',
+          Text(
+            context.tr('spo2_empty_hint'),
             style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const Gap(24),
           OutlinedButton.icon(
             onPressed: _showSyncBottomSheet,
             icon: const Icon(Icons.watch, size: 18),
-            label: const Text('Đồng bộ từ Health Connect'),
+            label: Text(context.tr('sync_from_health_connect')),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.blue[700],
               side: BorderSide(color: Colors.blue[300]!),
@@ -652,14 +699,14 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                       children: [
                         Icon(
                           record.sourceIcon,
-                          size: 10,
+                          size: 12,
                           color: record.sourceColor,
                         ),
                         const Gap(3),
                         Text(
-                          record.sourceLabel,
+                          _sourceLabel(_sourceCode(record)),
                           style: TextStyle(
-                            fontSize: 9,
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: record.sourceColor,
                           ),
@@ -684,7 +731,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                         Icon(statusIcon, size: 14, color: statusColor),
                         const Gap(4),
                         Text(
-                          record.combinedStatus,
+                          _combinedStatusLabel(_combinedStatusCode(record)),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -769,7 +816,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               ),
                               const Gap(4),
                               Text(
-                                'Nhịp tim',
+                                context.tr('heart_rate_label'),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[700],
@@ -791,7 +838,7 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
                               ),
                               const Gap(4),
                               Text(
-                                'bpm',
+                                context.tr('unit_bpm'),
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Colors.grey[600],
@@ -810,5 +857,53 @@ class _Spo2HeartRateScreenState extends State<Spo2HeartRateScreen> {
         ),
       ),
     );
+  }
+
+  String _sourceCode(SpO2HeartRate record) {
+    switch (record.source) {
+      case SpO2Source.manual:
+        return 'manual';
+      case SpO2Source.healthConnect:
+        return 'device';
+    }
+  }
+
+  String _sourceLabel(String source) {
+    switch (source) {
+      case 'manual':
+        return context.tr('manual_entry');
+      case 'device':
+        return context.tr('device');
+      default:
+        return context.tr('not_selected');
+    }
+  }
+
+  String _combinedStatusCode(SpO2HeartRate record) {
+    if (record.spo2 < 85 || record.heartRate > 150 || record.heartRate < 40) {
+      return 'danger';
+    }
+    if (record.spo2 < 90 || record.heartRate > 120 || record.heartRate < 50) {
+      return 'attention';
+    }
+    if (record.spo2 < 95 || record.heartRate > 100 || record.heartRate < 60) {
+      return 'monitoring';
+    }
+    return 'normal';
+  }
+
+  String _combinedStatusLabel(String status) {
+    switch (status) {
+      case 'normal':
+        return context.tr('status_normal');
+      case 'monitoring':
+        return context.tr('status_monitoring');
+      case 'attention':
+        return context.tr('status_attention');
+      case 'danger':
+        return context.tr('status_danger');
+      default:
+        return context.tr('not_selected');
+    }
   }
 }

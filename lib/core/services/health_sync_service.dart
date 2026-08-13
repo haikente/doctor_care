@@ -143,6 +143,35 @@ class HealthSyncService {
     }
   }
 
+  /// Lấy tổng số bước của một ngày bất kỳ.
+  ///
+  /// Với ngày hôm nay, khoảng thời gian kết thúc ở thời điểm hiện tại.
+  /// Với ngày quá khứ, khoảng thời gian kết thúc ở 00:00 ngày kế tiếp.
+  Future<int?> getStepsForDay(
+    DateTime date, {
+    bool requestPermission = true,
+  }) async {
+    try {
+      if (requestPermission) {
+        final ok = await requestPermissions();
+        if (!ok) return null;
+      }
+
+      final dayStart = DateTime(date.year, date.month, date.day);
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      final dayEnd = dayStart == todayStart
+          ? now
+          : dayStart.add(const Duration(days: 1));
+
+      final steps = await _health.getTotalStepsInInterval(dayStart, dayEnd);
+      return steps;
+    } catch (e) {
+      _log('HealthSync Exception getting steps for day: $e');
+      return null;
+    }
+  }
+
   /// Lấy dữ liệu SpO2 & Heart Rate từ Health Connect
   /// [daysBack] - Số ngày lấy dữ liệu ngược lại (mặc định 7 ngày)
   /// Trả về danh sách kết quả, mỗi kết quả chứa SpO2 và/hoặc Heart Rate

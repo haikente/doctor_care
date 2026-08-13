@@ -299,7 +299,7 @@ class _BarChartPainter extends CustomPainter {
       final barHeight = maxBarHeight * values[i];
       final isToday = i == DateTime.now().weekday - 1;
 
-      // Background bar (target)
+      // nền bar (dùng để hiển thị mục tiêu)
       final bgRect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, 0, barWidth, maxBarHeight),
         const Radius.circular(6),
@@ -308,7 +308,7 @@ class _BarChartPainter extends CustomPainter {
         ..color = const Color(0xFF1E88E5).withOpacity(0.08);
       canvas.drawRRect(bgRect, bgPaint);
 
-      // Value bar (only draw if there's data)
+      // bar chính (dựa trên giá trị thực tế)
       if (barHeight > 0) {
         final barRect = RRect.fromRectAndRadius(
           Rect.fromLTWH(x, maxBarHeight - barHeight, barWidth, barHeight),
@@ -333,7 +333,7 @@ class _BarChartPainter extends CustomPainter {
         canvas.drawRRect(barRect, barPaint);
       }
 
-      // Today indicator dot
+      // chấm nhỏ bên trên bar nếu là ngày hiện tại
       if (isToday) {
         final dotPaint = Paint()..color = const Color(0xFF1E88E5);
         canvas.drawCircle(

@@ -129,8 +129,8 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                       ),
                     ),
                     const Gap(10),
-                    const Text(
-                      'Nhấn nút + để thêm bản ghi mới',
+                    Text(
+                      context.tr('add_new_record_hint'),
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
@@ -150,7 +150,10 @@ class _SleepRecordScreenState extends State<SleepRecordScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${filteredRecords.length} bản ghi",
+                          context.tr(
+                            'record_count',
+                            params: {'count': '${filteredRecords.length}'},
+                          ),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,

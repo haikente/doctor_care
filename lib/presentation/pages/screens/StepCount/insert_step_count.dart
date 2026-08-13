@@ -315,6 +315,7 @@ class _InsertStepCountState extends State<InsertStepCount> {
                   note: _noteController.text.isEmpty
                       ? null
                       : _noteController.text,
+                  source: widget.stepCount?.source ?? StepCountSource.manual,
                 );
                 if (widget.stepCount == null) {
                   context.read<StepCountCubit>().insertStepCountRecord(record);

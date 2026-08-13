@@ -163,13 +163,43 @@ class Mealcard {
     );
   }
 
-    Color _getGIColor(double gi) {
+  Color _getGIColor(double gi) {
     if (gi <= 55) return Colors.green;
     if (gi <= 69) return Colors.orange;
     return Colors.red;
   }
 
-    void _showMealDetail(BuildContext context, MealAnalysis meal) {
+  String _getMealTypeLabel(String? mealType) {
+    switch (mealType) {
+      case 'breakfast':
+        return 'Bữa sáng';
+      case 'lunch':
+        return 'Bữa trưa';
+      case 'dinner':
+        return 'Bữa tối';
+      case 'snack':
+        return 'Bữa phụ';
+      default:
+        return 'Bữa ăn';
+    }
+  }
+
+  IconData _getMealTypeIcon(String? mealType) {
+    switch (mealType) {
+      case 'breakfast':
+        return Icons.free_breakfast_rounded;
+      case 'lunch':
+        return Icons.lunch_dining_rounded;
+      case 'dinner':
+        return Icons.dinner_dining_rounded;
+      case 'snack':
+        return Icons.fastfood_rounded;
+      default:
+        return Icons.restaurant_rounded;
+    }
+  }
+
+  void _showMealDetail(BuildContext context, MealAnalysis meal) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -275,6 +305,37 @@ class Mealcard {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.blue.shade100),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _getMealTypeIcon(meal.mealType),
+                                size: 18,
+                                color: Colors.blue.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Loại bữa: ${_getMealTypeLabel(meal.mealType)}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
 
                         const SizedBox(height: 20),

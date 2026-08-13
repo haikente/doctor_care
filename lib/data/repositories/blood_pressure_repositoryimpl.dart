@@ -16,6 +16,7 @@ class BloodPressureRepositoryImpl implements BloodPressureRepository {
         systolic: bp.systolic,
         diastolic: bp.diastolic,
         timestamp: bp.timestamp,
+        source: bp.source,
       )
     );
   }
@@ -39,6 +40,7 @@ class BloodPressureRepositoryImpl implements BloodPressureRepository {
         systolic: bp.systolic,
         diastolic: bp.diastolic,
         timestamp: bp.timestamp,
+        source: bp.source,
       )
     );   
   }

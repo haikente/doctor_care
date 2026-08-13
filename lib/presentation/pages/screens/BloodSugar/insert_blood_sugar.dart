@@ -27,6 +27,7 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
   bool hasChanges = false;
   DateTime? _selectedDateTime;
   String _selectedMealStatus = 'fasting';
+  String? errorMessage;
 
   List<Map<String, String>> _getMealOptions(BuildContext context) => [
     {'key': 'fasting', 'label': context.tr('meal_status_fasting')},
@@ -81,6 +82,12 @@ class _InsertBloodSugarState extends State<InsertBloodSugar> {
             _selectedMealStatus != widget.bloodSugar!.mealStatus ||
             _selectedDateTime != widget.bloodSugar!.timestamp ||
             _noteController.text != (widget.bloodSugar!.note ?? '');
+      }
+
+      // 4. chỉ số đường huyết không được âm và không quá 1000
+      if (value != null && (value < 0 || value > 1000)) {
+        errorMessage = 'Chỉ số đường huyết phải từ 0 đến 1000';
+        isValid = false;
       }
     });
   }

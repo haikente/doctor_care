@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.doctor_care"
+    namespace = "com.os.doctorcare"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.doctor_care"
+        applicationId = "com.os.doctorcare"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

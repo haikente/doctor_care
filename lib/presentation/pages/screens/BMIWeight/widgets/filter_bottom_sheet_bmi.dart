@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
@@ -46,7 +47,8 @@ class _FilterBottomSheetContent extends StatefulWidget {
   });
 
   @override
-  State<_FilterBottomSheetContent> createState() => _FilterBottomSheetContentState();
+  State<_FilterBottomSheetContent> createState() =>
+      _FilterBottomSheetContentState();
 }
 
 class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
@@ -64,8 +66,8 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
 
   String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
   }
 
   @override
@@ -91,14 +93,18 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   child: Center(
                     child: Text(
                       "Lọc kết quả",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColor.textSecondary(context)),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColor.textSecondary(context),
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(Icons.clear, size: 24),
-                )
+                ),
               ],
             ),
           ),
@@ -109,7 +115,14 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColor.textSecondary(context))),
+                Text(
+                  "Thời gian",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColor.textSecondary(context),
+                  ),
+                ),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -136,7 +149,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                           : "${formatDate(widget.initialStartDate ?? DateTime.now())} - ${formatDate(widget.initialEndDate ?? DateTime.now())}",
                       style: TextStyle(
                         fontSize: 13,
-                        color: _startDate != null ? Colors.black : Colors.black87,
+                        color: _startDate != null
+                            ? Colors.black
+                            : Colors.black87,
                       ),
                     ),
                     Icon(Icons.calendar_today, size: 18, color: Colors.grey),
@@ -149,7 +164,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           // ========== TRẠNG THÁI ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Trạng thái", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              "Trạng thái",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           Padding(
@@ -174,7 +192,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         _selectedStatus = "Thiếu cân";
                       });
                     },
-                    child: _buildStatusChip("Thiếu cân", _selectedStatus == "Thiếu cân"),
+                    child: _buildStatusChip(
+                      "Thiếu cân",
+                      _selectedStatus == "Thiếu cân",
+                    ),
                   ),
                 ),
               ],
@@ -192,7 +213,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         _selectedStatus = "Bình thường";
                       });
                     },
-                    child: _buildStatusChip("Bình thường", _selectedStatus == "Bình thường"),
+                    child: _buildStatusChip(
+                      "Bình thường",
+                      _selectedStatus == "Bình thường",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -203,7 +227,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         _selectedStatus = "Thừa cân";
                       });
                     },
-                    child: _buildStatusChip("Thừa cân", _selectedStatus == "Thừa cân"),
+                    child: _buildStatusChip(
+                      "Thừa cân",
+                      _selectedStatus == "Thừa cân",
+                    ),
                   ),
                 ),
               ],
@@ -221,7 +248,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         _selectedStatus = "Béo phì độ I";
                       });
                     },
-                    child: _buildStatusChip("Béo phì I", _selectedStatus == "Béo phì độ I"),
+                    child: _buildStatusChip(
+                      "Béo phì I",
+                      _selectedStatus == "Béo phì độ I",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -232,7 +262,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         _selectedStatus = "Béo phì độ II";
                       });
                     },
-                    child: _buildStatusChip("Béo phì II", _selectedStatus == "Béo phì độ II"),
+                    child: _buildStatusChip(
+                      "Béo phì II",
+                      _selectedStatus == "Béo phì độ II",
+                    ),
                   ),
                 ),
               ],
@@ -247,7 +280,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   _selectedStatus = "Béo phì độ III";
                 });
               },
-              child: _buildStatusChip("Béo phì III", _selectedStatus == "Béo phì độ III"),
+              child: _buildStatusChip(
+                "Béo phì III",
+                _selectedStatus == "Béo phì độ III",
+              ),
             ),
           ),
 
@@ -259,7 +295,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bộ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         _startDate = null;
@@ -281,7 +317,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         if (_startDate!.isAfter(_endDate!)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Ngày bắt đầu phải trước ngày kết thúc'),
+                              content: Text(
+                                'Ngày bắt đầu phải trước ngày kết thúc',
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );

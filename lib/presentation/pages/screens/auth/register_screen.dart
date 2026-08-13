@@ -1,4 +1,4 @@
-import 'package:doctor_care/core/images/images.dart';
+// import 'package:doctor_care/core/images/images.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutter/material.dart';
@@ -71,12 +71,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              Images.login,
-              fit: BoxFit.cover,
-            ),
-          ),
+          // Positioned.fill(
+          //   child: Image.asset(
+          //     Images.login,
+          //     fit: BoxFit.cover,
+          //   ),
+          // ),
         BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is Authenticated) {
@@ -140,37 +140,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Gap(24),
-        
+                          const Gap(10),
                           // Header
                           Column(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      theme.colorScheme.primary,
-                                      theme.colorScheme.secondary,
-                                    ],
-                                  ),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.colorScheme.primary
-                                          .withOpacity(0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.person_add_rounded,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const Gap(20),
+                              const Gap(10),
                               ShaderMask(
                                 shaderCallback: (bounds) => LinearGradient(
                                   colors: [
@@ -181,46 +155,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: Text(
                                   l10n.translate('register_title'),
                                   style: const TextStyle(
-                                    fontSize: 32,
+                                    fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
                               ),
-                              const Gap(8),
+                              const Gap(4),
                               Text(
                                 l10n.translate('register_subtitle'),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface.withOpacity(
                                     0.6,
                                   ),
+                                  fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
         
-                          const Gap(40),
-        
-                          // Register Card
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: theme.cardColor,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Column(
+                          const Gap(30),
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // Full Name Field
                                 TextFormField(
+                                  style: TextStyle(
+                                      color: Color(0xFF333333),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14
+                                    ),
                                   controller: _fullNameController,
                                   textCapitalization: TextCapitalization.words,
                                   decoration: InputDecoration(
@@ -229,10 +194,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       color: Colors.grey,
                                       fontSize: 14,
                                     ),
-                                    prefixIcon: Icon(
-                                      Icons.person_outline,
-                                      color: theme.colorScheme.primary,
-                                    ),
+                                    // prefixIcon: Icon(
+                                    //   Icons.person_outline,
+                                    //   color: theme.colorScheme.primary,
+                                    // ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -267,6 +232,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         
                                 // Email Field
                                 TextFormField(
+                                  style: TextStyle(
+                                      color: Color(0xFF333333),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14
+                                    ),
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
@@ -275,10 +245,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       color: Colors.grey,
                                       fontSize: 14,
                                     ),
-                                    prefixIcon: Icon(
-                                      Icons.email_outlined,
-                                      color: theme.colorScheme.primary,
-                                    ),
+                                    // prefixIcon: Icon(
+                                    //   Icons.email_outlined,
+                                    //   color: theme.colorScheme.primary,
+                                    // ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -319,6 +289,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         
                                 // Password Field
                                 TextFormField(
+                                  style: TextStyle(
+                                      color: Color(0xFF333333),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14
+                                    ),
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
                                   decoration: InputDecoration(
@@ -327,10 +302,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       color: Colors.grey,
                                       fontSize: 14,
                                     ),
-                                    prefixIcon: Icon(
-                                      Icons.lock_outline,
-                                      color: theme.colorScheme.primary,
-                                    ),
+                                    // prefixIcon: Icon(
+                                    //   Icons.lock_outline,
+                                    //   color: theme.colorScheme.primary,
+                                    // ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
@@ -382,6 +357,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         
                                 // Confirm Password Field
                                 TextFormField(
+                                  style: TextStyle(
+                                      color: Color(0xFF333333),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14
+                                    ),
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureConfirmPassword,
                                   decoration: InputDecoration(
@@ -390,10 +370,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       color: Colors.grey,
                                       fontSize: 14,
                                     ),
-                                    prefixIcon: Icon(
-                                      Icons.lock_reset_outlined,
-                                      color: theme.colorScheme.primary,
-                                    ),
+                                    // prefixIcon: Icon(
+                                    //   Icons.lock_reset_outlined,
+                                    //   color: theme.colorScheme.primary,
+                                    // ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscureConfirmPassword
@@ -652,7 +632,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   ),
         
-                                const Gap(28),
+                                const Gap(20),
         
                                 // Register Button
                                 SizedBox(
@@ -697,7 +677,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ],
                             ),
-                          ),
         
                           const Gap(10),
         

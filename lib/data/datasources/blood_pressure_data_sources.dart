@@ -55,6 +55,7 @@ class BloodPressureDataSourcesImpl implements BloodPressureDataSources {
       'timestamp': record.timestamp.toIso8601String(),
       'systolic': record.systolic,
       'diastolic': record.diastolic,
+      'source': record.source,
       'profileId': record.profileId,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -97,6 +98,7 @@ class BloodPressureDataSourcesImpl implements BloodPressureDataSources {
         'profileId': profileId,
         'systolic': data['systolic'],
         'diastolic': data['diastolic'],
+        'source': data['source'] ?? 'manual',
       };
 
       batch.insert(
@@ -157,6 +159,7 @@ class BloodPressureDataSourcesImpl implements BloodPressureDataSources {
           timestamp: bp.timestamp,
           systolic: bp.systolic,
           diastolic: bp.diastolic,
+          source: bp.source,
         ),
       );
     } catch (_) {}
@@ -203,6 +206,7 @@ class BloodPressureDataSourcesImpl implements BloodPressureDataSources {
           diastolic: bp.diastolic,
           profileId: activeProfileId,
           timestamp: bp.timestamp,
+          source: bp.source,
         ),
       );
     } catch (_) {}

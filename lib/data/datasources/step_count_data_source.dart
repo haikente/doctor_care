@@ -57,6 +57,8 @@ class StepCountDataSourceImpl implements StepCountDataSource {
       'distance': record.distance,
       'caloriesBurned': record.caloriesBurned,
       'timestamp': record.timestamp.toIso8601String(),
+      'note': record.note,
+      'source': record.source.name,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
@@ -99,6 +101,8 @@ class StepCountDataSourceImpl implements StepCountDataSource {
         'steps': data['steps'],
         'distance': data['distance'],
         'caloriesBurned': data['caloriesBurned'],
+        'note': data['note'],
+        'source': data['source'] ?? 'manual',
       };
 
       batch.insert(
@@ -115,11 +119,36 @@ class StepCountDataSourceImpl implements StepCountDataSource {
   Future<void> addStepCount(StepCountModel record) async {
     final db = await dbHelper.database;
     final activeProfileId = await _getActiveFamilyProfile(db);
-
-    final id = await db.insert('step_count', {
+    final payload = {
       ...record.toMap(),
       if (activeProfileId != null) 'profileId': activeProfileId,
-    });
+    };
+
+    int id;
+    if (activeProfileId != null) {
+      final existingRows = await db.query(
+        'step_count',
+        columns: ['id'],
+        where: 'profileId = ? AND timestamp = ?',
+        whereArgs: [activeProfileId, record.timestamp.toIso8601String()],
+        limit: 1,
+      );
+
+      if (existingRows.isNotEmpty) {
+        id = existingRows.first['id'] as int;
+        final updatePayload = Map<String, dynamic>.from(payload)..remove('id');
+        await db.update(
+          'step_count',
+          updatePayload,
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      } else {
+        id = await db.insert('step_count', payload);
+      }
+    } else {
+      id = await db.insert('step_count', payload);
+    }
 
     try {
       await _syncUpsertToCloud(
@@ -130,6 +159,8 @@ class StepCountDataSourceImpl implements StepCountDataSource {
           profileId: activeProfileId,
           steps: record.steps,
           timestamp: record.timestamp,
+          note: record.note,
+          source: record.source,
         ),
       );
     } catch (_) {}
@@ -207,6 +238,8 @@ class StepCountDataSourceImpl implements StepCountDataSource {
           profileId: activeProfileId,
           steps: record.steps,
           timestamp: record.timestamp,
+          note: record.note,
+          source: record.source,
         ),
       );
     } catch (_) {}

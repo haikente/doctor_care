@@ -4,7 +4,6 @@ import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gap/gap.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -14,7 +13,6 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
-
   @override
   void initState() {
     super.initState();
@@ -25,16 +23,16 @@ class _SplashState extends State<Splash> {
 
   Future<void> redirect() async {
     await Future.delayed(const Duration(seconds: 3));
-    
+
     if (!mounted) return;
-    
+
     final hasSession = await AuthStorageService.hasValidSession();
     final currentUser = FirebaseAuth.instance.currentUser;
-    
+
     // Debug
     await AuthStorageService.debugPrint();
-    
-    if (!hasSession) {
+
+    if (!hasSession || currentUser == null) {
       if (currentUser != null) {
         try {
           await FirebaseAuth.instance.signOut();
@@ -46,9 +44,7 @@ class _SplashState extends State<Splash> {
       return;
     }
 
-    if (mounted) {
-      context.read<AuthBloc>().add(CheckAuthStatusEvent());
-    }
+    context.read<AuthBloc>().add(CheckAuthStatusEvent());
   }
 
   @override
@@ -59,16 +55,9 @@ class _SplashState extends State<Splash> {
         children: [
           Center(
             child: SizedBox(
-              height: 130,
-              width: 130,
-              child: Image.asset(Images.splashBackground, fit: BoxFit.cover,))),
-              Gap(20),
-            Text(
-              "Doctor Care",
-              style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue.shade400,
+              height: 200,
+              width: 200,
+              child: Image.asset(Images.logoapp, fit: BoxFit.cover),
             ),
           ),
         ],

@@ -4,7 +4,7 @@ import 'package:doctor_care/core/localization/app_localizations.dart';
 class DailyHealthTip extends StatelessWidget {
   const DailyHealthTip({super.key});
 
-  // Health tips rotate daily
+  // danh sách các tip sức khỏe với icon, title, content và gradient màu sắc
   static final List<_TipData> _tips = [
     _TipData(
       icon: Icons.water_drop_outlined,
@@ -52,7 +52,7 @@ class DailyHealthTip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Choose tip based on day of year
+    // lấy tip dựa trên ngày trong năm để đảm bảo thay đổi hàng ngày
     final dayOfYear = DateTime.now()
         .difference(DateTime(DateTime.now().year, 1, 1))
         .inDays;

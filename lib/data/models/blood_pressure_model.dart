@@ -9,6 +9,7 @@ class BloodPressureModel extends BloodPressure {
     required super.timestamp,
     required super.systolic,
     required super.diastolic,
+    super.source,
   });
 
   factory BloodPressureModel.fromMap(Map<String, dynamic> map) {
@@ -18,6 +19,7 @@ class BloodPressureModel extends BloodPressure {
       timestamp: DateTime.parse(map['timestamp']),
       systolic: map['systolic'],
       diastolic: map['diastolic'],
+      source: map['source'] as String? ?? 'manual',
     );
   }
 
@@ -26,6 +28,7 @@ class BloodPressureModel extends BloodPressure {
       'timestamp': timestamp.toIso8601String(),
       'systolic': systolic,
       'diastolic': diastolic,
+      'source': source,
       'profileId': profileId,
     };
   }

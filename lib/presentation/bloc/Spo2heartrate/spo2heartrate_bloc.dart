@@ -93,10 +93,12 @@ class Spo2heartrateBloc extends Bloc<Spo2heartrateEvent, Spo2heartrateState> {
       );
 
       if (results.isEmpty) {
-        emit(const Spo2heartrateSyncResult(
-          syncedCount: 0,
-          message: 'Không tìm thấy dữ liệu từ Health Connect',
-        ));
+        emit(
+          const Spo2heartrateSyncResult(
+            syncedCount: 0,
+            message: 'Không tìm thấy dữ liệu từ Health Connect',
+          ),
+        );
         // Reload existing records
         add(LoadSpo2HeartRateRecords());
         return;
@@ -107,8 +109,9 @@ class Spo2heartrateBloc extends Bloc<Spo2heartrateEvent, Spo2heartrateState> {
         if (!result.hasAnyData) continue;
 
         // Chỉ lưu nếu có cả SpO2 và Heart Rate, hoặc điền giá trị mặc định
-        final spo2 = result.spo2 ?? 98;       // mặc định 98% nếu chỉ có HR
-        final heartRate = result.heartRate ?? 75; // mặc định 75 bpm nếu chỉ có SpO2
+        final spo2 = result.spo2 ?? 98; // mặc định 98% nếu chỉ có HR
+        final heartRate =
+            result.heartRate ?? 75; // mặc định 75 bpm nếu chỉ có SpO2
 
         final record = SpO2HeartRate(
           spo2: spo2,
@@ -126,10 +129,12 @@ class Spo2heartrateBloc extends Bloc<Spo2heartrateEvent, Spo2heartrateState> {
         }
       }
 
-      emit(Spo2heartrateSyncResult(
-        syncedCount: syncedCount,
-        message: 'Đã đồng bộ $syncedCount bản ghi từ Health Connect',
-      ));
+      emit(
+        Spo2heartrateSyncResult(
+          syncedCount: syncedCount,
+          message: 'Đã đồng bộ $syncedCount bản ghi từ Health Connect',
+        ),
+      );
 
       // Reload dữ liệu
       add(LoadSpo2HeartRateRecords());

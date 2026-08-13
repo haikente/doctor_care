@@ -95,13 +95,13 @@ class FamilyProfileScreen extends StatelessWidget {
             ),
           ),
           const Gap(24),
-          const Text(
-            '',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            context.tr('no_family_profiles'),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Gap(8),
           Text(
-            '',
+            context.tr('family_profile_empty_hint'),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
@@ -255,7 +255,7 @@ class FamilyProfileScreen extends StatelessWidget {
                           ),
                           const Gap(4),
                           Text(
-                            profile.relationshipLabel,
+                            _relationshipLabel(context, profile.relationship),
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey.shade600,
@@ -270,7 +270,10 @@ class FamilyProfileScreen extends StatelessWidget {
                             ),
                             const Gap(4),
                             Text(
-                              '${profile.age} tuổi',
+                              context.tr(
+                                'years_old_count',
+                                params: {'count': '${profile.age}'},
+                              ),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey.shade600,
@@ -280,7 +283,7 @@ class FamilyProfileScreen extends StatelessWidget {
                           if (profile.gender != null) ...[
                             const Gap(12),
                             Text(
-                              profile.genderLabel,
+                              _genderLabel(context, profile.gender),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey.shade600,
@@ -298,5 +301,39 @@ class FamilyProfileScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _relationshipLabel(BuildContext context, String relationship) {
+    switch (relationship) {
+      case 'self':
+        return context.tr('rel_self');
+      case 'spouse':
+        return context.tr('rel_spouse');
+      case 'child':
+        return context.tr('rel_child');
+      case 'parent':
+        return context.tr('rel_parent');
+      case 'sibling':
+        return context.tr('rel_sibling');
+      case 'grandparent':
+        return context.tr('rel_grandparent');
+      case 'other':
+        return context.tr('rel_other');
+      default:
+        return context.tr('not_selected');
+    }
+  }
+
+  String _genderLabel(BuildContext context, String? gender) {
+    switch (gender) {
+      case 'male':
+        return context.tr('gender_male');
+      case 'female':
+        return context.tr('gender_female');
+      case 'other':
+        return context.tr('gender_other');
+      default:
+        return context.tr('not_selected');
+    }
   }
 }

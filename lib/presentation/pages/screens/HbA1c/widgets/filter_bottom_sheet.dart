@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 
@@ -110,7 +111,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Lọc kết quả",
+                      context.tr('filter_results'),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -133,7 +134,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             child: Row(
               children: [
                 Text(
-                  "Thời gian",
+                  context.tr('time'),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 Gap(4),
@@ -176,7 +177,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              "Trạng thái",
+              context.tr('status'),
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ),
@@ -193,29 +194,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       tempStatus = "";
                     });
                   },
+                  child: _buildStatusChip(context.tr('all'), tempStatus == ""),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      tempStatus = "normal";
+                    });
+                  },
                   child: _buildStatusChip(
-                    "Tất cả",
-                    tempStatus == "" || tempStatus == "Tất cả",
+                    context.tr('hba1c_status_normal'),
+                    tempStatus == "normal",
                   ),
                 ),
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      tempStatus = "Bình thường";
+                      tempStatus = "high";
                     });
                   },
                   child: _buildStatusChip(
-                    "Bình thường",
-                    tempStatus == "Bình thường",
+                    context.tr('hba1c_status_high'),
+                    tempStatus == "high",
                   ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      tempStatus = "Cao";
-                    });
-                  },
-                  child: _buildStatusChip("Cao", tempStatus == "Cao"),
                 ),
               ],
             ),
@@ -228,7 +229,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bộ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       widget.onReset();
                       Navigator.pop(context);
@@ -240,13 +241,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Gap(10),
                 Expanded(
                   child: CustomButton(
-                    text: "Áp dụng",
+                    text: context.tr('filter'),
                     onPressed: () {
-                      String finalStatus = tempStatus;
-                      if (tempStatus == "Cao") {
-                        finalStatus = "Cao";
-                      }
-                      widget.onApply(tempStartDate, tempEndDate, finalStatus);
+                      widget.onApply(tempStartDate, tempEndDate, tempStatus);
                       Navigator.pop(context);
                     },
                     gradient: [Colors.blue.shade600, Colors.blue.shade900],

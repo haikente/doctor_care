@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
@@ -12,10 +13,12 @@ class HealthGoalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomStackAppBar(
-        title: 'Mục tiêu sức khỏe',
+        title: tr('health_goal_title'),
         centerTitle: true,
         onBack: () => Navigator.pop(context),
       ),
@@ -28,24 +31,24 @@ class HealthGoalScreen extends StatelessWidget {
               children: [
                 _buildSectionHeader(
                   context,
-                  'Hoạt động hàng ngày',
+                  tr('health_goal_daily_activity'),
                   Icons.directions_run_rounded,
                   Colors.blue,
                 ),
                 const Gap(12),
                 _buildGoalCard(
                   context,
-                  title: 'Số bước chân',
-                  subtitle: 'Mục tiêu bước chân mỗi ngày',
+                  title: tr('health_goal_steps_title'),
+                  subtitle: tr('health_goal_steps_subtitle'),
                   value: '${state.dailySteps}',
-                  unit: 'bước',
+                  unit: tr('steps_unit'),
                   icon: Icons.directions_walk_rounded,
                   iconColor: Colors.green,
                   bgColor: Colors.green.shade50,
                   onEdit: () => _showEditDialog(
                     context,
-                    title: 'Mục tiêu bước chân',
-                    unit: 'bước',
+                    title: tr('health_goal_steps_edit_title'),
+                    unit: tr('steps_unit'),
                     initialValue: state.dailySteps.toString(),
                     isDecimal: false,
                     min: 1000,
@@ -58,8 +61,8 @@ class HealthGoalScreen extends StatelessWidget {
                 const Gap(12),
                 _buildGoalCard(
                   context,
-                  title: 'Lượng nước uống',
-                  subtitle: 'Mục tiêu uống nước mỗi ngày',
+                  title: tr('health_goal_water_title'),
+                  subtitle: tr('health_goal_water_subtitle'),
                   value: '${state.dailyWaterMl}',
                   unit: 'ml',
                   icon: Icons.water_drop_rounded,
@@ -67,7 +70,7 @@ class HealthGoalScreen extends StatelessWidget {
                   bgColor: Colors.blue.shade50,
                   onEdit: () => _showEditDialog(
                     context,
-                    title: 'Mục tiêu uống nước',
+                    title: tr('health_goal_water_edit_title'),
                     unit: 'ml',
                     initialValue: state.dailyWaterMl.toString(),
                     isDecimal: false,
@@ -81,8 +84,8 @@ class HealthGoalScreen extends StatelessWidget {
                 const Gap(12),
                 _buildGoalCard(
                   context,
-                  title: 'Lượng calo nạp vào',
-                  subtitle: 'Mục tiêu calo mỗi ngày',
+                  title: tr('health_goal_calories_title'),
+                  subtitle: tr('health_goal_calories_subtitle'),
                   value: '${state.dailyCalories}',
                   unit: 'kcal',
                   icon: Icons.restaurant_menu_rounded,
@@ -90,7 +93,7 @@ class HealthGoalScreen extends StatelessWidget {
                   bgColor: Colors.orange.shade50,
                   onEdit: () => _showEditDialog(
                     context,
-                    title: 'Mục tiêu calo',
+                    title: tr('health_goal_calories_edit_title'),
                     unit: 'kcal',
                     initialValue: state.dailyCalories.toString(),
                     isDecimal: false,
@@ -104,24 +107,24 @@ class HealthGoalScreen extends StatelessWidget {
                 const Gap(24),
                 _buildSectionHeader(
                   context,
-                  'Giấc ngủ & Cân nặng',
+                  tr('health_goal_sleep_weight'),
                   Icons.bedtime_rounded,
                   Colors.purple,
                 ),
                 const Gap(12),
                 _buildGoalCard(
                   context,
-                  title: 'Thời gian ngủ',
-                  subtitle: 'Mục tiêu số giờ ngủ mỗi đêm',
+                  title: tr('health_goal_sleep_title'),
+                  subtitle: tr('health_goal_sleep_subtitle'),
                   value: state.sleepHours.toStringAsFixed(1),
-                  unit: 'giờ',
+                  unit: tr('unit_hour'),
                   icon: Icons.bedtime_rounded,
                   iconColor: Colors.purple,
                   bgColor: Colors.purple.shade50,
                   onEdit: () => _showEditDialog(
                     context,
-                    title: 'Mục tiêu giấc ngủ',
-                    unit: 'giờ',
+                    title: tr('health_goal_sleep_edit_title'),
+                    unit: tr('unit_hour'),
                     initialValue: state.sleepHours.toString(),
                     isDecimal: true,
                     min: 4,
@@ -133,10 +136,10 @@ class HealthGoalScreen extends StatelessWidget {
                 const Gap(12),
                 _buildGoalCard(
                   context,
-                  title: 'Cân nặng mục tiêu',
+                  title: tr('health_goal_weight_title'),
                   subtitle: state.targetWeight == 0
-                      ? 'Chưa đặt mục tiêu'
-                      : 'Mục tiêu cân nặng của bạn',
+                      ? tr('health_goal_not_set')
+                      : tr('health_goal_weight_subtitle'),
                   value: state.targetWeight == 0
                       ? '--'
                       : state.targetWeight.toStringAsFixed(1),
@@ -146,7 +149,7 @@ class HealthGoalScreen extends StatelessWidget {
                   bgColor: Colors.teal.shade50,
                   onEdit: () => _showEditDialog(
                     context,
-                    title: 'Cân nặng mục tiêu',
+                    title: tr('health_goal_weight_title'),
                     unit: 'kg',
                     initialValue: state.targetWeight == 0
                         ? '65'
@@ -302,7 +305,7 @@ class HealthGoalScreen extends StatelessWidget {
                       Icon(Icons.edit_rounded, size: 12, color: iconColor),
                       const Gap(4),
                       Text(
-                        'Sửa',
+                        context.tr('edit'),
                         style: TextStyle(
                           fontSize: 12,
                           color: iconColor,
@@ -341,7 +344,7 @@ class HealthGoalScreen extends StatelessWidget {
             ),
             const Gap(8),
             Text(
-              'Đặt lại về mặc định',
+              context.tr('health_goal_reset_defaults'),
               style: TextStyle(
                 color: Colors.red.shade400,
                 fontWeight: FontWeight.w600,
@@ -365,6 +368,7 @@ class HealthGoalScreen extends StatelessWidget {
     required Function(double) onSave,
   }) {
     final controller = TextEditingController(text: initialValue);
+    final tr = context.tr;
     String? errorText;
 
     showDialog(
@@ -388,7 +392,10 @@ class HealthGoalScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Nhập giá trị ($min – $max $unit)',
+                    tr(
+                      'health_goal_enter_value',
+                      params: {'min': '$min', 'max': '$max', 'unit': unit},
+                    ),
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                   ),
                   const Gap(12),
@@ -431,7 +438,7 @@ class HealthGoalScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
                   child: Text(
-                    'Huỷ',
+                    tr('cancel'),
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                 ),
@@ -439,11 +446,18 @@ class HealthGoalScreen extends StatelessWidget {
                   onPressed: () {
                     final parsed = double.tryParse(controller.text);
                     if (parsed == null) {
-                      setDialogState(() => errorText = 'Giá trị không hợp lệ');
+                      setDialogState(
+                        () => errorText = tr('health_goal_invalid_value'),
+                      );
                       return;
                     }
                     if (parsed < min || parsed > max) {
-                      setDialogState(() => errorText = 'Phải từ $min đến $max');
+                      setDialogState(
+                        () => errorText = tr(
+                          'health_goal_value_range',
+                          params: {'min': '$min', 'max': '$max'},
+                        ),
+                      );
                       return;
                     }
                     onSave(parsed);
@@ -456,7 +470,7 @@ class HealthGoalScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Lưu'),
+                  child: Text(tr('save')),
                 ),
               ],
             );
@@ -468,21 +482,23 @@ class HealthGoalScreen extends StatelessWidget {
 
   void _showResetConfirmDialog(BuildContext context) {
     final cubit = context.read<HealthGoalCubit>();
+    final tr = context.tr;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Đặt lại mục tiêu',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        title: Text(
+          tr('health_goal_reset_title'),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        content: const Text(
-          'Tất cả mục tiêu sẽ được đặt lại về giá trị mặc định. Bạn có chắc không?',
-        ),
+        content: Text(tr('health_goal_reset_confirm')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Huỷ', style: TextStyle(color: Colors.grey.shade600)),
+            child: Text(
+              tr('cancel'),
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -500,7 +516,7 @@ class HealthGoalScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Đặt lại'),
+            child: Text(tr('reset')),
           ),
         ],
       ),

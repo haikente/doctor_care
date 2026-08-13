@@ -1,25 +1,25 @@
 import 'dart:io';
+
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:doctor_care/domain/entities/meal_analysis.dart';
 import 'package:doctor_care/domain/entities/food_item.dart';
+import 'package:doctor_care/domain/entities/meal_analysis.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-/// Screen displaying AI analysis results with edit capability
 class MealAnalysisResultScreen extends StatefulWidget {
-  final MealAnalysis mealAnalysis;
-  final String imagePath;
-
   const MealAnalysisResultScreen({
     super.key,
     required this.mealAnalysis,
     required this.imagePath,
   });
+
+  final MealAnalysis mealAnalysis;
+  final String imagePath;
 
   @override
   State<MealAnalysisResultScreen> createState() =>
@@ -27,37 +27,81 @@ class MealAnalysisResultScreen extends StatefulWidget {
 }
 
 class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
+  late final TextEditingController _dishNameController;
+  late final TextEditingController _notesController;
   late List<FoodItem> _foodItems;
-  late TextEditingController _notesController;
-  late TextEditingController _dishNameController;
+  late String _selectedMealType;
+
+  static const List<_MealTypeOption> _mealTypeOptions = [
+    _MealTypeOption(
+      value: 'breakfast',
+      labelKey: 'meal_suggestion_breakfast',
+      icon: Icons.free_breakfast_rounded,
+    ),
+    _MealTypeOption(
+      value: 'lunch',
+      labelKey: 'meal_suggestion_lunch',
+      icon: Icons.lunch_dining_rounded,
+    ),
+    _MealTypeOption(
+      value: 'dinner',
+      labelKey: 'meal_suggestion_dinner',
+      icon: Icons.dinner_dining_rounded,
+    ),
+    _MealTypeOption(
+      value: 'snack',
+      labelKey: 'meal_suggestion_snack',
+      icon: Icons.fastfood_rounded,
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _foodItems = List.from(widget.mealAnalysis.foodItems);
-    _notesController = TextEditingController(text: widget.mealAnalysis.notes);
+    _foodItems = List<FoodItem>.from(widget.mealAnalysis.foodItems);
     _dishNameController = TextEditingController(
       text: widget.mealAnalysis.dishName,
     );
+    _notesController = TextEditingController(text: widget.mealAnalysis.notes);
+    _selectedMealType = _resolveInitialMealType(widget.mealAnalysis.mealType);
   }
 
   @override
   void dispose() {
-    _notesController.dispose();
     _dishNameController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
-  void _updateFoodItem(int index, FoodItem updatedItem) {
-    setState(() {
-      _foodItems[index] = updatedItem;
-    });
+  double get _totalCalories {
+    return _foodItems.fold(0.0, (sum, item) => sum + item.calories);
   }
 
-  void _removeFoodItem(int index) {
-    setState(() {
-      _foodItems.removeAt(index);
-    });
+  double get _totalProtein {
+    return _foodItems.fold(0.0, (sum, item) => sum + item.protein);
+  }
+
+  double get _totalCarbs {
+    return _foodItems.fold(0.0, (sum, item) => sum + item.carbs);
+  }
+
+  double get _totalFat {
+    return _foodItems.fold(0.0, (sum, item) => sum + item.fat);
+  }
+
+  double get _averageGI {
+    if (_foodItems.isEmpty) return 0.0;
+
+    var weightedGI = 0.0;
+    var totalCarbs = 0.0;
+
+    for (final item in _foodItems) {
+      if (item.carbs <= 0) continue;
+      weightedGI += item.glycemicIndex * item.carbs;
+      totalCarbs += item.carbs;
+    }
+
+    return totalCarbs == 0 ? 0.0 : weightedGI / totalCarbs;
   }
 
   void _saveMealAnalysis() {
@@ -73,55 +117,57 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
 
     final updatedAnalysis = widget.mealAnalysis.copyWith(
       foodItems: _foodItems,
-      notes: _notesController.text.trim().isEmpty 
-          ? null 
-          : _notesController.text.trim(),
-      dishName: _dishNameController.text.trim().isEmpty
-          ? null
-          : _dishNameController.text.trim(),
+      dishName: _nullableText(_dishNameController.text),
+      mealType: _selectedMealType,
+      notes: _nullableText(_notesController.text),
     );
 
-    try {
-      context.read<MealAnalysisBloc>().add(
-        SaveMealAnalysisEvent(updatedAnalysis),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.tr(
-              'meal_analysis_save_error',
-              params: {'error': e.toString()},
-            ),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    context.read<MealAnalysisBloc>().add(SaveMealAnalysisEvent(updatedAnalysis));
   }
 
-  double get _totalCalories {
-    return _foodItems.fold(0.0, (sum, item) => sum + item.calories);
+  void _removeFoodItem(int index) {
+    setState(() {
+      _foodItems.removeAt(index);
+    });
   }
 
-  double get _averageGI {
-    if (_foodItems.isEmpty) return 0.0;
-    double totalWeightedGI = 0.0;
-    double totalCarbs = 0.0;
+  void _updateFoodItem(int index, FoodItem updatedItem) {
+    setState(() {
+      _foodItems[index] = updatedItem;
+    });
+  }
 
-    for (var item in _foodItems) {
-      if (item.carbs > 0) {
-        totalWeightedGI += item.glycemicIndex * item.carbs;
-        totalCarbs += item.carbs;
-      }
-    }
+  String? _nullableText(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
 
-    return totalCarbs > 0 ? totalWeightedGI / totalCarbs : 0.0;
+  String _resolveInitialMealType(String? mealType) {
+    final exists = _mealTypeOptions.any((option) => option.value == mealType);
+    if (exists) return mealType!;
+    return _defaultMealTypeFor(DateTime.now());
+  }
+
+  String _defaultMealTypeFor(DateTime now) {
+    final hour = now.hour;
+    if (hour < 10) return 'breakfast';
+    if (hour < 14) return 'lunch';
+    if (hour < 20) return 'dinner';
+    return 'snack';
+  }
+
+  Color _giColor(double gi) {
+    if (gi <= 55) return Colors.green;
+    if (gi <= 69) return Colors.orange;
+    return Colors.red;
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: CustomStackAppBar(
         title: context.tr('meal_analysis_result_title'),
         centerTitle: true,
@@ -151,284 +197,405 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
             );
           }
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image preview
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(widget.imagePath),
-                  width: double.infinity,
-                  height: 220,
-                  fit: BoxFit.cover,
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _MealImagePreview(imagePath: widget.imagePath),
+                const Gap(18),
+                _DishDetailsSection(
+                  dishNameController: _dishNameController,
+                  selectedMealType: _selectedMealType,
+                  mealTypeOptions: _mealTypeOptions,
+                  onMealTypeChanged: (value) {
+                    setState(() {
+                      _selectedMealType = value;
+                    });
+                  },
                 ),
-              ),
-              Gap(20),
-              // Dish Name Input
-              TextField(
-                controller: _dishNameController,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
+                const Gap(18),
+                _OverviewCard(
+                  totalCalories: _totalCalories,
+                  averageGI: _averageGI,
+                  foodCount: _foodItems.length,
+                  totalProtein: _totalProtein,
+                  totalCarbs: _totalCarbs,
+                  totalFat: _totalFat,
+                  giColor: _giColor(_averageGI),
                 ),
-                decoration: InputDecoration(
-                  labelText: context.tr('dish_name_label'),
-                  labelStyle: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                  hintText: context.tr('dish_name_hint'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: Icon(Icons.restaurant, color: Colors.blue, size: 20,),
+                const Gap(22),
+                _SectionTitle(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: context.tr('food_items'),
+                  trailing: context.tr('tap_to_edit'),
                 ),
-              ),
-              Gap(20),
-              // Summary card
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 4,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade400,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const Gap(10),
-                          Text(
-                            context.tr('overview'),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildSummaryItem(
-                            context.tr('total_calories'),
-                            '${_totalCalories.toStringAsFixed(0)} kcal',
-                            Icons.local_fire_department,
-                            Colors.orange,
-                          ),
-                          _buildSummaryItem(
-                            context.tr('glycemic_index'),
-                            _averageGI.toStringAsFixed(0),
-                            Icons.analytics,
-                            _getGIColor(_averageGI),
-                          ),
-                          _buildSummaryItem(
-                            context.tr('meals'),
-                            '${_foodItems.length}',
-                            Icons.restaurant,
-                            Colors.blue,
-                          ),
-                        ],
-                      ),
-                    ],
+                const Gap(12),
+                if (_foodItems.isEmpty)
+                  _EmptyFoodItemsMessage(
+                    message: context.tr('meal_analysis_need_food_item_to_save'),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _foodItems.length,
+                    separatorBuilder: (_, __) => const Gap(12),
+                    itemBuilder: (context, index) {
+                      final item = _foodItems[index];
+                      return _FoodItemCard(
+                        key: ValueKey('${item.id}_${item.foodName}_$index'),
+                        foodItem: item,
+                        giColor: _giColor(item.glycemicIndex.toDouble()),
+                        onEdit: () => _showEditFoodItemDialog(index, item),
+                        onDelete: () => _removeFoodItem(index),
+                      );
+                    },
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Food items list
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade400,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Gap(10),
-                  Text(
-                    context.tr('food_items'),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const Spacer(),
-                  Text(
-                    context.tr('tap_to_edit'),
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                if (_hasHealthRecommendations) ...[
+                  const Gap(22),
+                  _HealthRecommendationCard(
+                    recommendations: widget.mealAnalysis.healthRecommendations!,
                   ),
                 ],
-              ),
-              const SizedBox(height: 12),
-
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _foodItems.length,
-                itemBuilder: (context, index) {
-                  final foodItem = _foodItems[index];
-                  return _buildFoodItemCard(
-                    foodItem, 
-                    index,
-                    key: ValueKey('${foodItem.foodName}_$index'),
-                  );
-                },
-              ),
-
-              // Health Recommendations
-              if (widget.mealAnalysis.healthRecommendations != null &&
-                  widget.mealAnalysis.healthRecommendations!.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.health_and_safety,
-                            color: Colors.green.shade700,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            context.tr('health_recommendations'),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green.shade900,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.mealAnalysis.healthRecommendations!,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.green.shade900,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  ),
+                const Gap(22),
+                _SectionTitle(
+                  icon: Icons.notes_rounded,
+                  title: context.tr('notes'),
                 ),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Notes section
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade400,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const Gap(10),
-                  Text(
-                    context.tr('notes'),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _notesController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: context.tr('notes'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Save button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: _saveMealAnalysis,
-                  icon: const Icon(Icons.save_outlined, size: 24),
-                  label: Text(
-                    context.tr('save_meal'),
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade50,
-                    shape: RoundedRectangleBorder(
+                const Gap(12),
+                TextField(
+                  controller: _notesController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: context.tr('notes'),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
+                const Gap(24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: FilledButton.icon(
+                    onPressed: _saveMealAnalysis,
+                    icon: const Icon(Icons.save_outlined),
+                    label: Text(
+                      context.tr('save_meal'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryItem(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  bool get _hasHealthRecommendations {
+    final value = widget.mealAnalysis.healthRecommendations;
+    return value != null && value.trim().isNotEmpty;
+  }
+
+  void _showEditFoodItemDialog(int index, FoodItem foodItem) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return _EditFoodItemDialog(
+          foodItem: foodItem,
+          onSave: (updatedItem) => _updateFoodItem(index, updatedItem),
+        );
+      },
+    );
+  }
+}
+
+class _MealImagePreview extends StatelessWidget {
+  const _MealImagePreview({required this.imagePath});
+
+  final String imagePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: AspectRatio(
+        aspectRatio: 16 / 10,
+        child: Image.file(
+          File(imagePath),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey.shade200,
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: Colors.grey.shade600,
+                size: 40,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _DishDetailsSection extends StatelessWidget {
+  const _DishDetailsSection({
+    required this.dishNameController,
+    required this.selectedMealType,
+    required this.mealTypeOptions,
+    required this.onMealTypeChanged,
+  });
+
+  final TextEditingController dishNameController;
+  final String selectedMealType;
+  final List<_MealTypeOption> mealTypeOptions;
+  final ValueChanged<String> onMealTypeChanged;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: color,
+        TextField(
+          controller: dishNameController,
+          textInputAction: TextInputAction.next,
+          decoration: InputDecoration(
+            labelText: context.tr('dish_name_label'),
+            hintText: context.tr('dish_name_hint'),
+            prefixIcon: Icon(Icons.restaurant_rounded,),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        const Gap(12),
+        DropdownButtonFormField<String>(
+          value: selectedMealType,
+          isExpanded: true,
+          decoration: InputDecoration(
+            labelText: context.tr('meal_type_label'),
+            prefixIcon: const Icon(Icons.schedule_rounded),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          items: mealTypeOptions.map((option) {
+            return DropdownMenuItem<String>(
+              value: option.value,
+              child: Row(
+                children: [
+                  Icon(option.icon, size: 20),
+                  const Gap(10),
+                  Expanded(
+                    child: Text(
+                      context.tr(option.labelKey),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            onMealTypeChanged(value);
+          },
+        ),
       ],
     );
   }
+}
 
-  Widget _buildFoodItemCard(
-    FoodItem foodItem, 
-    int index, {
-    Key? key,
-  }) {
+class _OverviewCard extends StatelessWidget {
+  const _OverviewCard({
+    required this.totalCalories,
+    required this.averageGI,
+    required this.foodCount,
+    required this.totalProtein,
+    required this.totalCarbs,
+    required this.totalFat,
+    required this.giColor,
+  });
+
+  final double totalCalories;
+  final double averageGI;
+  final int foodCount;
+  final double totalProtein;
+  final double totalCarbs;
+  final double totalFat;
+  final Color giColor;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
-      key: key,
-      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionTitle(
+              icon: Icons.analytics_rounded,
+              title: context.tr('overview'),
+            ),
+            const Gap(14),
+            Row(
+              children: [
+                Expanded(
+                  child: _OverviewMetric(
+                    label: context.tr('total_calories'),
+                    value: totalCalories.toStringAsFixed(0),
+                    unit: 'kcal',
+                    icon: Icons.local_fire_department_rounded,
+                    color: Colors.orange,
+                  ),
+                ),
+                Expanded(
+                  child: _OverviewMetric(
+                    label: context.tr('glycemic_index'),
+                    value: averageGI.toStringAsFixed(0),
+                    icon: Icons.speed_rounded,
+                    color: giColor,
+                  ),
+                ),
+                Expanded(
+                  child: _OverviewMetric(
+                    label: context.tr('food_items'),
+                    value: '$foodCount',
+                    icon: Icons.restaurant_rounded,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+            const Gap(16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _MacroChip(label: context.tr('protein'), value: totalProtein),
+                _MacroChip(label: context.tr('carbs'), value: totalCarbs),
+                _MacroChip(label: context.tr('fat'), value: totalFat),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OverviewMetric extends StatelessWidget {
+  const _OverviewMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.unit,
+  });
+
+  final String label;
+  final String value;
+  final String? unit;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 28),
+        const Gap(6),
+        Text(
+          unit == null ? value : '$value $unit',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: color,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const Gap(2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 12,
+            height: 1.2,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MacroChip extends StatelessWidget {
+  const _MacroChip({required this.label, required this.value});
+
+  final String label;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$label: ${value.toStringAsFixed(1)}g',
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blue),
+      ),
+    );
+  }
+}
+
+class _FoodItemCard extends StatelessWidget {
+  const _FoodItemCard({
+    super.key,
+    required this.foodItem,
+    required this.giColor,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final FoodItem foodItem;
+  final Color giColor;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => _showEditDialog(foodItem, index),
+        onTap: onEdit,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -438,38 +605,42 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                       foodItem.foodName,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const Gap(4),
                     Text(
                       '${foodItem.portionGrams.toStringAsFixed(0)}g',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const Gap(10),
                     Wrap(
                       spacing: 8,
-                      runSpacing: 4,
+                      runSpacing: 8,
                       children: [
-                        _buildNutrientChip(
-                          '${foodItem.calories.toStringAsFixed(0)} kcal',
-                          Colors.orange,
+                        _NutrientChip(
+                          label:
+                              '${foodItem.calories.toStringAsFixed(0)} kcal',
+                          color: Colors.orange,
                         ),
-                        _buildNutrientChip(
-                          'GI: ${foodItem.glycemicIndex}',
-                          _getGIColor(foodItem.glycemicIndex.toDouble()),
+                        _NutrientChip(
+                          label: 'GI ${foodItem.glycemicIndex}',
+                          color: giColor,
                         ),
-                        _buildNutrientChip(
-                          'P: ${foodItem.protein.toStringAsFixed(1)}g',
-                          Colors.blue,
+                        _NutrientChip(
+                          label: 'P ${foodItem.protein.toStringAsFixed(1)}g',
+                          color: Colors.blue,
                         ),
-                        _buildNutrientChip(
-                          'C: ${foodItem.carbs.toStringAsFixed(1)}g',
-                          Colors.green,
+                        _NutrientChip(
+                          label: 'C ${foodItem.carbs.toStringAsFixed(1)}g',
+                          color: Colors.green,
                         ),
-                        _buildNutrientChip(
-                          'F: ${foodItem.fat.toStringAsFixed(1)}g',
-                          Colors.purple,
+                        _NutrientChip(
+                          label: 'F ${foodItem.fat.toStringAsFixed(1)}g',
+                          color: Colors.purple,
                         ),
                       ],
                     ),
@@ -477,8 +648,10 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _removeFoodItem(index),
+                tooltip: context.tr('delete'),
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded),
+                color: Colors.red,
               ),
             ],
           ),
@@ -486,60 +659,153 @@ class _MealAnalysisResultScreenState extends State<MealAnalysisResultScreen> {
       ),
     );
   }
+}
 
-  Widget _buildNutrientChip(String label, Color color) {
+class _NutrientChip extends StatelessWidget {
+  const _NutrientChip({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(0.10),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12,
           color: color,
-          fontWeight: FontWeight.w500,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
-      ),
-    );
-  }
-
-  Color _getGIColor(double gi) {
-    if (gi <= 55) return Colors.green;
-    if (gi <= 69) return Colors.orange;
-    return Colors.red;
-  }
-
-  void _showEditDialog(FoodItem foodItem, int index) {
-    showDialog(
-      context: context,
-      builder: (context) => _EditFoodItemDialog(
-        foodItem: foodItem,
-        onSave: (updatedItem) {
-          _updateFoodItem(index, updatedItem);
-        },
       ),
     );
   }
 }
 
-/// Separate StatefulWidget for edit dialog to properly manage controller lifecycle
-class _EditFoodItemDialog extends StatefulWidget {
-  final FoodItem foodItem;
-  final Function(FoodItem) onSave;
+class _HealthRecommendationCard extends StatelessWidget {
+  const _HealthRecommendationCard({required this.recommendations});
 
+  final String recommendations;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(
+            icon: Icons.health_and_safety_rounded,
+            title: context.tr('health_recommendations'),
+            color: Colors.green.shade800,
+          ),
+          const Gap(10),
+          Text(
+            recommendations,
+            style: TextStyle(
+              color: Colors.green.shade900,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({
+    required this.icon,
+    required this.title,
+    this.trailing,
+    this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? trailing;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = color ?? Colors.blue.shade700;
+
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: effectiveColor),
+        const Gap(8),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              color: effectiveColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        if (trailing != null)
+          Text(
+            trailing!,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          ),
+      ],
+    );
+  }
+}
+
+class _EmptyFoodItemsMessage extends StatelessWidget {
+  const _EmptyFoodItemsMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(
+          color: Colors.orange.shade800,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _EditFoodItemDialog extends StatefulWidget {
   const _EditFoodItemDialog({
     required this.foodItem,
     required this.onSave,
   });
+
+  final FoodItem foodItem;
+  final ValueChanged<FoodItem> onSave;
 
   @override
   State<_EditFoodItemDialog> createState() => _EditFoodItemDialogState();
 }
 
 class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
-  late TextEditingController _portionController;
+  late final TextEditingController _portionController;
 
   @override
   void initState() {
@@ -555,21 +821,23 @@ class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
     super.dispose();
   }
 
-  void _handleSave() {
-    final newPortion = double.tryParse(_portionController.text) ?? 
-                      widget.foodItem.portionGrams;
-    final ratio = newPortion / widget.foodItem.portionGrams;
+  void _save() {
+    final nextPortion = double.tryParse(_portionController.text.trim());
+    if (nextPortion == null || nextPortion <= 0) return;
 
-    final updatedItem = widget.foodItem.copyWith(
-      portionGrams: newPortion,
-      calories: widget.foodItem.calories * ratio,
-      protein: widget.foodItem.protein * ratio,
-      carbs: widget.foodItem.carbs * ratio,
-      fat: widget.foodItem.fat * ratio,
-      fiber: widget.foodItem.fiber * ratio,
+    final currentPortion = widget.foodItem.portionGrams;
+    final ratio = currentPortion <= 0 ? 1.0 : nextPortion / currentPortion;
+
+    widget.onSave(
+      widget.foodItem.copyWith(
+        portionGrams: nextPortion,
+        calories: widget.foodItem.calories * ratio,
+        protein: widget.foodItem.protein * ratio,
+        carbs: widget.foodItem.carbs * ratio,
+        fat: widget.foodItem.fat * ratio,
+        fiber: widget.foodItem.fiber * ratio,
+      ),
     );
-
-    widget.onSave(updatedItem);
     Navigator.pop(context);
   }
 
@@ -584,24 +852,25 @@ class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _portionController,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
             decoration: InputDecoration(
               labelText: context.tr('portion_grams_label'),
-              border: OutlineInputBorder(),
               suffixText: 'g',
+              border: const OutlineInputBorder(),
             ),
           ),
-          const SizedBox(height: 12),
+          const Gap(10),
           Text(
             context.tr('nutrition_recalc_note'),
             style: TextStyle(
-              fontSize: 12,
               color: Colors.grey.shade600,
-              fontStyle: FontStyle.italic,
+              fontSize: 12,
+              height: 1.3,
             ),
           ),
         ],
@@ -611,11 +880,23 @@ class _EditFoodItemDialogState extends State<_EditFoodItemDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(context.tr('cancel')),
         ),
-        ElevatedButton(
-          onPressed: _handleSave,
+        FilledButton(
+          onPressed: _save,
           child: Text(context.tr('save')),
         ),
       ],
     );
   }
+}
+
+class _MealTypeOption {
+  const _MealTypeOption({
+    required this.value,
+    required this.labelKey,
+    required this.icon,
+  });
+
+  final String value;
+  final String labelKey;
+  final IconData icon;
 }

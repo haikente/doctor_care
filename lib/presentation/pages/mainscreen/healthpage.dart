@@ -16,6 +16,7 @@ class Healthpage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return SafeArea(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -29,13 +30,13 @@ class Healthpage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.orange.shade300],
+                    colors: [primary.withOpacity(0.95), const Color(0xFF20A386)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: primary.withOpacity(0.1),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),

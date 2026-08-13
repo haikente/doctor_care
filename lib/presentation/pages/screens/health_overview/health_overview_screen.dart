@@ -1,5 +1,6 @@
-﻿import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/presentation/bloc/blood_pressure/blood_pressure_cubit.dart';
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/presentation/bloc/hba1c/hba1c_cubit.dart';
 import 'package:doctor_care/presentation/bloc/temperature/temperature_cubit.dart';
 import 'package:doctor_care/presentation/bloc/Spo2heartrate/spo2heartrate_bloc.dart';
@@ -16,19 +17,21 @@ class HealthOverviewScreen extends StatefulWidget {
 }
 
 class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
-  String _selectedPeriod = 'Tuần này';
+  String _selectedPeriod = 'week';
+  
+  get primary => Theme.of(context).colorScheme.primary;
 
   DateTime _getStartDate() {
     final now = DateTime.now();
     switch (_selectedPeriod) {
-      case 'Hôm nay':
+      case 'today':
         return DateTime(now.year, now.month, now.day);
-      case 'Tuần này':
+      case 'week':
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         return DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-      case 'Tháng này':
+      case 'month':
         return DateTime(now.year, now.month, 1);
-      case 'Năm nay':
+      case 'year':
         return DateTime(now.year, 1, 1);
       default:
         return DateTime(1970);
@@ -43,7 +46,11 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   bool _isThisWeek(DateTime date) {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final startDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+    final startDate = DateTime(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
+    );
     return date.isAfter(startDate) || date.isAtSameMomentAs(startDate);
   }
 
@@ -53,7 +60,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: 'Sức khoẻ tổng quan',
+        title: context.tr('health_overview_title'),
         centerTitle: true,
       ),
       body: BlocBuilder<BloodPressureCubit, BloodPressureState>(
@@ -64,7 +71,12 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
                 builder: (context, tempState) {
                   return BlocBuilder<Spo2heartrateBloc, Spo2heartrateState>(
                     builder: (context, spo2State) {
-                      return _buildBodyContent(bpState, hba1cState, tempState, spo2State);
+                      return _buildBodyContent(
+                        bpState,
+                        hba1cState,
+                        tempState,
+                        spo2State,
+                      );
                     },
                   );
                 },
@@ -94,7 +106,12 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
           const Gap(20),
           _buildDetailedMetrics(bpState, hba1cState, tempState, spo2State),
           const Gap(20),
-          _buildHealthRecommendations(bpState, hba1cState, tempState, spo2State),
+          _buildHealthRecommendations(
+            bpState,
+            hba1cState,
+            tempState,
+            spo2State,
+          ),
           const Gap(60),
         ],
       ),
@@ -102,41 +119,91 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   }
 
   List<dynamic> _getFilteredBp(BloodPressureState state) {
-    if (state is BloodPressureLoaded) return state.records.where((e) => _isRecordInPeriod(e.timestamp)).toList();
+    if (state is BloodPressureLoaded) {
+      return state.records
+          .where((e) => _isRecordInPeriod(e.timestamp))
+          .toList();
+    }
     return [];
   }
+
   List<dynamic> _getFilteredHba1c(Hba1cState state) {
-    if (state is Hba1cLoaded) return state.hba1cRecords.where((e) => _isRecordInPeriod(e.date)).toList();
+    if (state is Hba1cLoaded) {
+      return state.hba1cRecords
+          .where((e) => _isRecordInPeriod(e.date))
+          .toList();
+    }
     return [];
   }
+
   List<dynamic> _getFilteredTemp(TemperatureState state) {
-    if (state is TemperatureLoaded) return state.temperatures.where((e) => _isRecordInPeriod(e.timestamp)).toList();
+    if (state is TemperatureLoaded) {
+      return state.temperatures
+          .where((e) => _isRecordInPeriod(e.timestamp))
+          .toList();
+    }
     return [];
   }
+
   List<dynamic> _getFilteredSpo2(Spo2heartrateState state) {
-    if (state is Spo2heartrateLoaded) return state.records.where((e) => _isRecordInPeriod(e.timestamp)).toList();
+    if (state is Spo2heartrateLoaded) {
+      return state.records
+          .where((e) => _isRecordInPeriod(e.timestamp))
+          .toList();
+    }
     return [];
   }
 
-  int _getTotalMeasurements(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
+  int _getTotalMeasurements(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
     int total = 0;
-    if (bp is BloodPressureLoaded) total += bp.records.length;
-    if (hba1c is Hba1cLoaded) total += hba1c.hba1cRecords.length;
-    if (temp is TemperatureLoaded) total += temp.temperatures.length;
-    if (spo2 is Spo2heartrateLoaded) total += spo2.records.length;
+    if (bp is BloodPressureLoaded) {
+      total += bp.records.length;
+    }
+    if (hba1c is Hba1cLoaded) {
+      total += hba1c.hba1cRecords.length;
+    }
+    if (temp is TemperatureLoaded) {
+      total += temp.temperatures.length;
+    }
+    if (spo2 is Spo2heartrateLoaded) {
+      total += spo2.records.length;
+    }
     return total;
   }
 
-  int _getThisWeekMeasurements(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
+  int _getThisWeekMeasurements(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
     int total = 0;
-    if (bp is BloodPressureLoaded) total += bp.records.where((e) => _isThisWeek(e.timestamp)).length;
-    if (hba1c is Hba1cLoaded) total += hba1c.hba1cRecords.where((e) => _isThisWeek(e.date)).length;
-    if (temp is TemperatureLoaded) total += temp.temperatures.where((e) => _isThisWeek(e.timestamp)).length;
-    if (spo2 is Spo2heartrateLoaded) total += spo2.records.where((e) => _isThisWeek(e.timestamp)).length;
+    if (bp is BloodPressureLoaded) {
+      total += bp.records.where((e) => _isThisWeek(e.timestamp)).length;
+    }
+    if (hba1c is Hba1cLoaded) {
+      total += hba1c.hba1cRecords.where((e) => _isThisWeek(e.date)).length;
+    }
+    if (temp is TemperatureLoaded) {
+      total += temp.temperatures.where((e) => _isThisWeek(e.timestamp)).length;
+    }
+    if (spo2 is Spo2heartrateLoaded) {
+      total += spo2.records.where((e) => _isThisWeek(e.timestamp)).length;
+    }
     return total;
   }
 
-  int _getFilteredWarnings(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
+  int _getFilteredWarnings(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
     int w = 0;
     var bpList = _getFilteredBp(bp);
     for (var r in bpList) {
@@ -157,18 +224,25 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
     return w;
   }
 
-  Widget _buildOverallStatusCard(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
+  Widget _buildOverallStatusCard(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
     int total = _getTotalMeasurements(bp, hba1c, temp, spo2);
     int week = _getThisWeekMeasurements(bp, hba1c, temp, spo2);
     int warnings = _getFilteredWarnings(bp, hba1c, temp, spo2);
-    String statusText = warnings == 0 ? 'Tốt' : 'Cần chú ý';
+    String statusText = warnings == 0
+        ? context.tr('good')
+        : context.tr('status_attention');
 
     return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade400, Colors.orange.shade300],
+          colors: [primary.withOpacity(0.95), const Color(0xFF20A386)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -203,7 +277,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tình trạng sức khỏe',
+                      context.tr('health_status_title'),
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 14,
@@ -229,7 +303,9 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
                 ),
                 child: Icon(
                   warnings == 0 ? Icons.check_circle : Icons.error_outline,
-                  color: warnings == 0 ? Colors.green.shade400 : Colors.red.shade400,
+                  color: warnings == 0
+                      ? Colors.green.shade400
+                      : Colors.red.shade400,
                   size: 20,
                 ),
               ),
@@ -245,11 +321,23 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatusItem('Đo lường', '$total', Icons.assessment),
+                _buildStatusItem(
+                  context.tr('health_overview_measurements'),
+                  '$total',
+                  Icons.assessment,
+                ),
                 _buildDivider(),
-                _buildStatusItem('Tuần này', '$week', Icons.calendar_today),
+                _buildStatusItem(
+                  context.tr('this_week'),
+                  '$week',
+                  Icons.calendar_today,
+                ),
                 _buildDivider(),
-                _buildStatusItem('Cảnh báo', '$warnings', Icons.warning_amber),
+                _buildStatusItem(
+                  context.tr('health_overview_warnings'),
+                  '$warnings',
+                  Icons.warning_amber,
+                ),
               ],
             ),
           ),
@@ -274,10 +362,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
         const Gap(4),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 11,
-          ),
+          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11),
         ),
       ],
     );
@@ -292,8 +377,14 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   }
 
   Widget _buildPeriodSelector() {
-    final periods = ['Hôm nay', 'Tuần này', 'Tháng này', 'Năm nay'];
-    
+    final periods = ['today', 'week', 'month', 'year'];
+    final labels = {
+      'today': context.tr('today'),
+      'week': context.tr('this_week'),
+      'month': context.tr('month'),
+      'year': context.tr('health_overview_this_year'),
+    };
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SingleChildScrollView(
@@ -331,7 +422,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
                         : null,
                   ),
                   child: Text(
-                    period,
+                    labels[period] ?? period,
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.grey.shade700,
                       fontWeight: FontWeight.w600,
@@ -347,7 +438,12 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
     );
   }
 
-  Widget _buildHealthMetricsSummary(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
+  Widget _buildHealthMetricsSummary(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -365,7 +461,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
               ),
               Gap(10),
               Text(
-                'Chỉ số sức khỏe',
+                context.tr('health_metrics_title'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -378,7 +474,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
           Column(
             children: [
               _buildMetricCard(
-                'Huyết áp',
+                context.tr('blood_pressure'),
                 _getBPValue(bp),
                 'mmHg',
                 Icons.favorite,
@@ -387,7 +483,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
               ),
               const Gap(12),
               _buildMetricCard(
-                'Chỉ số HbA1c',
+                context.tr('hba1c_index'),
                 _getHbA1cValue(hba1c),
                 '%',
                 Icons.water_drop,
@@ -405,7 +501,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
               ),
               const Gap(12),
               _buildMetricCard(
-                'Nhiệt độ',
+                context.tr('temperature'),
                 _getTempValue(temp),
                 '°C',
                 Icons.thermostat,
@@ -498,7 +594,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              status,
+              context.tr(status),
               style: TextStyle(
                 color: _getStatusColor(status),
                 fontSize: 12,
@@ -511,10 +607,19 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
     );
   }
 
-  Widget _buildDetailedMetrics(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
-    int filteredTotal = _getFilteredBp(bp).length + _getFilteredHba1c(hba1c).length + _getFilteredTemp(temp).length + _getFilteredSpo2(spo2).length;
+  Widget _buildDetailedMetrics(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
+    int filteredTotal =
+        _getFilteredBp(bp).length +
+        _getFilteredHba1c(hba1c).length +
+        _getFilteredTemp(temp).length +
+        _getFilteredSpo2(spo2).length;
     int warnings = _getFilteredWarnings(bp, hba1c, temp, spo2);
-    
+
     // Attempt to calculate average. Just a rough estimate per day:
     DateTime start = _getStartDate();
     DateTime now = DateTime.now();
@@ -539,7 +644,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
               ),
               const Gap(10),
               Text(
-                'Thống kê chi tiết',
+                context.tr('health_overview_detailed_stats'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -564,11 +669,26 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
             ),
             child: Column(
               children: [
-                _buildStatRow('Tổng số đo lường', '$filteredTotal lần'),
-                const Divider(height: 26, color: Colors.grey,),
-                _buildStatRow('Trung bình mỗi ngày', '${avg.toStringAsFixed(1)} lần'),
-                const Divider(height: 26, color: Colors.grey,),
-                _buildStatRow('Dữ liệu bất thường', '$warnings'),
+                _buildStatRow(
+                  context.tr('health_overview_total_measurements'),
+                  context.tr(
+                    'health_overview_times_count',
+                    params: {'count': '$filteredTotal'},
+                  ),
+                ),
+                const Divider(height: 26, color: Colors.grey),
+                _buildStatRow(
+                  context.tr('health_overview_daily_average'),
+                  context.tr(
+                    'health_overview_times_count',
+                    params: {'count': avg.toStringAsFixed(1)},
+                  ),
+                ),
+                const Divider(height: 26, color: Colors.grey),
+                _buildStatRow(
+                  context.tr('health_overview_abnormal_data'),
+                  '$warnings',
+                ),
               ],
             ),
           ),
@@ -583,10 +703,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
         ),
         Text(
           value,
@@ -600,7 +717,12 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
     );
   }
 
-  Widget _buildHealthRecommendations(BloodPressureState bp, Hba1cState hba1c, TemperatureState temp, Spo2heartrateState spo2) {
+  Widget _buildHealthRecommendations(
+    BloodPressureState bp,
+    Hba1cState hba1c,
+    TemperatureState temp,
+    Spo2heartrateState spo2,
+  ) {
     String bpStat = _getBPStatus(bp);
     String hba1cStat = _getHbA1cStatus(hba1c);
     String tempStat = _getTempStatus(temp);
@@ -622,7 +744,7 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
               ),
               const Gap(10),
               Text(
-                'Khuyến nghị sức khỏe',
+                context.tr('health_recommendations'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -632,24 +754,56 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
             ],
           ),
           const Gap(16),
-          if (bpStat == 'Cao' || bpStat == 'Cao nhẹ')
-            _buildRecommendationCard('Chú ý Huyết áp', 'Huyết áp có dấu hiệu cao. Hạn chế ăn mặn, tập thể dục nhẹ nhàng.', Icons.warning, Colors.red)
-          else 
-            _buildRecommendationCard('Huyết áp ổn định', 'Tiếp tục duy trì chế độ ăn uống lành mạnh và tập thể dục đều đặn.', Icons.check_circle, Colors.green),
-          
-          const Gap(12),
-          
-          if (hba1cStat == 'Tiền đái tháo đường' || hba1cStat == 'Đái tháo đường')
-            _buildRecommendationCard('Kiểm soát đường huyết', 'Chỉ số đường huyết cao. Tham khảo ý kiến bác sĩ và kiểm soát chế độ ăn.', Icons.warning, Colors.orange)
+          if (bpStat == 'health_status_high' ||
+              bpStat == 'health_status_slightly_high')
+            _buildRecommendationCard(
+              context.tr('health_overview_bp_warning_title'),
+              context.tr('health_overview_bp_warning_desc'),
+              Icons.warning,
+              Colors.red,
+            )
           else
-            _buildRecommendationCard('Đường huyết ổn định', 'Hãy duy trì đo kiểm tra HbA1c định kỳ để theo dõi.', Icons.info, Colors.blue),
+            _buildRecommendationCard(
+              context.tr('health_overview_bp_stable_title'),
+              context.tr('health_overview_bp_stable_desc'),
+              Icons.check_circle,
+              Colors.green,
+            ),
 
           const Gap(12),
-          
-          if (tempStat == 'Cao')
-            _buildRecommendationCard('Có thể bạn đang sốt', 'Nhiệt độ cơ thể cao, hãy uống nhiều nước và theo dõi sát sao.', Icons.warning, Colors.red)
+
+          if (hba1cStat == 'blood_sugar_prediabetes' ||
+              hba1cStat == 'blood_sugar_diabetes')
+            _buildRecommendationCard(
+              context.tr('health_overview_glucose_control_title'),
+              context.tr('health_overview_glucose_control_desc'),
+              Icons.warning,
+              Colors.orange,
+            )
           else
-            _buildRecommendationCard('Giữ ấm cơ thể', 'Nhiệt độ cơ thể bình thường. Duy trì nhiệt độ môi trường phù hợp.', Icons.thermostat, Colors.green),
+            _buildRecommendationCard(
+              context.tr('health_overview_glucose_stable_title'),
+              context.tr('health_overview_glucose_stable_desc'),
+              Icons.info,
+              Colors.blue,
+            ),
+
+          const Gap(12),
+
+          if (tempStat == 'health_status_high')
+            _buildRecommendationCard(
+              context.tr('health_overview_fever_title'),
+              context.tr('health_overview_fever_desc'),
+              Icons.warning,
+              Colors.red,
+            )
+          else
+            _buildRecommendationCard(
+              context.tr('health_overview_temperature_normal_title'),
+              context.tr('health_overview_temperature_normal_desc'),
+              Icons.thermostat,
+              Colors.green,
+            ),
         ],
       ),
     );
@@ -719,7 +873,8 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   String _getBPValue(BloodPressureState state) {
     var recs = _getFilteredBp(state);
     if (recs.isNotEmpty) {
-      final sorted = List.of(recs)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final sorted = List.of(recs)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return '${sorted.first.systolic}/${sorted.first.diastolic}';
     }
     return '--/--';
@@ -728,14 +883,15 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   String _getBPStatus(BloodPressureState state) {
     var recs = _getFilteredBp(state);
     if (recs.isNotEmpty) {
-      final sorted = List.of(recs)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final sorted = List.of(recs)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       final systolic = sorted.first.systolic;
-      if (systolic < 120 && systolic >= 90) return 'Bình thường';
-      if (systolic < 90) return 'Thấp';
-      if (systolic < 140) return 'Cao nhẹ';
-      return 'Cao';
+      if (systolic < 120 && systolic >= 90) return 'status_normal';
+      if (systolic < 90) return 'health_status_low';
+      if (systolic < 140) return 'health_status_slightly_high';
+      return 'health_status_high';
     }
-    return 'N/A';
+    return 'not_available';
   }
 
   String _getHbA1cValue(Hba1cState state) {
@@ -752,17 +908,18 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
     if (recs.isNotEmpty) {
       final sorted = List.of(recs)..sort((a, b) => b.date.compareTo(a.date));
       final value = sorted.first.value;
-      if (value < 5.7) return 'Bình thường';
-      if (value < 6.5) return 'Tiền đái tháo đường';
-      return 'Đái tháo đường';
+      if (value < 5.7) return 'status_normal';
+      if (value < 6.5) return 'blood_sugar_prediabetes';
+      return 'blood_sugar_diabetes';
     }
-    return 'N/A';
+    return 'not_available';
   }
 
   String _getSpO2Value(Spo2heartrateState state) {
     var recs = _getFilteredSpo2(state);
     if (recs.isNotEmpty) {
-      final sorted = List.of(recs)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final sorted = List.of(recs)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return sorted.first.spo2.toString();
     }
     return '--';
@@ -771,19 +928,21 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   String _getSpO2Status(Spo2heartrateState state) {
     var recs = _getFilteredSpo2(state);
     if (recs.isNotEmpty) {
-      final sorted = List.of(recs)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final sorted = List.of(recs)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       final spo2 = sorted.first.spo2;
-      if (spo2 >= 95) return 'Bình thường';
-      if (spo2 >= 90) return 'Thấp nhẹ';
-      return 'Thấp';
+      if (spo2 >= 95) return 'status_normal';
+      if (spo2 >= 90) return 'health_status_slightly_low';
+      return 'health_status_low';
     }
-    return 'N/A';
+    return 'not_available';
   }
 
   String _getTempValue(TemperatureState state) {
     var recs = _getFilteredTemp(state);
     if (recs.isNotEmpty) {
-      final sorted = List.of(recs)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final sorted = List.of(recs)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return sorted.first.value.toStringAsFixed(1);
     }
     return '--';
@@ -792,26 +951,27 @@ class _HealthOverviewScreenState extends State<HealthOverviewScreen> {
   String _getTempStatus(TemperatureState state) {
     var recs = _getFilteredTemp(state);
     if (recs.isNotEmpty) {
-      final sorted = List.of(recs)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final sorted = List.of(recs)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       final temp = sorted.first.value;
-      if (temp >= 36.1 && temp <= 37.2) return 'Bình thường';
-      if (temp < 36.1) return 'Thấp';
-      return 'Cao';
+      if (temp >= 36.1 && temp <= 37.2) return 'status_normal';
+      if (temp < 36.1) return 'health_status_low';
+      return 'health_status_high';
     }
-    return 'N/A';
+    return 'not_available';
   }
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'Bình thường':
+      case 'status_normal':
         return Colors.green;
-      case 'Cao nhẹ':
-      case 'Thấp nhẹ':
-      case 'Tiền đái tháo đường':
+      case 'health_status_slightly_high':
+      case 'health_status_slightly_low':
+      case 'blood_sugar_prediabetes':
         return Colors.orange;
-      case 'Cao':
-      case 'Thấp':
-      case 'Đái tháo đường':
+      case 'health_status_high':
+      case 'health_status_low':
+      case 'blood_sugar_diabetes':
         return Colors.red;
       default:
         return Colors.grey;

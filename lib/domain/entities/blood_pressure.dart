@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class BloodPressure {
   final int? id;
   final DateTime timestamp;
+  final String source;
   final int systolic;    // Huyết áp tâm thu (mmHg)
   final int diastolic;   // Huyết áp tâm trương (mmHg)
 
@@ -11,7 +12,12 @@ class BloodPressure {
     required this.timestamp, 
     required this.systolic,
     required this.diastolic,
+    this.source = 'manual',
   });
+
+  String get sourceLabel {
+    return source == 'manual' ? 'Nhập tay' : 'Thiết bị';
+  }
 
   /// Phân loại huyết áp theo chuẩn WHO/ESC 2023
   String get bloodPressureLevel {

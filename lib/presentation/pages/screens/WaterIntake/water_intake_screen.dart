@@ -125,10 +125,16 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
           ),
           // Nút thêm bản ghi
           IconButton(
-            icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 22),
+            icon: const Icon(
+              Icons.add_circle_outline,
+              color: Colors.white,
+              size: 22,
+            ),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const InsertWaterIntake()),
+              MaterialPageRoute(
+                builder: (context) => const InsertWaterIntake(),
+              ),
             ),
           ),
         ],
@@ -136,9 +142,9 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
       body: BlocConsumer<WaterIntakeBloc, WaterIntakeState>(
         listener: (context, state) {
           if (state is WaterIntakeError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -158,12 +164,18 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
               children: [
                 // ========== BẢN GHI + ICON BỘ LỌC ==========
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "${filteredRecords.length} bản ghi",
+                        context.tr(
+                          'record_count',
+                          params: {'count': '${filteredRecords.length}'},
+                        ),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -189,7 +201,10 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                             },
                           );
                         },
-                        child: const Icon(Icons.science_outlined, color: Colors.black54),
+                        child: const Icon(
+                          Icons.science_outlined,
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
@@ -209,9 +224,16 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                             Chip(
                               label: Text(
                                 DateFormat('dd/MM/yyyy').format(_selectedDate),
-                                style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade800,
+                                ),
                               ),
-                              deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                              deleteIcon: Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.blue.shade800,
+                              ),
                               onDeleted: () {
                                 setState(() => _selectedDate = DateTime.now());
                               },
@@ -225,9 +247,16 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                             Chip(
                               label: Text(
                                 _getAmountFilterLabel(_selectedAmountFilter!),
-                                style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade800,
+                                ),
                               ),
-                              deleteIcon: Icon(Icons.close, size: 16, color: Colors.blue.shade800),
+                              deleteIcon: Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.blue.shade800,
+                              ),
                               onDeleted: () {
                                 setState(() => _selectedAmountFilter = null);
                               },
@@ -287,7 +316,10 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                             ],
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: statusColor.withOpacity(0.9),
                               borderRadius: BorderRadius.circular(20),
@@ -310,7 +342,9 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                           value: progress / 100,
                           minHeight: 12,
                           backgroundColor: Colors.white.withOpacity(0.3),
-                          valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            statusColor,
+                          ),
                         ),
                       ),
                       const Gap(8),
@@ -345,11 +379,18 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.water_drop_outlined, size: 80, color: Colors.grey.shade400),
+                              Icon(
+                                Icons.water_drop_outlined,
+                                size: 80,
+                                color: Colors.grey.shade400,
+                              ),
                               const Gap(16),
                               Text(
                                 "Chưa có dữ liệu trong ngày",
-                                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey.shade600,
+                                ),
                               ),
                             ],
                           ),
@@ -368,15 +409,18 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                                   children: [
                                     SlidableAction(
                                       onPressed: (_) {
-                                        final bloc = context.read<WaterIntakeBloc>();
+                                        final bloc = context
+                                            .read<WaterIntakeBloc>();
                                         AppDialog.showDeleteConfirm(
                                           context: context,
                                           onConfirm: () {
                                             if (!mounted) return;
                                             if (record.id != null) {
                                               bloc.add(
-                                                    DeleteWaterIntakeRecord(record.id!.toString()),
-                                                  );
+                                                DeleteWaterIntakeRecord(
+                                                  record.id!.toString(),
+                                                ),
+                                              );
                                             }
                                           },
                                         );
@@ -395,7 +439,8 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => InsertWaterIntake(record: record),
+                                        builder: (context) =>
+                                            InsertWaterIntake(record: record),
                                       ),
                                     );
                                   },
@@ -405,10 +450,10 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                             );
                           },
                         ),
-                      ),
-                    ],
-                  );
-                }
+                ),
+              ],
+            );
+          }
 
           return Center(child: Text(context.tr('no_data')));
         },
@@ -461,10 +506,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                   const Gap(4),
                   Text(
                     DateFormat('HH:mm').format(record.timestamp),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                   if (record.note != null && record.note!.isNotEmpty) ...[
                     const Gap(4),

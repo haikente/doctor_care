@@ -29,7 +29,7 @@ class SpO2HeartRate {
       case SpO2Source.manual:
         return 'Nhập tay';
       case SpO2Source.healthConnect:
-        return 'Health Connect';
+        return 'Thiết bị';
     }
   }
 
@@ -49,7 +49,7 @@ class SpO2HeartRate {
       case SpO2Source.manual:
         return Colors.blueGrey;
       case SpO2Source.healthConnect:
-        return Colors.teal;
+        return Colors.blue;
     }
   }
 

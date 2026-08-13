@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     child: Text(
                       "Lọc kết quả",
                       style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -110,9 +113,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Text("Thời gian",
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Thời gian",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 const Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -125,8 +129,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             child: GestureDetector(
               onTap: () => _openCustomDatePicker(context),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -135,17 +141,22 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text(
-                       _startDate != null && _endDate != null
+                    Text(
+                      _startDate != null && _endDate != null
                           ? "${formatDate(_startDate!)} - ${formatDate(_endDate!)}"
                           : "${formatDate(widget.initialStartDate ?? DateTime.now())} - ${formatDate(widget.initialEndDate ?? DateTime.now())}",
-                       style: TextStyle(
-                         fontSize: 13,
-                         color: _startDate != null ? Colors.black : Colors.black87,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _startDate != null
+                            ? Colors.black
+                            : Colors.black87,
                       ),
                     ),
-                    const Icon(Icons.calendar_today,
-                        size: 18, color: Colors.grey),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
                   ],
                 ),
               ),
@@ -155,8 +166,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           // ========== ĐÁNH GIÁ TỔNG THỂ ==========
           const Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 16),
-            child: Text("Đánh giá tổng thể",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              "Đánh giá tổng thể",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
           const Gap(8),
 
@@ -187,10 +200,11 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () =>
-                        setState(() => _selectedStatus = "Cần chú ý"),
+                    onTap: () => setState(() => _selectedStatus = "Cần chú ý"),
                     child: _buildChip(
-                        "Cần chú ý", _selectedStatus == "Cần chú ý"),
+                      "Cần chú ý",
+                      _selectedStatus == "Cần chú ý",
+                    ),
                   ),
                 ),
                 const Gap(8),
@@ -199,7 +213,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Nguy cơ cao"),
                     child: _buildChip(
-                        "Nguy cơ cao", _selectedStatus == "Nguy cơ cao"),
+                      "Nguy cơ cao",
+                      _selectedStatus == "Nguy cơ cao",
+                    ),
                   ),
                 ),
               ],
@@ -215,7 +231,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bỏ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         _startDate = null;
@@ -238,7 +254,8 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                  'Ngày bắt đầu phải trước ngày kết thúc'),
+                                'Ngày bắt đầu phải trước ngày kết thúc',
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );

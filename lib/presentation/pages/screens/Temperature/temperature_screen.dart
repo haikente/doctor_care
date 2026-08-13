@@ -54,9 +54,9 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       }).toList();
     }
     // Lọc theo trạng thái (chỉ khi có chọn trạng thái cụ thể)
-    if (selectedStatus.isNotEmpty && selectedStatus != "Tất cả") {
+    if (selectedStatus.isNotEmpty) {
       filtered = filtered
-          .where((record) => record.getStatus == selectedStatus)
+          .where((record) => _temperatureStatusCode(record) == selectedStatus)
           .toList();
     }
 
@@ -74,7 +74,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Theo dõi nhiệt độ",
+        title: context.tr('track_temperature'),
         centerTitle: true,
         icon: const Icon(
           Icons.add_circle_outline_outlined,
@@ -119,7 +119,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                     ),
                     Gap(20),
                     Text(
-                      'Chưa có dữ liệu nhiệt độ',
+                      context.tr('no_temperature_records'),
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.grey,
@@ -128,7 +128,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                     ),
                     Gap(10),
                     Text(
-                      'Nhấn nút + để thêm bản ghi mới',
+                      context.tr('add_new_record_hint'),
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
@@ -147,7 +147,10 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${filteredRecords.length} bản ghi",
+                          context.tr(
+                            'record_count',
+                            params: {'count': '${filteredRecords.length}'},
+                          ),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -243,8 +246,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                             ),
 
                           // Chip trạng thái - hiện khi có chọn trạng thái cụ thể
-                          if (selectedStatus.isNotEmpty &&
-                              selectedStatus != "Tất cả")
+                          if (selectedStatus.isNotEmpty)
                             Container(
                               padding: EdgeInsets.all(5),
                               decoration: BoxDecoration(
@@ -259,7 +261,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    selectedStatus,
+                                    _temperatureStatusLabel(selectedStatus),
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -524,7 +526,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                 border: Border.all(color: temperature.getColor),
               ),
               child: Text(
-                temperature.getStatus.toString(),
+                _temperatureRecordStatusLabel(temperature),
                 style: TextStyle(
                   fontSize: 11,
                   color: temperature.getColor,
@@ -536,5 +538,42 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
         ),
       ),
     );
+  }
+
+  String _temperatureStatusCode(Temperature temperature) {
+    if (temperature.value < 36.0) {
+      return 'low';
+    }
+    if (temperature.value <= 37.5) {
+      return 'normal';
+    }
+    if (temperature.value <= 38.5) {
+      return 'mild_fever';
+    }
+    if (temperature.value <= 39.5) {
+      return 'moderate_fever';
+    }
+    return 'high_fever';
+  }
+
+  String _temperatureRecordStatusLabel(Temperature temperature) {
+    return _temperatureStatusLabel(_temperatureStatusCode(temperature));
+  }
+
+  String _temperatureStatusLabel(String status) {
+    switch (status) {
+      case 'low':
+        return context.tr('temp_low');
+      case 'normal':
+        return context.tr('status_normal');
+      case 'mild_fever':
+        return context.tr('temp_mild_fever');
+      case 'moderate_fever':
+        return context.tr('temp_moderate_fever');
+      case 'high_fever':
+        return context.tr('temp_high_fever');
+      default:
+        return context.tr('not_selected');
+    }
   }
 }

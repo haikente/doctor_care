@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
+import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/presentation/bloc/auth/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -50,38 +51,6 @@ class AccountSecurityScreen extends StatelessWidget {
         ),
       );
     }
-  }
-
-  Future<void> _signOutAll(BuildContext context) async {
-    final theme = Theme.of(context);
-    final tr = AppLocalizations.of(context).translate;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('confirm')),
-        content: Text(tr('logout_confirm')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr('cancel')),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(tr('logout')),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    await AuthStorageService.clearAll();
-    if (!context.mounted) return;
-    context.read<AuthBloc>().add(SignOutEvent());
   }
 
   @override
@@ -197,7 +166,7 @@ class AccountSecurityScreen extends StatelessWidget {
                   color: Colors.red,
                   title: tr('logout'),
                   subtitle: tr('sign_out_and_clear_session'),
-                  onTap: () => _signOutAll(context),
+                  onTap: () => _showLogoutDialog(context, theme),
                 ),
               ],
             ),
@@ -317,3 +286,71 @@ class _ActionTile extends StatelessWidget {
     );
   }
 }
+
+  void _showLogoutDialog(BuildContext context, ThemeData theme) {
+    //final tr = AppLocalizations.of(context).translate;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.notifications_active_rounded,
+                color: Colors.blue,
+                size: 70,
+              ),
+            ),
+            const Gap(25),
+            Text(
+              "Thông báo",
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5
+              ),
+            ),
+            Gap(20),
+            Text(
+            "Bạn có chắc chắn muốn đăng xuất?",
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
+              fontSize: 14,
+            ),
+          ),
+          Gap(20),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                text: "Huỷ", 
+                onPressed: () => Navigator.pop(ctx),
+                gradient: [Colors.blue.shade50, Colors.blue.shade50],
+                          textColor: Colors.blue,
+                ),
+              ),
+              Gap(10),
+              Expanded(
+                child: CustomButton(text: "Đồng ý", onPressed: () async {
+                Navigator.pop(ctx);
+                await AuthStorageService.clearLoginSessionOnly();
+                // ignore: use_build_context_synchronously
+                  context.read<AuthBloc>().add(SignOutEvent());
+                },
+               ),
+             ),
+           ],
+          ),
+         ],
+        ), 
+      ),
+    );
+  }

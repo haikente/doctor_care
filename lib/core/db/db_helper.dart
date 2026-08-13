@@ -8,7 +8,7 @@ class DbHelper {
   DbHelper._internal();
 
   static const _defaultDbName = 'doctor_care.db';
-  static const _dbVersion = 29;
+  static const _dbVersion = 32;
   static String get dbName => instance.currentDbName;
   static const dbVersion = _dbVersion;
 
@@ -74,6 +74,7 @@ class DbHelper {
         timestamp TEXT NOT NULL,
         systolic INTEGER NOT NULL,
         diastolic INTEGER NOT NULL,
+        source TEXT NOT NULL DEFAULT 'manual',
         profileId INTEGER
       )
     ''');
@@ -110,6 +111,7 @@ class DbHelper {
         height REAL NOT NULL,
         timestamp TEXT NOT NULL,
         note TEXT,
+        source TEXT NOT NULL DEFAULT 'manual',
         profileId INTEGER
       )
     ''');
@@ -159,6 +161,7 @@ class DbHelper {
         caloriesBurned REAL,
         timestamp TEXT NOT NULL,
         note TEXT,
+        source TEXT NOT NULL DEFAULT 'manual',
         profileId INTEGER
       )
     ''');
@@ -186,7 +189,8 @@ class DbHelper {
         user_id TEXT,
         notes TEXT,
         health_recommendations TEXT,
-        dish_name TEXT
+        dish_name TEXT,
+        meal_type TEXT
       )
     ''');
 
@@ -486,7 +490,8 @@ class DbHelper {
           image_path TEXT NOT NULL,
           user_id TEXT,
           notes TEXT,
-          health_recommendations TEXT
+          health_recommendations TEXT,
+          meal_type TEXT
         )
       ''');
 
@@ -566,7 +571,8 @@ class DbHelper {
           distance REAL,
           caloriesBurned REAL,
           timestamp TEXT NOT NULL,
-          note TEXT
+          note TEXT,
+          source TEXT NOT NULL DEFAULT 'manual'
         )
       ''');
 
@@ -909,6 +915,64 @@ class DbHelper {
       }
     }
 
+    if (oldVersion < 30) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(blood_pressure)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('source')) {
+          await db.execute(
+            "ALTER TABLE blood_pressure ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'",
+          );
+          print('Added source column to blood_pressure table (v30)');
+        }
+      } catch (e) {
+        print('Error in v30 migration: $e');
+      }
+    }
+
+    if (oldVersion < 31) {
+      try {
+        final tables = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='meal_analysis'",
+        );
+
+        if (tables.isNotEmpty) {
+          final columns = await db.rawQuery('PRAGMA table_info(meal_analysis)');
+          final columnNames = columns
+              .map((col) => col['name'] as String)
+              .toList();
+
+          if (!columnNames.contains('meal_type')) {
+            await db.execute(
+              'ALTER TABLE meal_analysis ADD COLUMN meal_type TEXT',
+            );
+            print('Added meal_type column to meal_analysis table (v31)');
+          }
+        }
+      } catch (e) {
+        print('Error in v31 migration: $e');
+      }
+    }
+
+    if (oldVersion < 32) {
+      try {
+        final columns = await db.rawQuery('PRAGMA table_info(step_count)');
+        final columnNames = columns
+            .map((col) => col['name'] as String)
+            .toList();
+        if (!columnNames.contains('source')) {
+          await db.execute(
+            "ALTER TABLE step_count ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'",
+          );
+          print('Added source column to step_count table (v32)');
+        }
+      } catch (e) {
+        print('Error in v32 migration: $e');
+      }
+    }
+
     print('Nâng cấp cơ sở dữ liệu đã hoàn tất');
   }
 
@@ -1118,7 +1182,8 @@ class DbHelper {
           user_id TEXT,
           notes TEXT,
           health_recommendations TEXT,
-          dish_name TEXT
+          dish_name TEXT,
+          meal_type TEXT
         )
       ''');
 
@@ -1151,6 +1216,11 @@ class DbHelper {
         if (!columnNames.contains('dish_name')) {
           await db.execute(
             'ALTER TABLE meal_analysis ADD COLUMN dish_name TEXT',
+          );
+        }
+        if (!columnNames.contains('meal_type')) {
+          await db.execute(
+            'ALTER TABLE meal_analysis ADD COLUMN meal_type TEXT',
           );
         }
       } catch (_) {}

@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
 import 'package:doctor_care/domain/entities/creatinine.dart';
@@ -104,8 +105,8 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
                       ),
                     ),
                     const Gap(10),
-                    const Text(
-                      'Nhấn + để thêm bản ghi mới',
+                    Text(
+                      context.tr('add_new_record_hint'),
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
@@ -128,7 +129,10 @@ class _CreatinineScreenState extends State<CreatinineScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${filteredRecords.length} bản ghi',
+                        context.tr(
+                          'record_count',
+                          params: {'count': '${filteredRecords.length}'},
+                        ),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,

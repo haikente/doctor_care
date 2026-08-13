@@ -9,6 +9,26 @@ import 'package:gap/gap.dart';
 import 'package:doctor_care/presentation/pages/screens/admin/admin_settings_screen.dart';
 
 class Usercase {
+  static const List<DropdownMenuItem<String>> _roleItems = [
+    DropdownMenuItem(value: 'users', child: Text('Người dùng')),
+    DropdownMenuItem(value: 'patient', child: Text('Bệnh nhân')),
+    DropdownMenuItem(value: 'doctor', child: Text('Bác sĩ')),
+    DropdownMenuItem(value: 'admin', child: Text('Admin')),
+  ];
+
+  static String _normalizedRole(dynamic role) {
+    final value = role?.toString().trim().toLowerCase();
+    if (value == null || value.isEmpty) {
+      return 'users';
+    }
+    if (value == 'user') {
+      return 'users';
+    }
+
+    final hasMatchingItem = _roleItems.any((item) => item.value == value);
+    return hasMatchingItem ? value : 'users';
+  }
+
   void showEditUserDialog(
     BuildContext context,
     String docId,
@@ -38,7 +58,7 @@ class Usercase {
 
     String selectedGender = userData['gender'] ?? 'male';
     String selectedBloodType = userData['bloodType'] ?? 'O+';
-    String selectedRole = userData['role'] ?? 'users';
+    String selectedRole = _normalizedRole(userData['role']);
     DateTime? selectedDate = userData['dateOfBirth'] != null
         ? DateTime.parse(userData['dateOfBirth'])
         : null;
@@ -46,305 +66,651 @@ class Usercase {
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('✏️ Chỉnh sửa thông tin'),
-          content: SingleChildScrollView(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          final initials = (userData['fullName'] ?? 'U')
+              .toString()
+              .trim()
+              .split(' ')
+              .where((s) => s.isNotEmpty)
+              .map((s) => s[0].toUpperCase())
+              .take(2)
+              .join();
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            elevation: 8,
+            shadowColor: theme.colorScheme.primary.withOpacity(0.2),
+            backgroundColor: Colors.transparent,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 520),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Full Name
-                  TextField(
-                    controller: fullNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Họ và tên',
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const Gap(12),
-
-                  // Phone
-                  TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Số điện thoại',
-                      prefixIcon: Icon(Icons.phone),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const Gap(12),
-
-                  // Gender
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedGender,
-                    decoration: const InputDecoration(
-                      labelText: 'Giới tính',
-                      prefixIcon: Icon(Icons.wc),
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'male', child: Text('Nam')),
-                      DropdownMenuItem(value: 'female', child: Text('Nữ')),
-                      DropdownMenuItem(value: 'other', child: Text('Khác')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedGender = value!;
-                      });
-                    },
-                  ),
-                  const Gap(12),
-
-                  // Date of Birth
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate ?? DateTime(2000),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-                      if (date != null) {
-                        setState(() {
-                          selectedDate = date;
-                        });
-                      }
-                    },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Ngày sinh',
-                        prefixIcon: Icon(Icons.cake),
-                        border: OutlineInputBorder(),
+                  // ── Gradient Header ──
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 12, 20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          theme.colorScheme.primary,
+                          theme.colorScheme.primary.withOpacity(0.75),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      child: Text(
-                        selectedDate != null
-                            ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-                            : 'Chọn ngày sinh',
-                        style: TextStyle(
-                          color: selectedDate != null
-                              ? Colors.black
-                              : Colors.grey,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.white.withOpacity(0.25),
+                          child: Text(
+                            initials,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
+                        const Gap(14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Chỉnh sửa thông tin',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const Gap(2),
+                              Text(
+                                userData['email'] ??
+                                    'Cập nhật dữ liệu người dùng',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.white70,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () {
+                            fullNameController.dispose();
+                            phoneController.dispose();
+                            addressController.dispose();
+                            heightController.dispose();
+                            weightController.dispose();
+                            emergencyContactController.dispose();
+                            emergencyPhoneController.dispose();
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Gap(16),
+
+                  // Content
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── Section 1: Thông tin cơ bản ──
+                          _buildSectionCard(
+                            theme,
+                            icon: Icons.person_rounded,
+                            title: 'Thông tin cơ bản',
+                            color: Colors.blue,
+                            children: [
+                              _buildTextField(
+                                controller: fullNameController,
+                                label: 'Họ và tên',
+                                icon: Icons.person_outline,
+                              ),
+                              const Gap(12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildTextField(
+                                      controller: phoneController,
+                                      label: 'Số điện thoại',
+                                      icon: Icons.phone_outlined,
+                                      keyboardType: TextInputType.phone,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: _buildDropdown<String>(
+                                      value: selectedGender,
+                                      label: 'Giới tính',
+                                      icon: Icons.wc_outlined,
+                                      items: const [
+                                        DropdownMenuItem(
+                                          value: 'male',
+                                          child: Text('Nam'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'female',
+                                          child: Text('Nữ'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'other',
+                                          child: Text('Khác'),
+                                        ),
+                                      ],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedGender = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Gap(12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: () async {
+                                        final date = await showDatePicker(
+                                          context: context,
+                                          initialDate:
+                                              selectedDate ?? DateTime(2000),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime.now(),
+                                        );
+                                        if (date != null) {
+                                          setState(() {
+                                            selectedDate = date;
+                                          });
+                                        }
+                                      },
+                                      child: InputDecorator(
+                                        decoration: InputDecoration(
+                                          labelText: 'Ngày sinh',
+                                          prefixIcon: Icon(
+                                            Icons.cake_outlined,
+                                            color: Colors.grey.shade500,
+                                          ),
+                                          filled: true,
+                                          fillColor: theme
+                                              .colorScheme
+                                              .surfaceContainerHighest
+                                              .withOpacity(0.35),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 14,
+                                              ),
+                                        ),
+                                        child: Text(
+                                          selectedDate != null
+                                              ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
+                                              : 'Chọn ngày',
+                                          style: TextStyle(
+                                            color: selectedDate != null
+                                                ? theme.colorScheme.onSurface
+                                                : Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: _buildDropdown<String>(
+                                      value: selectedRole,
+                                      label: 'Vai trò',
+                                      icon: Icons.admin_panel_settings_outlined,
+                                      items: _roleItems,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedRole = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Gap(16),
+
+                          // ── Section 2: Thông tin sức khỏe ──
+                          _buildSectionCard(
+                            theme,
+                            icon: Icons.favorite_rounded,
+                            title: 'Thông tin sức khỏe',
+                            color: Colors.redAccent,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildDropdown<String>(
+                                      value: selectedBloodType,
+                                      label: 'Nhóm máu',
+                                      icon: Icons.bloodtype_outlined,
+                                      items: const [
+                                        DropdownMenuItem(
+                                          value: 'A+',
+                                          child: Text('A+'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'A-',
+                                          child: Text('A-'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'B+',
+                                          child: Text('B+'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'B-',
+                                          child: Text('B-'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'AB+',
+                                          child: Text('AB+'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'AB-',
+                                          child: Text('AB-'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'O+',
+                                          child: Text('O+'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'O-',
+                                          child: Text('O-'),
+                                        ),
+                                      ],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedBloodType = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      controller: heightController,
+                                      label: 'Chiều cao (cm)',
+                                      icon: Icons.height,
+                                      keyboardType: TextInputType.number,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      controller: weightController,
+                                      label: 'Cân nặng (kg)',
+                                      icon: Icons.monitor_weight_outlined,
+                                      keyboardType: TextInputType.number,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Gap(16),
+
+                          // ── Section 3: Liên hệ & Địa chỉ ──
+                          _buildSectionCard(
+                            theme,
+                            icon: Icons.contact_mail_rounded,
+                            title: 'Liên hệ & Địa chỉ',
+                            color: Colors.teal,
+                            children: [
+                              _buildTextField(
+                                controller: addressController,
+                                label: 'Địa chỉ',
+                                icon: Icons.home_outlined,
+                                maxLines: 2,
+                              ),
+                              const Gap(12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildTextField(
+                                      controller: emergencyContactController,
+                                      label: 'Liên hệ khẩn cấp',
+                                      icon: Icons.contact_emergency_outlined,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      controller: emergencyPhoneController,
+                                      label: 'SĐT khẩn cấp',
+                                      icon: Icons.phone_in_talk_outlined,
+                                      keyboardType: TextInputType.phone,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Gap(8),
+                        ],
                       ),
                     ),
                   ),
-                  const Gap(12),
 
-                  // Blood Type
-                  DropdownButtonFormField<String>(
-                    value: selectedBloodType,
-                    decoration: const InputDecoration(
-                      labelText: 'Nhóm máu',
-                      prefixIcon: Icon(Icons.bloodtype),
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'A+', child: Text('A+')),
-                      DropdownMenuItem(value: 'A-', child: Text('A-')),
-                      DropdownMenuItem(value: 'B+', child: Text('B+')),
-                      DropdownMenuItem(value: 'B-', child: Text('B-')),
-                      DropdownMenuItem(value: 'AB+', child: Text('AB+')),
-                      DropdownMenuItem(value: 'AB-', child: Text('AB-')),
-                      DropdownMenuItem(value: 'O+', child: Text('O+')),
-                      DropdownMenuItem(value: 'O-', child: Text('O-')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedBloodType = value!;
-                      });
-                    },
-                  ),
-                  const Gap(12),
+                  // ── Actions Footer ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              fullNameController.dispose();
+                              phoneController.dispose();
+                              addressController.dispose();
+                              heightController.dispose();
+                              weightController.dispose();
+                              emergencyContactController.dispose();
+                              emergencyPhoneController.dispose();
+                              Navigator.pop(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: const Text('Hủy'),
+                          ),
+                        ),
+                        const Gap(14),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                final updateData = <String, dynamic>{
+                                  'fullName': fullNameController.text.trim(),
+                                  'phoneNumber': phoneController.text.trim(),
+                                  'gender': selectedGender,
+                                  'bloodType': selectedBloodType,
+                                  'role': selectedRole,
+                                  'address': addressController.text.trim(),
+                                  'emergencyContact': emergencyContactController
+                                      .text
+                                      .trim(),
+                                  'emergencyPhone': emergencyPhoneController
+                                      .text
+                                      .trim(),
+                                };
+                                if (selectedDate != null) {
+                                  updateData['dateOfBirth'] = selectedDate!
+                                      .toIso8601String();
+                                }
+                                if (heightController.text.isNotEmpty) {
+                                  updateData['height'] =
+                                      double.tryParse(heightController.text) ??
+                                      0;
+                                }
+                                if (weightController.text.isNotEmpty) {
+                                  updateData['weight'] =
+                                      double.tryParse(weightController.text) ??
+                                      0;
+                                }
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(docId)
+                                    .update(updateData);
 
-                  // Height
-                  TextField(
-                    controller: heightController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Chiều cao (cm)',
-                      prefixIcon: Icon(Icons.height),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const Gap(12),
+                                fullNameController.dispose();
+                                phoneController.dispose();
+                                addressController.dispose();
+                                heightController.dispose();
+                                weightController.dispose();
+                                emergencyContactController.dispose();
+                                emergencyPhoneController.dispose();
 
-                  // Weight
-                  TextField(
-                    controller: weightController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Cân nặng (kg)',
-                      prefixIcon: Icon(Icons.monitor_weight),
-                      border: OutlineInputBorder(),
+                                if (!dialogContext.mounted) return;
+                                Navigator.pop(dialogContext);
+                                ScaffoldMessenger.of(
+                                  dialogContext,
+                                ).showSnackBar(
+                                  SnackBar(
+                                    content: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        Gap(8),
+                                        Text('Cập nhật thành công!'),
+                                      ],
+                                    ),
+                                    backgroundColor: Colors.green.shade600,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              } catch (e) {
+                                if (dialogContext.mounted) {
+                                  ScaffoldMessenger.of(
+                                    dialogContext,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.error_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          const Gap(8),
+                                          Expanded(
+                                            child: Text('Lỗi: ${e.toString()}'),
+                                          ),
+                                        ],
+                                      ),
+                                      backgroundColor: Colors.red.shade600,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.save_rounded, size: 20),
+                            label: const Text(
+                              'Lưu thay đổi',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              shadowColor: theme.colorScheme.primary
+                                  .withOpacity(0.3),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const Gap(12),
-
-                  // Address
-                  TextField(
-                    controller: addressController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Địa chỉ',
-                      prefixIcon: Icon(Icons.home),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const Gap(12),
-
-                  // Emergency Contact
-                  TextField(
-                    controller: emergencyContactController,
-                    decoration: const InputDecoration(
-                      labelText: 'Liên hệ khẩn cấp',
-                      prefixIcon: Icon(Icons.contact_emergency),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const Gap(12),
-
-                  // Emergency Phone
-                  TextField(
-                    controller: emergencyPhoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'SĐT khẩn cấp',
-                      prefixIcon: Icon(Icons.phone_in_talk),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const Gap(12),
-
-                  // Role (Admin only)
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedRole,
-                    decoration: const InputDecoration(
-                      labelText: 'Vai trò',
-                      prefixIcon: Icon(Icons.admin_panel_settings),
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'users',
-                        child: Text('Người dùng'),
-                      ),
-                      DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRole = value!;
-                      });
-                    },
                   ),
                 ],
               ),
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(
+    ThemeData theme, {
+    required IconData icon,
+    required String title,
+    required Color color,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 18, color: color),
+              ),
+              const Gap(10),
+              Text(
+                title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                fullNameController.dispose();
-                phoneController.dispose();
-                addressController.dispose();
-                heightController.dispose();
-                weightController.dispose();
-                emergencyContactController.dispose();
-                emergencyPhoneController.dispose();
-                Navigator.pop(context);
-              },
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  print('🔄 Bắt đầu cập nhật user: $docId');
+          const Gap(14),
+          ...children,
+        ],
+      ),
+    );
+  }
 
-                  // Prepare update data
-                  final updateData = <String, dynamic>{
-                    'fullName': fullNameController.text.trim(),
-                    'phoneNumber': phoneController.text.trim(),
-                    'gender': selectedGender,
-                    'bloodType': selectedBloodType,
-                    'role': selectedRole,
-                    'address': addressController.text.trim(),
-                    'emergencyContact': emergencyContactController.text.trim(),
-                    'emergencyPhone': emergencyPhoneController.text.trim(),
-                  };
-
-                  // Add optional fields
-                  if (selectedDate != null) {
-                    updateData['dateOfBirth'] = selectedDate!.toIso8601String();
-                  }
-
-                  if (heightController.text.isNotEmpty) {
-                    updateData['height'] =
-                        double.tryParse(heightController.text) ?? 0;
-                  }
-
-                  if (weightController.text.isNotEmpty) {
-                    updateData['weight'] =
-                        double.tryParse(weightController.text) ?? 0;
-                  }
-
-                  print('📝 Update data: $updateData');
-
-                  // Update Firestore
-                  print('🔥 Updating Firestore...');
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(docId)
-                      .update(updateData);
-
-                  print('✅ Firestore updated successfully!');
-
-                  // Dispose controllers
-                  fullNameController.dispose();
-                  phoneController.dispose();
-                  addressController.dispose();
-                  heightController.dispose();
-                  weightController.dispose();
-                  emergencyContactController.dispose();
-                  emergencyPhoneController.dispose();
-
-                  if (!dialogContext.mounted) {
-                    return;
-                  }
-
-                  Navigator.pop(dialogContext);
-
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(
-                      content: Text('✅ Cập nhật thành công!'),
-                      backgroundColor: Colors.green,
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-
-                  print('✅ Success message shown!');
-                } catch (e, stackTrace) {
-                  print('❌ ERROR: $e');
-                  print('📍 Stack trace: $stackTrace');
-
-                  if (dialogContext.mounted) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(
-                        content: Text('❌ Lỗi: ${e.toString()}'),
-                        backgroundColor: Colors.red,
-                        duration: const Duration(seconds: 5),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Lưu'),
-            ),
-          ],
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 16, color: Colors.grey.shade500),
+        filled: true,
+        fillColor: Colors.grey.withOpacity(0.06),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
         ),
       ),
+    );
+  }
+
+  Widget _buildDropdown<T>({
+    required T value,
+    required String label,
+    required IconData icon,
+    required List<DropdownMenuItem<T>> items,
+    required void Function(T?) onChanged,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 16, color: Colors.grey.shade500),
+        filled: true,
+        fillColor: Colors.grey.withOpacity(0.06),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+      ),
+      items: items,
+      onChanged: onChanged,
     );
   }
 
@@ -675,6 +1041,456 @@ class Usercase {
       context,
       MaterialPageRoute(builder: (_) => const AdminSettingsScreen()),
     );
+  }
+
+  void showSendNotificationDialogModern(BuildContext context) {
+    final rootContext = context;
+    final formKey = GlobalKey<FormState>();
+    final titleController = TextEditingController();
+    final bodyController = TextEditingController();
+    NotificationType selectedType = NotificationType.info;
+    var isSending = false;
+
+    final typeOptions = <NotificationType, ({String label, IconData icon, Color color})>{
+      NotificationType.info: (
+        label: 'Thông tin',
+        icon: Icons.info_outline_rounded,
+        color: Colors.blue,
+      ),
+      NotificationType.warning: (
+        label: 'Cảnh báo',
+        icon: Icons.warning_amber_rounded,
+        color: Colors.orange,
+      ),
+      NotificationType.error: (
+        label: 'Lỗi',
+        icon: Icons.error_outline_rounded,
+        color: Colors.red,
+      ),
+      NotificationType.success: (
+        label: 'Thành công',
+        icon: Icons.check_circle_outline_rounded,
+        color: Colors.green,
+      ),
+      NotificationType.promotion: (
+        label: 'Khuyến mãi',
+        icon: Icons.local_offer_outlined,
+        color: Colors.purple,
+      ),
+      NotificationType.system: (
+        label: 'Hệ thống',
+        icon: Icons.settings_outlined,
+        color: Colors.blueGrey,
+      ),
+    };
+
+    InputDecoration fieldDecoration({
+      required BuildContext context,
+      required String hint,
+      required IconData icon,
+      bool alignLabelWithHint = false,
+    }) {
+      final theme = Theme.of(context);
+      final borderColor = theme.dividerColor.withOpacity(0.35);
+      return InputDecoration(
+        hintText: hint,
+        alignLabelWithHint: alignLabelWithHint,
+        prefixIcon: Icon(icon, size: 21),
+        filled: true,
+        fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.22),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 15,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: theme.primaryColor, width: 1.6),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.6),
+        ),
+      );
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          final selectedOption = typeOptions[selectedType]!;
+
+          Future<void> sendNotification() async {
+            if (!(formKey.currentState?.validate() ?? false)) return;
+
+            final title = titleController.text.trim();
+            final body = bodyController.text.trim();
+
+            setState(() => isSending = true);
+            try {
+              final usersSnap = await FirebaseFirestore.instance
+                  .collection('users')
+                  .get();
+              final userIds = usersSnap.docs
+                  .map((doc) => doc.id.trim())
+                  .where((id) => id.isNotEmpty)
+                  .toSet()
+                  .toList();
+
+              if (userIds.isEmpty) {
+                if (!dialogContext.mounted) return;
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Không có người dùng để gửi thông báo.'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
+
+              await InjectionContainer().notificationRepository
+                  .sendNotification(
+                    title: title,
+                    body: body,
+                    type: selectedType,
+                    userIds: userIds,
+                  );
+
+              if (!dialogContext.mounted) return;
+              Navigator.pop(dialogContext);
+              ScaffoldMessenger.of(rootContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Đã gửi thông báo cho ${userIds.length} người dùng.',
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            } catch (e) {
+              if (!dialogContext.mounted) return;
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(
+                  content: Text('Gửi thông báo thất bại: $e'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+            } finally {
+              if (dialogContext.mounted) {
+                setState(() => isSending = false);
+              }
+            }
+          }
+
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
+            backgroundColor: theme.colorScheme.surface,
+            elevation: 8,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.92,
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(22),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                Icons.campaign_rounded,
+                                color: theme.primaryColor,
+                                size: 27,
+                              ),
+                            ),
+                            const Gap(14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Gửi thông báo',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const Gap(3),
+                                  Text(
+                                    'Thông báo sẽ hiển thị trong hộp thư của người dùng.',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.62),
+                                      height: 1.25,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Đóng',
+                              onPressed: isSending
+                                  ? null
+                                  : () => Navigator.pop(dialogContext),
+                              icon: const Icon(Icons.close_rounded),
+                            ),
+                          ],
+                        ),
+                        const Gap(22),
+                        Text(
+                          'Tiêu đề',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Gap(8),
+                        TextFormField(
+                          controller: titleController,
+                          enabled: !isSending,
+                          textInputAction: TextInputAction.next,
+                          maxLength: 80,
+                          decoration: fieldDecoration(
+                            context: context,
+                            hint: 'Nhập tiêu đề ngắn gọn',
+                            icon: Icons.title_rounded,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập tiêu đề.';
+                            }
+                            if (value.trim().length < 3) {
+                              return 'Tiêu đề cần ít nhất 3 ký tự.';
+                            }
+                            return null;
+                          },
+                        ),
+                        const Gap(14),
+                        Text(
+                          'Nội dung',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Gap(8),
+                        TextFormField(
+                          controller: bodyController,
+                          enabled: !isSending,
+                          minLines: 4,
+                          maxLines: 6,
+                          maxLength: 500,
+                          textInputAction: TextInputAction.newline,
+                          decoration: fieldDecoration(
+                            context: context,
+                            hint: 'Nhập nội dung thông báo',
+                            icon: Icons.notes_rounded,
+                            alignLabelWithHint: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập nội dung.';
+                            }
+                            if (value.trim().length < 5) {
+                              return 'Nội dung cần ít nhất 5 ký tự.';
+                            }
+                            return null;
+                          },
+                        ),
+                        const Gap(14),
+                        Text(
+                          'Loại thông báo',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Gap(8),
+                        DropdownButtonFormField<NotificationType>(
+                          value: selectedType,
+                          isExpanded: true,
+                          icon: const Icon(Icons.expand_more_rounded),
+                          decoration: fieldDecoration(
+                            context: context,
+                            hint: 'Chọn loại thông báo',
+                            icon: selectedOption.icon,
+                          ),
+                          selectedItemBuilder: (context) {
+                            return NotificationType.values.map((type) {
+                              final option = typeOptions[type]!;
+                              return Row(
+                                children: [
+                                  Icon(
+                                    option.icon,
+                                    color: option.color,
+                                    size: 20,
+                                  ),
+                                  const Gap(10),
+                                  Text(option.label),
+                                ],
+                              );
+                            }).toList();
+                          },
+                          items: NotificationType.values.map((type) {
+                            final option = typeOptions[type]!;
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 34,
+                                    height: 34,
+                                    decoration: BoxDecoration(
+                                      color: option.color.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      option.icon,
+                                      color: option.color,
+                                      size: 19,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Text(option.label),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: isSending
+                              ? null
+                              : (value) {
+                                  if (value != null) {
+                                    setState(() => selectedType = value);
+                                  }
+                                },
+                        ),
+                        const Gap(18),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: selectedOption.color.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: selectedOption.color.withOpacity(0.18),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.people_alt_outlined,
+                                color: selectedOption.color,
+                                size: 21,
+                              ),
+                              const Gap(10),
+                              Expanded(
+                                child: Text(
+                                  'Người nhận: tất cả tài khoản trong hệ thống.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    height: 1.35,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.72),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Gap(22),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: isSending
+                                    ? null
+                                    : () => Navigator.pop(dialogContext),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                child: const Text('Hủy'),
+                              ),
+                            ),
+                            const Gap(12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: isSending ? null : sendNotification,
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                  ),
+                                  backgroundColor: theme.primaryColor,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor:
+                                      theme.primaryColor.withOpacity(0.55),
+                                  disabledForegroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                icon: isSending
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.send_rounded,
+                                        size: 18,
+                                      ),
+                                label: Text(
+                                  isSending ? 'Đang gửi...' : 'Gửi ngay',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ).whenComplete(() {
+      titleController.dispose();
+      bodyController.dispose();
+    });
   }
 
   void showSendNotificationDialog(BuildContext context) {
@@ -1080,7 +1896,9 @@ class Usercase {
                                       bodyController.dispose();
                                       Navigator.pop(dialogContext);
 
-                                      ScaffoldMessenger.of(rootContext).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        rootContext,
+                                      ).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             '✅ Đã gửi thông báo cho ${userIds.length} người dùng.',
@@ -1091,9 +1909,13 @@ class Usercase {
                                       );
                                     } catch (e) {
                                       if (!dialogContext.mounted) return;
-                                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        dialogContext,
+                                      ).showSnackBar(
                                         SnackBar(
-                                          content: Text('❌ Lỗi: ${e.toString()}'),
+                                          content: Text(
+                                            '❌ Lỗi: ${e.toString()}',
+                                          ),
                                           backgroundColor: Colors.red,
                                           duration: const Duration(seconds: 5),
                                         ),

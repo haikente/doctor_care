@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
@@ -242,7 +243,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bỏ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         _startDate = null;

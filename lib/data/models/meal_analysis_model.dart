@@ -9,6 +9,7 @@ class MealAnalysisModel extends MealAnalysis {
     required super.timestamp,
     required super.imagePath,
     super.dishName,
+    super.mealType,
     required super.foodItems,
     super.userId,
     super.notes,
@@ -22,6 +23,7 @@ class MealAnalysisModel extends MealAnalysis {
       timestamp: entity.timestamp,
       imagePath: entity.imagePath,
       dishName: entity.dishName,
+      mealType: entity.mealType,
       foodItems: entity.foodItems,
       userId: entity.userId,
       notes: entity.notes,
@@ -36,6 +38,7 @@ class MealAnalysisModel extends MealAnalysis {
       timestamp: DateTime.parse(json['timestamp'] as String),
       imagePath: json['imagePath'] as String,
       dishName: json['dishName'] as String?,
+      mealType: json['mealType'] as String?,
       foodItems: (json['foodItems'] as List<dynamic>)
           .map((item) => FoodItemModel.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -52,6 +55,7 @@ class MealAnalysisModel extends MealAnalysis {
       'timestamp': timestamp.toIso8601String(),
       'imagePath': imagePath,
       'dishName': dishName,
+      'mealType': mealType,
       'foodItems': foodItems
           .map((item) => FoodItemModel.fromEntity(item).toJson())
           .toList(),
@@ -71,6 +75,7 @@ class MealAnalysisModel extends MealAnalysis {
       timestamp: DateTime.parse(map['timestamp'] as String),
       imagePath: map['image_path'] as String,
       dishName: map['dish_name'] as String?,
+      mealType: map['meal_type'] as String?,
       foodItems: foodItems ?? [],
       userId: map['user_id'] as String?,
       notes: map['notes'] as String?,
@@ -85,6 +90,7 @@ class MealAnalysisModel extends MealAnalysis {
       'timestamp': timestamp.toIso8601String(),
       'image_path': imagePath,
       'dish_name': dishName,
+      'meal_type': mealType,
       'user_id': userId,
       'notes': notes,
       'health_recommendations': healthRecommendations,
@@ -98,6 +104,7 @@ class MealAnalysisModel extends MealAnalysis {
       timestamp: timestamp,
       imagePath: imagePath,
       dishName: dishName,
+      mealType: mealType,
       foodItems: foodItems,
       userId: userId,
       notes: notes,

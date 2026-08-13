@@ -1,5 +1,6 @@
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
+import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
 import 'package:doctor_care/presentation/bloc/step_count/step_count_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,8 +9,6 @@ import 'dart:math';
 
 class StepCountTargetChart extends StatelessWidget {
   const StepCountTargetChart({super.key});
-
-  static const int _dailyGoal = 10000;
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
@@ -20,6 +19,10 @@ class StepCountTargetChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dailyGoal = context.select(
+      (HealthGoalCubit cubit) => cubit.state.dailySteps,
+    );
+
     return BlocBuilder<StepCountCubit, StepCountState>(
       builder: (context, state) {
         int totalSteps = 0;
@@ -41,7 +44,9 @@ class StepCountTargetChart extends StatelessWidget {
           );
         }
 
-        final progress = (totalSteps / _dailyGoal).clamp(0.0, 1.0);
+        final progress = dailyGoal > 0
+            ? (totalSteps / dailyGoal).clamp(0.0, 1.0)
+            : 0.0;
         final progressColor = _getProgressColor(totalSteps);
 
         return Padding(
@@ -113,7 +118,7 @@ class StepCountTargetChart extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                "/ ${_formatNumber(_dailyGoal)}",
+                                "/ ${_formatNumber(dailyGoal)}",
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Colors.grey.shade500,
@@ -255,29 +260,29 @@ class _CircularProgressPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
+    final center = Offset(size.width / 2, size.height / 2); // tâm của vòng tròn
+    final radius = (size.width - strokeWidth) / 2; // bán kính của vòng tròn (trừ đi strokeWidth để không bị cắt)
 
-    // Background circle
+    // Background circle (vòng tròn nền)
     final bgPaint = Paint()
       ..color = bgColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      ..style = PaintingStyle.stroke // chỉ vẽ đường viền
+      ..strokeWidth = strokeWidth // độ dày của đường viền
+      ..strokeCap = StrokeCap.round; // đầu mút tròn
 
-    canvas.drawCircle(center, radius, bgPaint);
+    canvas.drawCircle(center, radius, bgPaint); // vẽ vòng tròn nền
 
-    // Progress arc
+    // Progress arc (vòng tròn tiến độ)
     final progressPaint = Paint()
       ..color = progressColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    final sweepAngle = 2 * pi * progress;
+    final sweepAngle = 2 * pi * progress; // góc quét dựa trên tiến độ (0.0 đến 1.0)
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
-      -pi / 2, // Start from top
+      -pi / 2, // 
       sweepAngle,
       false,
       progressPaint,

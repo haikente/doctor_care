@@ -17,6 +17,7 @@ class StepCountRepositoryImpl implements StepCountRepository {
         caloriesBurned: record.caloriesBurned,
         timestamp: record.timestamp,
         note: record.note,
+        source: record.source,
       ),
     );
   }
@@ -39,6 +40,7 @@ class StepCountRepositoryImpl implements StepCountRepository {
         caloriesBurned: record.caloriesBurned,
         timestamp: record.timestamp,
         note: record.note,
+        source: record.source,
       ),
     );
   }

@@ -45,11 +45,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .doc(user.uid)
           .get();
       if (docSnapshot.exists && docSnapshot.data() != null) {
-        return UserModel.fromMap(
-          docSnapshot.data()!,
-          user.uid,
-          user.email ?? "",
-        );
+        final userData = docSnapshot.data()!;
+        final status = userData['accountStatus']?.toString().toLowerCase();
+        final isDisabled =
+            userData['isActive'] == false ||
+            status == 'disabled' ||
+            status == 'locked' ||
+            status == 'inactive';
+        if (isDisabled) {
+          await firebaseAuth.signOut();
+          throw ServerFailure(
+            'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.',
+          );
+        }
+        return UserModel.fromMap(userData, user.uid, user.email ?? "");
       }
 
       return UserModel(uid: user.uid, email: user.email ?? "", role: 'patient');
@@ -255,7 +264,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       final userDoc = await firestore.collection('users').doc(user.uid).get();
       if (userDoc.exists && userDoc.data() != null) {
-        return UserModel.fromMap(userDoc.data()!, user.uid, user.email ?? "");
+        final userData = userDoc.data()!;
+        final status = userData['accountStatus']?.toString().toLowerCase();
+        final isDisabled =
+            userData['isActive'] == false ||
+            status == 'disabled' ||
+            status == 'locked' ||
+            status == 'inactive';
+        if (isDisabled) {
+          await firebaseAuth.signOut();
+          await googleSignIn.signOut();
+          throw ServerFailure(
+            'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.',
+          );
+        }
+        return UserModel.fromMap(userData, user.uid, user.email ?? "");
       }
 
       return UserModel(uid: user.uid, email: user.email ?? "", role: role);

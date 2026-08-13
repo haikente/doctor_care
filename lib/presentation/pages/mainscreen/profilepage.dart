@@ -1,6 +1,6 @@
-import 'package:doctor_care/core/images/images.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
+import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/services/auth_storage_service.dart';
 import 'package:doctor_care/core/services/image_upload_service.dart';
 import 'package:doctor_care/presentation/bloc/locale/locale_cubit.dart';
@@ -23,164 +23,155 @@ class Profilepage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       body: SingleChildScrollView(
         child: Column(
           children: [
             _buildHeader(context, theme, isDarkMode),
 
-            Transform.translate(
-              offset: const Offset(0, -40),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Quick Stats Card ──
-                    _buildQuickStatsCard(context, theme),
-                    const Gap(24),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Quick Stats Card ──
+                  _buildQuickStatsCard(context, theme),
+                  const Gap(24),
 
-                    // ── Cài đặt Section ──
-                    _buildSectionTitle(context, context.tr('settings'), theme),
-                    const Gap(10),
-                    _buildMenuCard(theme, [
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.person_outline_rounded,
-                        iconColor: Colors.blue,
-                        title: context.tr('personal_info'),
-                        subtitle: context.tr('personal_info_sub'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditProfileScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      _buildDivider(theme),
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.family_restroom_rounded,
-                        iconColor: Colors.purple,
-                        title: context.tr('family_members'),
-                        subtitle: context.tr('family_members_sub'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FamilyProfileScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      _buildDivider(theme),
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.shield_outlined,
-                        iconColor: Colors.teal,
-                        title: context.tr('account_security'),
-                        subtitle: context.tr('account_security_sub'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AccountSecurityScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ]),
-
-                    const Gap(24),
-
-                    // ── Tùy chọn Section ──
-                    _buildSectionTitle(
-                      context,
-                      context.tr('preferences'),
-                      theme,
+                  // ── Cài đặt Section ──
+                  _buildSectionTitle(context, context.tr('settings'), theme),
+                  const Gap(10),
+                  _buildMenuCard(theme, [
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.person_outline_rounded,
+                      iconColor: Colors.blue,
+                      title: context.tr('personal_info'),
+                      subtitle: context.tr('personal_info_sub'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProfileScreen(),
+                          ),
+                        );
+                      },
                     ),
-                    const Gap(10),
-                    _buildMenuCard(theme, [
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.notifications_outlined,
-                        iconColor: Colors.orange,
-                        title: context.tr('notifications'),
-                        subtitle: context.tr('notifications_sub'),
-                        trailing: Switch(
-                          value: true,
-                          onChanged: (value) {},
-                          activeThumbColor: theme.primaryColor,
-                        ),
-                        onTap: null,
-                      ),
-                      _buildDivider(theme),
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: isDarkMode
-                            ? Icons.dark_mode_rounded
-                            : Icons.light_mode_rounded,
-                        iconColor: isDarkMode ? Colors.indigo : Colors.amber,
-                        title: context.tr('dark_mode'),
-                        subtitle: isDarkMode
-                            ? context.tr('dark_mode_on')
-                            : context.tr('dark_mode_off'),
-                        trailing: Switch(
-                          value: isDarkMode,
-                          onChanged: (value) {
-                            context.read<ThemeCubit>().toggleTheme();
-                          },
-                          activeThumbColor: theme.primaryColor,
-                        ),
-                        onTap: null,
-                      ),
-                      _buildDivider(theme),
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.translate_rounded,
-                        iconColor: Colors.green,
-                        title: context.tr('language'),
-                        subtitle: context
-                            .read<LocaleCubit>()
-                            .currentLanguageName,
-                        onTap: () => _showLanguageDialog(context, theme),
-                      ),
-                    ]),
+                    _buildDivider(theme),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.family_restroom_rounded,
+                      iconColor: Colors.purple,
+                      title: context.tr('family_members'),
+                      subtitle: context.tr('family_members_sub'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FamilyProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildDivider(theme),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.shield_outlined,
+                      iconColor: Colors.teal,
+                      title: context.tr('account_security'),
+                      subtitle: context.tr('account_security_sub'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AccountSecurityScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ]),
 
-                    const Gap(24),
+                  const Gap(24),
 
-                    // ── Hỗ trợ Section ──
-                    _buildSectionTitle(context, context.tr('support'), theme),
-                    const Gap(10),
-                    _buildMenuCard(theme, [
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.help_outline_rounded,
-                        iconColor: Colors.cyan,
-                        title: context.tr('help_faq'),
-                        onTap: () {},
+                  // ── Tùy chọn Section ──
+                  _buildSectionTitle(context, context.tr('preferences'), theme),
+                  const Gap(10),
+                  _buildMenuCard(theme, [
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.notifications_outlined,
+                      iconColor: Colors.orange,
+                      title: context.tr('notifications'),
+                      subtitle: context.tr('notifications_sub'),
+                      trailing: Switch(
+                        value: true,
+                        onChanged: (value) {},
+                        activeThumbColor: theme.primaryColor,
                       ),
-                      _buildDivider(theme),
-                      _buildMenuItem(
-                        theme: theme,
-                        icon: Icons.info_outline_rounded,
-                        iconColor: Colors.grey,
-                        title: context.tr('about_app'),
-                        subtitle: '${context.tr('version')} 1.0.0',
-                        onTap: () {},
+                      onTap: null,
+                    ),
+                    _buildDivider(theme),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: isDarkMode
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
+                      iconColor: isDarkMode ? Colors.indigo : Colors.amber,
+                      title: context.tr('dark_mode'),
+                      subtitle: isDarkMode
+                          ? context.tr('dark_mode_on')
+                          : context.tr('dark_mode_off'),
+                      trailing: Switch(
+                        value: isDarkMode,
+                        onChanged: (value) {
+                          context.read<ThemeCubit>().toggleTheme();
+                        },
+                        activeThumbColor: theme.primaryColor,
                       ),
-                    ]),
+                      onTap: null,
+                    ),
+                    _buildDivider(theme),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.translate_rounded,
+                      iconColor: Colors.green,
+                      title: context.tr('language'),
+                      subtitle: context.read<LocaleCubit>().currentLanguageName,
+                      onTap: () => _showLanguageDialog(context, theme),
+                    ),
+                  ]),
 
-                    const Gap(24),
+                  const Gap(24),
 
-                    // ── Logout Button ──
-                    _buildLogoutButton(context, theme),
+                  // ── Hỗ trợ Section ──
+                  _buildSectionTitle(context, context.tr('support'), theme),
+                  const Gap(10),
+                  _buildMenuCard(theme, [
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.help_outline_rounded,
+                      iconColor: Colors.cyan,
+                      title: context.tr('help_faq'),
+                      onTap: () {},
+                    ),
+                    _buildDivider(theme),
+                    _buildMenuItem(
+                      theme: theme,
+                      icon: Icons.info_outline_rounded,
+                      iconColor: Colors.grey,
+                      title: context.tr('about_app'),
+                      subtitle: '${context.tr('version')} 1.0.0',
+                      onTap: () {},
+                    ),
+                  ]),
 
-                    const Gap(100),
-                  ],
-                ),
+                  const Gap(24),
+
+                  // ── Logout Button ──
+                  _buildLogoutButton(context, theme),
+
+                  const Gap(100),
+                ],
               ),
             ),
           ],
@@ -192,7 +183,17 @@ class Profilepage extends StatelessWidget {
   Widget _buildHeader(BuildContext context, ThemeData theme, bool isDarkMode) {
     return Stack(
       children: [
-        Positioned.fill(child: Image.asset(Images.profile, fit: BoxFit.cover)),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [theme.colorScheme.primary, const Color(0xFF20A386)],
+              ),
+            ),
+          ),
+        ),
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
@@ -200,8 +201,8 @@ class Profilepage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.2),
-                  Colors.black.withOpacity(0.2),
+                  Colors.black.withOpacity(0.04),
+                  Colors.black.withOpacity(0.16),
                 ],
               ),
             ),
@@ -211,7 +212,7 @@ class Profilepage extends StatelessWidget {
           bottom: false,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(bottom: 60),
+            padding: const EdgeInsets.only(bottom: 28),
             child: Column(
               children: [
                 const Gap(16),
@@ -223,8 +224,8 @@ class Profilepage extends StatelessWidget {
                       Text(
                         context.tr('profile'),
                         style: const TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.3,
                         ),
@@ -249,7 +250,7 @@ class Profilepage extends StatelessWidget {
                   ),
                 ),
 
-                const Gap(28),
+                const Gap(22),
 
                 // ── Avatar ──
                 BlocBuilder<AuthBloc, AuthState>(
@@ -279,7 +280,7 @@ class Profilepage extends StatelessWidget {
                         child: Stack(
                           children: [
                             CircleAvatar(
-                              radius: 52,
+                              radius: 44,
                               backgroundColor: Colors.white.withOpacity(0.3),
                               backgroundImage: photoUrl != null
                                   ? NetworkImage(photoUrl)
@@ -287,7 +288,7 @@ class Profilepage extends StatelessWidget {
                               child: photoUrl == null
                                   ? const Icon(
                                       Icons.person_rounded,
-                                      size: 50,
+                                      size: 42,
                                       color: Colors.white,
                                     )
                                   : null,
@@ -326,7 +327,7 @@ class Profilepage extends StatelessWidget {
                   },
                 ),
 
-                const Gap(20),
+                const Gap(16),
 
                 // ── Name + Info ──
                 BlocBuilder<AuthBloc, AuthState>(
@@ -336,6 +337,8 @@ class Profilepage extends StatelessWidget {
                         children: [
                           Text(
                             state.user.fullName ?? context.tr('user'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -348,6 +351,30 @@ class Profilepage extends StatelessWidget {
                                   offset: Offset(0, 2),
                                 ),
                               ],
+                            ),
+                          ),
+                          const Gap(6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.16),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.18),
+                              ),
+                            ),
+                            child: Text(
+                              state.user.email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.86),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -387,15 +414,16 @@ class Profilepage extends StatelessWidget {
 
   Widget _buildQuickStatsCard(BuildContext context, ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: theme.shadowColor.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -442,15 +470,17 @@ class Profilepage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: color.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: color, size: 22),
           ),
           const Gap(8),
           Text(
             label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
           ),
           const Gap(2),
           Text(
@@ -483,8 +513,8 @@ class Profilepage extends StatelessWidget {
             width: 4,
             height: 20,
             decoration: BoxDecoration(
-              color: Colors.blue.shade400,
-              borderRadius: BorderRadius.circular(2),
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(999),
             ),
           ),
           const Gap(10),
@@ -492,7 +522,7 @@ class Profilepage extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
               color: AppColor.textPrimary(context),
             ),
           ),
@@ -505,17 +535,18 @@ class Profilepage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+            color: theme.shadowColor.withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         child: Column(children: children),
       ),
     );
@@ -544,14 +575,16 @@ class Profilepage extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: iconColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, color: iconColor, size: 22),
               ),
@@ -564,7 +597,7 @@ class Profilepage extends StatelessWidget {
                       title,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -574,6 +607,7 @@ class Profilepage extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
+                          height: 1.25,
                           color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
                       ),
@@ -599,16 +633,16 @@ class Profilepage extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.red.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: Colors.red.withOpacity(0.15)),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
           onTap: () => _showLogoutDialog(context, theme),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 17),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -618,7 +652,7 @@ class Profilepage extends StatelessWidget {
                   context.tr('logout'),
                   style: const TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                     color: Colors.red,
                   ),
                 ),
@@ -631,72 +665,69 @@ class Profilepage extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context, ThemeData theme) {
-    final tr = AppLocalizations.of(context).translate;
+    //final tr = AppLocalizations.of(context).translate;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
+        title: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
-                Icons.logout_rounded,
-                color: Colors.red,
-                size: 20,
+                Icons.notifications_active_rounded,
+                color: Colors.blue,
+                size: 70,
               ),
             ),
-            const Gap(12),
+            const Gap(25),
             Text(
-              tr('logout'),
+              "Thông báo",
               style: TextStyle(
                 color: theme.colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
+                letterSpacing: 1.5
               ),
             ),
-          ],
-        ),
-        content: Text(
-          tr('logout_confirm'),
-          style: TextStyle(
-            color: theme.textTheme.bodyMedium?.color,
-            fontSize: 14,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              tr('cancel'),
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+            Gap(20),
+            Text(
+            "Bạn có chắc chắn muốn đăng xuất?",
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
+              fontSize: 14,
             ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await AuthStorageService.clearAll();
-              // ignore: use_build_context_synchronously
-              context.read<AuthBloc>().add(SignOutEvent());
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Gap(20),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                text: "Huỷ", 
+                onPressed: () => Navigator.pop(ctx),
+                gradient: [Colors.blue.shade50, Colors.blue.shade50],
+                          textColor: Colors.blue,
+                ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            ),
-            child: Text(
-              tr('logout'),
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-            ),
+              Gap(10),
+              Expanded(
+                child: CustomButton(text: "Đồng ý", onPressed: () async {
+                Navigator.pop(ctx);
+                await AuthStorageService.clearLoginSessionOnly();
+                // ignore: use_build_context_synchronously
+                  context.read<AuthBloc>().add(SignOutEvent());
+                },
+               ),
+             ),
+           ],
           ),
-        ],
+         ],
+        ), 
       ),
     );
   }

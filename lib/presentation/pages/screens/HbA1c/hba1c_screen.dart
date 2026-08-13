@@ -62,21 +62,10 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
       }).toList();
     }
     // Lọc theo trạng thái (chỉ khi có chọn trạng thái cụ thể)
-    if (selectedStatus.isNotEmpty && selectedStatus != "Tất cả") {
-      if (selectedStatus == "Cao") {
-        // "Cao" bao gồm cả "Tiền đái tháo đường" và "Đái tháo đường"
-        filtered = filtered
-            .where(
-              (record) =>
-                  record.getInterpretation == "Tiền đái tháo đường" ||
-                  record.getInterpretation == "Đái tháo đường",
-            )
-            .toList();
-      } else {
-        filtered = filtered
-            .where((record) => record.getInterpretation == selectedStatus)
-            .toList();
-      }
+    if (selectedStatus == "normal") {
+      filtered = filtered.where((record) => record.value < 5.7).toList();
+    } else if (selectedStatus == "high") {
+      filtered = filtered.where((record) => record.value >= 5.7).toList();
     }
     return filtered;
   }
@@ -110,20 +99,10 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
     }
 
     // Lọc theo trạng thái
-    if (chartSelectedStatus.isNotEmpty && chartSelectedStatus != "Tất cả") {
-      if (chartSelectedStatus == "Cao") {
-        filtered = filtered
-            .where(
-              (record) =>
-                  record.getInterpretation == "Tiền đái tháo đường" ||
-                  record.getInterpretation == "Đái tháo đường",
-            )
-            .toList();
-      } else {
-        filtered = filtered
-            .where((record) => record.getInterpretation == chartSelectedStatus)
-            .toList();
-      }
+    if (chartSelectedStatus == "normal") {
+      filtered = filtered.where((record) => record.value < 5.7).toList();
+    } else if (chartSelectedStatus == "high") {
+      filtered = filtered.where((record) => record.value >= 5.7).toList();
     }
     return filtered;
   }
@@ -265,7 +244,10 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${filteredRecords.length} bản ghi",
+                          context.tr(
+                            'record_count',
+                            params: {'count': '${filteredRecords.length}'},
+                          ),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -363,8 +345,7 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
                             ),
 
                           // Chip trạng thái - hiện khi có chọn trạng thái cụ thể
-                          if (selectedStatus.isNotEmpty &&
-                              selectedStatus != "Tất cả")
+                          if (selectedStatus.isNotEmpty)
                             Container(
                               padding: EdgeInsets.all(5),
                               decoration: BoxDecoration(
@@ -379,7 +360,7 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    selectedStatus,
+                                    _hba1cStatusLabel(selectedStatus),
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -587,7 +568,7 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
                 border: Border.all(color: hbA1c.getColor),
               ),
               child: Text(
-                hbA1c.getInterpretation.toString(),
+                _hba1cInterpretationLabel(hbA1c),
                 style: TextStyle(
                   fontSize: 11,
                   color: hbA1c.getColor,
@@ -599,5 +580,26 @@ class _Hba1cScreenState extends State<Hba1cScreen> {
         ),
       ),
     );
+  }
+
+  String _hba1cStatusLabel(String status) {
+    switch (status) {
+      case 'normal':
+        return context.tr('hba1c_status_normal');
+      case 'high':
+        return context.tr('hba1c_status_high');
+      default:
+        return context.tr('not_selected');
+    }
+  }
+
+  String _hba1cInterpretationLabel(HbA1c hbA1c) {
+    if (hbA1c.value < 5.7) {
+      return context.tr('hba1c_status_normal');
+    }
+    if (hbA1c.value < 6.5) {
+      return context.tr('hba1c_status_prediabetes');
+    }
+    return context.tr('hba1c_status_diabetes');
   }
 }

@@ -4,6 +4,7 @@ import 'package:doctor_care/domain/usecase/meal_analysis/analyze_meal_image_usec
 import 'package:doctor_care/domain/usecase/meal_analysis/save_meal_analysis_usecase.dart';
 import 'package:doctor_care/domain/usecase/meal_analysis/get_all_meal_analyses_usecase.dart';
 import 'package:doctor_care/domain/usecase/meal_analysis/delete_meal_analysis_usecase.dart';
+import 'package:doctor_care/data/repositories/meal_analysis_repository_impl.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 
@@ -37,7 +38,13 @@ class MealAnalysisBloc extends Bloc<MealAnalysisEvent, MealAnalysisState> {
     final result = await analyzeMealImageUseCase(event.imagePath);
 
     result.fold(
-      ifLeft: (error) => emit(MealAnalysisError(error.toString())),
+      ifLeft: (error) {
+        if (error is InvalidImageException) {
+          emit(MealAnalysisInvalidImage(error.reason));
+        } else {
+          emit(MealAnalysisError(error.toString()));
+        }
+      },
       ifRight: (mealAnalysis) => emit(MealAnalysisSuccess(mealAnalysis)),
     );
   }

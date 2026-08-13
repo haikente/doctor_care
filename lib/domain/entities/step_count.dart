@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+enum StepCountSource {
+  manual,
+  healthConnect,
+}
+
 class StepCount {
   final int? id;
   final int steps;
@@ -7,6 +12,7 @@ class StepCount {
   final double? caloriesBurned; // kcal
   final DateTime timestamp;
   final String? note;
+  final StepCountSource source;
 
   StepCount({
     this.id,
@@ -15,9 +21,38 @@ class StepCount {
     this.caloriesBurned,
     required this.timestamp,
     this.note,
+    this.source = StepCountSource.manual,
   });
 
-  /// Phân loại theo nghiên cứu y khoa
+  /// Nguồn dữ liệu.
+  String get sourceLabel {
+    switch (source) {
+      case StepCountSource.manual:
+        return 'Nhập tay';
+      case StepCountSource.healthConnect:
+        return 'Thiết bị';
+    }
+  }
+
+  IconData get sourceIcon {
+    switch (source) {
+      case StepCountSource.manual:
+        return Icons.edit_note;
+      case StepCountSource.healthConnect:
+        return Icons.watch;
+    }
+  }
+
+  Color get sourceColor {
+    switch (source) {
+      case StepCountSource.manual:
+        return Colors.blueGrey;
+      case StepCountSource.healthConnect:
+        return Colors.blue;
+    }
+  }
+
+  /// Phân loại theo nghiên cứu y khoa.
   String get status {
     if (steps < 3000) return 'Ít vận động';
     if (steps < 6000) return 'Vận động nhẹ';

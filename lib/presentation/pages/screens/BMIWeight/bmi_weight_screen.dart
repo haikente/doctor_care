@@ -110,7 +110,10 @@ class _BmiWeightScreenState extends State<BmiWeightScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "${filteredRecords.length} bản ghi",
+                        context.tr(
+                          'record_count',
+                          params: {'count': '${filteredRecords.length}'},
+                        ),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,

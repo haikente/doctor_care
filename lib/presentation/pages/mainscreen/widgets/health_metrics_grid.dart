@@ -50,16 +50,16 @@ extension _MetricStatusExt on _MetricStatus {
     }
   }
 
-  String get label {
+  String label(BuildContext context) {
     switch (this) {
       case _MetricStatus.normal:
-        return 'Bình thường';
+        return context.tr('status_normal');
       case _MetricStatus.caution:
-        return 'Chú ý';
+        return context.tr('status_caution');
       case _MetricStatus.danger:
-        return 'Nguy hiểm';
+        return context.tr('status_danger');
       case _MetricStatus.noData:
-        return 'Chưa có';
+        return context.tr('status_no_data');
     }
   }
 }
@@ -323,7 +323,7 @@ class HealthMetricsGrid extends StatelessWidget {
                       ),
                       const Gap(3),
                       Text(
-                        status.label,
+                        status.label(context),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,

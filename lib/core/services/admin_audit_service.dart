@@ -91,10 +91,10 @@ class AdminAuditService {
         .limit(50)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => AuditLog.fromMap(doc.id, doc.data()))
-          .toList();
-    });
+          return snapshot.docs
+              .map((doc) => AuditLog.fromMap(doc.id, doc.data()))
+              .toList();
+        });
   }
 
   /// Lấy logs một lần (paginated)
@@ -148,10 +148,7 @@ class AdminAuditService {
   }
 
   Future<void> logCheckSchema() async {
-    await log(
-      action: 'check_schema',
-      description: 'Checked database schema',
-    );
+    await log(action: 'check_schema', description: 'Checked database schema');
   }
 
   Future<void> logClearCache(String cacheType) async {
@@ -183,6 +180,30 @@ class AdminAuditService {
       action: 'edit_user',
       description: 'Edited user $email',
       details: {'userId': userId, 'email': email},
+    );
+  }
+
+  Future<void> logToggleUserStatus(
+    String userId,
+    String email,
+    bool isActive,
+  ) async {
+    await log(
+      action: 'toggle_user_status',
+      description: '${isActive ? 'Activated' : 'Disabled'} user $email',
+      details: {'userId': userId, 'email': email, 'isActive': isActive},
+    );
+  }
+
+  Future<void> logUpdateUserAccess(
+    String userId,
+    String email,
+    Map<String, bool> permissions,
+  ) async {
+    await log(
+      action: 'update_user_access',
+      description: 'Updated access permissions for $email',
+      details: {'userId': userId, 'email': email, 'permissions': permissions},
     );
   }
 

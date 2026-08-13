@@ -9,4 +9,6 @@ class Images {
   static const String homepage = 'assets/images/homepage.jpg';
   static const String profile = 'assets/images/profile.jpeg';
   static const String aifood = 'assets/images/aifood.jpeg';
+  static const String logologin = 'assets/images/logo_login.png';
+  static const String logoapp = 'assets/images/logo_app.png';
 }

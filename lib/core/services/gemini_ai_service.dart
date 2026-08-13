@@ -109,10 +109,20 @@ class GeminiAIService {
     final healthSection = _buildHealthContextSection(healthContext);
 
     return '''
-Phân tích hình ảnh bữa ăn này và cung cấp tên món ăn cùng danh sách các thành phần nguyên liệu chi tiết.
-$healthSection
-Hãy trả lời theo định dạng JSON sau (QUAN TRỌNG: CHỈ trả về JSON, không thêm text khác):
+Đầu tiên, hãy kiểm tra hình ảnh này:
+1. Ảnh có phải là hình ảnh thức ăn/bữa ăn/đồ uống không? (Nếu là ảnh phong cảnh, người, đồ vật không phải thức ăn → không hợp lệ)
+2. Ảnh có quá mờ, quá tối, hoặc không thể nhận diện nội dung không? (Nếu không thể xác định được đây là món gì → không hợp lệ)
+
+Nếu ảnh KHÔNG hợp lệ, trả về JSON:
 {
+  "imageValid": false,
+  "invalidReason": "Lý do cụ thể tại sao ảnh không hợp lệ (VD: 'Ảnh không phải thức ăn', 'Ảnh quá mờ không thể nhận diện', 'Ảnh quá tối'...)"
+}
+
+Nếu ảnh HỢP LỆ (là ảnh thức ăn rõ ràng), hãy phân tích và trả về:
+$healthSection
+{
+  "imageValid": true,
   "dishName": "Tên món ăn tổng quát (ví dụ: Phở Bò, Cơm Tấm...)",
   "healthRecommendations": "Lời khuyên sức khỏe cá nhân hóa dựa trên thông tin sức khỏe của người dùng bên trên (nếu có). Ví dụ: nếu đường huyết cao thì cảnh báo tinh bột, nếu huyết áp cao thì lưu ý muối... Nếu không có thông tin sức khỏe thì đưa ra lời khuyên chung.",
   "foods": [
@@ -357,11 +367,25 @@ Yêu cầu:
     }
   }
 
+  // 
   Future<Map<String, dynamic>> _parseAIResponse(String responseText) async {
     try {
       final cleanedText = _cleanJsonResponse(responseText);
 
       final jsonResponse = _parseJson(cleanedText);
+
+      // Kiểm tra tính hợp lệ của ảnh
+      final imageValid = jsonResponse['imageValid'] as bool? ?? true;
+      if (!imageValid) {
+        final invalidReason = jsonResponse['invalidReason'] as String? ??
+            'Ảnh không hợp lệ';
+        debugPrint('⚠️ [AI] Ảnh không hợp lệ: $invalidReason');
+        return {
+          'imageValid': false,
+          'invalidReason': invalidReason,
+        };
+      }
+
       final dishName = jsonResponse['dishName'] as String?;
       final healthRecommendations =
           jsonResponse['healthRecommendations'] as String?;
@@ -415,6 +439,7 @@ Yêu cầu:
       }
 
       return {
+        'imageValid': true,
         'dishName': dishName ?? 'Món ăn chưa đặt tên',
         'healthRecommendations': healthRecommendations,
         'foodItems': foodItems,

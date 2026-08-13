@@ -5,34 +5,36 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class FilterbottomsheetTemperature extends StatefulWidget {
-  final DateTime? initialStartDate; 
+  final DateTime? initialStartDate;
   final DateTime? initialEndDate;
-  final String initialStatus; 
+  final String initialStatus;
   final DateTime firstAvailableDate;
-  final DateTime lastAvailableDate; 
-  final Function(DateTime?, DateTime?, String) onApply; 
+  final DateTime lastAvailableDate;
+  final Function(DateTime?, DateTime?, String) onApply;
   final VoidCallback onReset;
 
   const FilterbottomsheetTemperature({
-    super.key, 
-    this.initialStartDate, 
-    this.initialEndDate, 
-    required this.initialStatus, 
-    required this.firstAvailableDate, 
-    required this.lastAvailableDate, 
-    required this.onApply, 
-    required this.onReset
+    super.key,
+    this.initialStartDate,
+    this.initialEndDate,
+    required this.initialStatus,
+    required this.firstAvailableDate,
+    required this.lastAvailableDate,
+    required this.onApply,
+    required this.onReset,
   });
 
   @override
-  State<FilterbottomsheetTemperature> createState() => _FilterbottomsheetTemperatureState();
+  State<FilterbottomsheetTemperature> createState() =>
+      _FilterbottomsheetTemperatureState();
 }
 
-class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperature> {
+class _FilterbottomsheetTemperatureState
+    extends State<FilterbottomsheetTemperature> {
   late DateTime? tempStartDate;
   late DateTime? tempEndDate;
-  late String tempStatus; 
-  late String tempClassify; 
+  late String tempStatus;
+  late String tempClassify;
 
   @override
   void initState() {
@@ -40,13 +42,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
     tempStartDate = widget.initialStartDate;
     tempEndDate = widget.initialEndDate;
     tempStatus = widget.initialStatus;
-    tempClassify = ""; 
+    tempClassify = "";
   }
 
   String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
   }
 
   @override
@@ -72,14 +74,17 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: Center(
                     child: Text(
                       context.tr('filter_results'),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(Icons.clear, size: 24),
-                )
+                ),
               ],
             ),
           ),
@@ -90,7 +95,10 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text(context.tr('time'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  context.tr('time'),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -127,7 +135,10 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
           // ========== Phân loại ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(context.tr('classification'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              context.tr('classification'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           Padding(
@@ -142,7 +153,10 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempClassify = "";
                       });
                     },
-                    child: _buildClassifyChip(context.tr('all'), tempClassify == ""),
+                    child: _buildClassifyChip(
+                      context.tr('all'),
+                      tempClassify == "",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -150,10 +164,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempClassify = "Nhập tay";
+                        tempClassify = "manual";
                       });
                     },
-                    child: _buildClassifyChip(context.tr('manual_entry'), tempClassify == "Nhập tay"),
+                    child: _buildClassifyChip(
+                      context.tr('manual_entry'),
+                      tempClassify == "manual",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -161,10 +178,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempClassify = "Thiết bị";
+                        tempClassify = "device";
                       });
                     },
-                    child: _buildClassifyChip(context.tr('device'), tempClassify == "Thiết bị"),
+                    child: _buildClassifyChip(
+                      context.tr('device'),
+                      tempClassify == "device",
+                    ),
                   ),
                 ),
               ],
@@ -174,7 +194,10 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
           // ========== TRáº NG THÃI (dÃ¹ng tempStatus) ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(context.tr('status'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              context.tr('status'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           Padding(
@@ -185,10 +208,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = ""; 
+                        tempStatus = "";
                       });
                     },
-                    child: _buildStatusChip(context.tr('all'), tempStatus == ""),
+                    child: _buildStatusChip(
+                      context.tr('all'),
+                      tempStatus == "",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -196,10 +222,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = "Hạ nhiệt";
+                        tempStatus = "low";
                       });
                     },
-                    child: _buildStatusChip(context.tr('temp_low'), tempStatus == "Hạ nhiệt"),
+                    child: _buildStatusChip(
+                      context.tr('temp_low'),
+                      tempStatus == "low",
+                    ),
                   ),
                 ),
               ],
@@ -214,10 +243,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = "Bình thường";
+                        tempStatus = "normal";
                       });
                     },
-                    child: _buildStatusChip(context.tr('status_normal'), tempStatus == "Bình thường"),
+                    child: _buildStatusChip(
+                      context.tr('status_normal'),
+                      tempStatus == "normal",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -225,10 +257,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = "Sốt nhẹ";
+                        tempStatus = "mild_fever";
                       });
                     },
-                    child: _buildStatusChip(context.tr('temp_mild_fever'), tempStatus == "Sốt nhẹ"),
+                    child: _buildStatusChip(
+                      context.tr('temp_mild_fever'),
+                      tempStatus == "mild_fever",
+                    ),
                   ),
                 ),
               ],
@@ -243,10 +278,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = "Sốt vừa";
+                        tempStatus = "moderate_fever";
                       });
                     },
-                    child: _buildStatusChip(context.tr('temp_moderate_fever'), tempStatus == "Sốt vừa"),
+                    child: _buildStatusChip(
+                      context.tr('temp_moderate_fever'),
+                      tempStatus == "moderate_fever",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -254,10 +292,13 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = "Sốt cao";
+                        tempStatus = "high_fever";
                       });
                     },
-                    child: _buildStatusChip(context.tr('temp_high_fever'), tempStatus == "Sốt cao"),
+                    child: _buildStatusChip(
+                      context.tr('temp_high_fever'),
+                      tempStatus == "high_fever",
+                    ),
                   ),
                 ),
               ],
@@ -270,10 +311,9 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
             child: Row(
               children: [
-                
                 Expanded(
                   child: CustomButton(
-                    text: context.tr('filter'),
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         tempStartDate = widget.firstAvailableDate;
@@ -281,7 +321,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                         tempStatus = "";
                         tempClassify = "";
                       });
-                    
+
                       widget.onReset();
                     },
                     gradient: [Colors.blue.shade50, Colors.blue.shade50],
@@ -289,7 +329,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
                   ),
                 ),
                 Gap(10),
-               
+
                 Expanded(
                   child: CustomButton(
                     text: context.tr('apply'),
@@ -340,6 +380,7 @@ class _FilterbottomsheetTemperatureState extends State<FilterbottomsheetTemperat
       },
     );
   }
+
   // ========== BUILD CHIPS ==========
   Widget _buildClassifyChip(String label, bool isSelected) {
     return Container(

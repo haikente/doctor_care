@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/images/images.dart';
 import 'package:doctor_care/domain/entities/hba1c.dart';
 import 'package:doctor_care/presentation/pages/screens/HbA1c/widgets/Infodialogicon.dart';
@@ -8,19 +9,16 @@ import 'package:gap/gap.dart';
 class Hba1cChart extends StatefulWidget {
   final List<HbA1c> data;
   final VoidCallback? onFilterTap;
-  
-  const Hba1cChart({
-    super.key, 
-    required this.data,
-    this.onFilterTap,
-  });
+
+  const Hba1cChart({super.key, required this.data, this.onFilterTap});
 
   @override
   State<Hba1cChart> createState() => _Hba1cChartState();
 }
 
 class _Hba1cChartState extends State<Hba1cChart> {
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
 
   @override
   void dispose() {
@@ -32,16 +30,13 @@ class _Hba1cChartState extends State<Hba1cChart> {
   Widget build(BuildContext context) {
     const double pointSpacing = 80.0;
     const double leftMargin = 50.0;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10),
         ],
       ),
       padding: EdgeInsets.only(left: 10, top: 22),
@@ -51,16 +46,16 @@ class _Hba1cChartState extends State<Hba1cChart> {
           Row(
             children: [
               Text(
-                "Biểu đồ HbA1c", 
+                context.tr('hba1c_chart_title'),
                 style: TextStyle(
-                  color: Colors.black, 
-                  fontSize: 16, 
-                  fontWeight: FontWeight.w500
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Gap(3),
               InfoDialogIcon(
-                image: Image.asset(Images.glucose, width: 100, height: 80), 
+                image: Image.asset(Images.glucose, width: 100, height: 80),
                 content: TextSpan(
                   style: const TextStyle(
                     fontSize: 14,
@@ -68,17 +63,21 @@ class _Hba1cChartState extends State<Hba1cChart> {
                     height: 1,
                   ),
                   children: [
-                    TextSpan(text: 'Chỉ số '),
-                    TextSpan(text: 'HbA1c', style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: ' phản ánh mức đường huyết trung bình trong '),
+                    TextSpan(text: context.tr('hba1c_info_prefix')),
                     TextSpan(
-                      text: '2–3 tháng gần nhất. ',
+                      text: 'HbA1c',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
+                    TextSpan(text: context.tr('hba1c_info_average')),
                     TextSpan(
-                      text: 'Mục tiêu điều trị được khuyến cáo cho người mắc đái tháo đường là',
+                      text: context.tr('hba1c_info_period'),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    TextSpan(text: ' <7%', style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(text: context.tr('hba1c_info_target')),
+                    TextSpan(
+                      text: ' <7%',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     TextSpan(text: '.'),
                   ],
                 ),
@@ -87,8 +86,12 @@ class _Hba1cChartState extends State<Hba1cChart> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 0),
                 child: GestureDetector(
-                  onTap: widget.onFilterTap,  
-                  child: Icon(Icons.science_outlined, size: 24, color: Colors.black54),
+                  onTap: widget.onFilterTap,
+                  child: Icon(
+                    Icons.science_outlined,
+                    size: 24,
+                    color: Colors.black54,
+                  ),
                 ),
               ),
               Gap(20),
@@ -99,16 +102,21 @@ class _Hba1cChartState extends State<Hba1cChart> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => FullscreenHba1cChart(data: widget.data),
+                        builder: (context) =>
+                            FullscreenHba1cChart(data: widget.data),
                       ),
                     );
                   },
-                  child: Icon(Icons.add_chart_sharp, size: 24, color: Colors.black54),
+                  child: Icon(
+                    Icons.add_chart_sharp,
+                    size: 24,
+                    color: Colors.black54,
+                  ),
                 ),
               ),
             ],
           ),
-          
+
           // Chart area hoặc Empty state
           Expanded(
             child: widget.data.isEmpty
@@ -123,7 +131,7 @@ class _Hba1cChartState extends State<Hba1cChart> {
                         ),
                         SizedBox(height: 16),
                         Text(
-                          'Không có dữ liệu',
+                          context.tr('no_data'),
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey.shade400,
@@ -132,7 +140,7 @@ class _Hba1cChartState extends State<Hba1cChart> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Vui lòng chọn bộ lọc khác',
+                          context.tr('try_change_filters'),
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade400,
@@ -141,48 +149,60 @@ class _Hba1cChartState extends State<Hba1cChart> {
                       ],
                     ),
                   )
-                 : LayoutBuilder(
-                      builder: (context, constraints) {
-                        final double chartWidth = widget.data.length * pointSpacing + 60;
-                        // Đảm bảo width tối thiểu bằng vùng hiển thị
-                        final double effectiveWidth = chartWidth < (constraints.maxWidth - leftMargin - 10) 
-                            ? constraints.maxWidth - leftMargin - 10 
-                            : chartWidth;
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double chartWidth =
+                          widget.data.length * pointSpacing + 60;
+                      // Đảm bảo width tối thiểu bằng vùng hiển thị
+                      final double effectiveWidth =
+                          chartWidth < (constraints.maxWidth - leftMargin - 10)
+                          ? constraints.maxWidth - leftMargin - 10
+                          : chartWidth;
 
-                        return Stack(
-                          children: [
-                            Positioned.fill(
-                              child: CustomPaint(
-                                painter: Hba1cAxesPainter(widget.data),
+                      return Stack(
+                        children: [
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: Hba1cAxesPainter(
+                                widget.data,
+                                targetLabel: context.tr('target'),
+                                targetValueLabel: context.tr(
+                                  'hba1c_target_value',
+                                ),
                               ),
                             ),
-                            Positioned.fill(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: leftMargin, right: 10),
-                                child: ClipRect(
-                                  child: InteractiveViewer(
-                                    transformationController: _transformationController,
-                                    minScale: 1.0,
-                                    maxScale: 3.0,
-                                    constrained: false,
-                                    scaleEnabled: true,
-                                    panEnabled: true,
-                                    child: SizedBox(
-                                      width: effectiveWidth,
-                                      height: constraints.maxHeight,
-                                      child: CustomPaint(
-                                        painter: Hba1cDataPainter(widget.data),
-                                      ),
+                          ),
+                          Positioned.fill(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                left: leftMargin,
+                                right: 10,
+                              ),
+                              child: ClipRect(
+                                child: InteractiveViewer(
+                                  transformationController:
+                                      _transformationController,
+                                  minScale: 1.0,
+                                  maxScale: 3.0,
+                                  constrained: false,
+                                  scaleEnabled: true,
+                                  panEnabled: true,
+                                  child: SizedBox(
+                                    width: effectiveWidth,
+                                    height: constraints.maxHeight,
+                                    child: CustomPaint(
+                                      painter: Hba1cDataPainter(widget.data),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        );
-                      },
-                    ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
+          ),
         ],
       ),
     );
@@ -192,18 +212,24 @@ class _Hba1cChartState extends State<Hba1cChart> {
 // Painter cho trục Y và X (cố định)
 class Hba1cAxesPainter extends CustomPainter {
   final List<HbA1c> data;
+  final String targetLabel;
+  final String targetValueLabel;
 
-  Hba1cAxesPainter(this.data);
-  
+  Hba1cAxesPainter(
+    this.data, {
+    required this.targetLabel,
+    required this.targetValueLabel,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
-    if(data.isEmpty) return;
-    
+    if (data.isEmpty) return;
+
     const double leftMargin = 50;
     const double topMargin = 50;
     const double bottomMargin = 70;
     const double axisPadding = 40;
-    
+
     final double chartHeight = size.height - topMargin - bottomMargin;
     final double bottomY = topMargin + chartHeight - axisPadding;
 
@@ -213,31 +239,31 @@ class Hba1cAxesPainter extends CustomPainter {
 
     // Vẽ trục Y
     canvas.drawLine(
-      Offset(leftMargin, topMargin), 
+      Offset(leftMargin, topMargin),
       Offset(leftMargin, bottomY),
-      axisPaint
+      axisPaint,
     );
 
     // Vẽ trục X
     canvas.drawLine(
       Offset(leftMargin, bottomY),
       Offset(size.width - 10, bottomY),
-      axisPaint
+      axisPaint,
     );
 
     // Vẽ labels trục Y
     final values = [0, 5, 10, 15, 20];
     double maxWidth = 0;
     final textPainters = <TextPainter>[];
-    
+
     for (int i = 0; i < values.length; i++) {
       final textPainter = TextPainter(
         text: TextSpan(
           text: i == 0 ? '${values[i]} %' : '${values[i]}',
           style: TextStyle(
-            color: Colors.black, 
-            fontSize: 11, 
-            fontWeight: FontWeight.w500
+            color: Colors.black,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -267,40 +293,46 @@ class Hba1cAxesPainter extends CustomPainter {
     canvas.drawCircle(
       Offset(leftMargin - 30, leftMargin + chartHeight + 40),
       4,
-      targetPaint
+      targetPaint,
     );
 
     final targetText = TextPainter(
       text: TextSpan(
-        text: "Mục tiêu",
+        text: targetLabel,
         style: TextStyle(
-          color: Colors.black54, 
-          fontSize: 12, 
-          letterSpacing: 0.5, 
-          fontWeight: FontWeight.w500
-        )
+          color: Colors.black54,
+          fontSize: 12,
+          letterSpacing: 0.5,
+          fontWeight: FontWeight.w500,
+        ),
       ),
-      textDirection: TextDirection.ltr
+      textDirection: TextDirection.ltr,
     );
     targetText.layout();
-    targetText.paint(canvas, Offset(leftMargin - 20, leftMargin + chartHeight + 32));
+    targetText.paint(
+      canvas,
+      Offset(leftMargin - 20, leftMargin + chartHeight + 32),
+    );
 
     final hba1cText = TextPainter(
       text: TextSpan(
-        text: "HbA1c < 7%",
+        text: targetValueLabel,
         style: TextStyle(
-          color: Colors.green, 
-          fontSize: 12, 
-          letterSpacing: 0.5, 
-          fontWeight: FontWeight.bold
-        )
+          color: Colors.green,
+          fontSize: 12,
+          letterSpacing: 0.5,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      textDirection: TextDirection.ltr
+      textDirection: TextDirection.ltr,
     );
     hba1cText.layout();
-    hba1cText.paint(canvas, Offset(leftMargin + 230, leftMargin + chartHeight + 32));
+    hba1cText.paint(
+      canvas,
+      Offset(leftMargin + 230, leftMargin + chartHeight + 32),
+    );
   }
-  
+
   @override
   bool shouldRepaint(Hba1cAxesPainter oldDelegate) {
     return oldDelegate.data != data;
@@ -312,17 +344,17 @@ class Hba1cDataPainter extends CustomPainter {
   final List<HbA1c> data;
 
   Hba1cDataPainter(this.data);
-  
+
   @override
   void paint(Canvas canvas, Size size) {
-    if(data.isEmpty) return;
-    
+    if (data.isEmpty) return;
+
     const double topMargin = 50;
     const double bottomMargin = 70;
     const double axisPadding = 40;
     const double xOffset = 30;
     const double pointSpacing = 80;
-    
+
     final double chartHeight = size.height - topMargin - bottomMargin;
     final double bottomY = topMargin + chartHeight - axisPadding;
     final double chartTop = topMargin;
@@ -331,23 +363,20 @@ class Hba1cDataPainter extends CustomPainter {
     final gridPaint = Paint()
       ..color = Colors.grey.shade200
       ..strokeWidth = 1;
-    
+
     final values = [0, 5, 10, 15, 20];
     for (int i = 0; i < values.length; i++) {
       final step = (bottomY - chartTop) / (values.length - 1);
       final y = bottomY - step * i;
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        gridPaint,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
     // Vẽ labels thời gian và ngày
     for (int i = 0; i < data.length; i++) {
       final double x = xOffset + (i * pointSpacing);
-      
-      final timeText = '${data[i].date.hour.toString().padLeft(2, '0')}:${data[i].date.minute.toString().padLeft(2, '0')}';
+
+      final timeText =
+          '${data[i].date.hour.toString().padLeft(2, '0')}:${data[i].date.minute.toString().padLeft(2, '0')}';
       final timeTextPainter = TextPainter(
         text: TextSpan(
           text: timeText,
@@ -365,7 +394,8 @@ class Hba1cDataPainter extends CustomPainter {
         Offset(x - timeTextPainter.width / 2, bottomY + 5),
       );
 
-      final dateText = '${data[i].date.day}/${data[i].date.month}/${data[i].date.year}';
+      final dateText =
+          '${data[i].date.day}/${data[i].date.month}/${data[i].date.year}';
       final dateTextPainter = TextPainter(
         text: TextSpan(
           text: dateText,
@@ -387,29 +417,26 @@ class Hba1cDataPainter extends CustomPainter {
     // Vẽ gradient area
     final gradientPath = Path();
     gradientPath.moveTo(xOffset, bottomY);
-    
+
     for (int i = 0; i < data.length; i++) {
       final double x = xOffset + (i * pointSpacing);
       final valueRatio = data[i].value / 20.0;
       final y = bottomY - (valueRatio * (bottomY - chartTop));
       gradientPath.lineTo(x, y);
     }
-    
+
     final lastX = xOffset + ((data.length - 1) * pointSpacing);
     gradientPath.lineTo(lastX, bottomY);
     gradientPath.close();
-    
+
     final gradientPaint = Paint()
       ..shader = LinearGradient(
-        colors: [
-          Colors.blue.shade800,
-          Colors.blue.shade50.withOpacity(0.5),
-        ],
+        colors: [Colors.blue.shade800, Colors.blue.shade50.withOpacity(0.5)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, chartTop, size.width, bottomY - chartTop))
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawPath(gradientPath, gradientPaint);
 
     // Vẽ line
@@ -423,7 +450,7 @@ class Hba1cDataPainter extends CustomPainter {
       final double x = xOffset + (i * pointSpacing);
       final valueRatio = data[i].value / 20.0;
       final y = bottomY - (valueRatio * (bottomY - chartTop));
-      
+
       if (i == 0) {
         path.moveTo(x, y);
       } else {
@@ -434,15 +461,15 @@ class Hba1cDataPainter extends CustomPainter {
 
     // Vẽ points và values
     final pointPaint = Paint()..style = PaintingStyle.fill;
-    
+
     for (int i = 0; i < data.length; i++) {
       final double x = xOffset + (i * pointSpacing);
       final valueRatio = data[i].value / 20.0;
       final y = bottomY - (valueRatio * (bottomY - chartTop));
-      
+
       pointPaint.color = Colors.blue.shade800;
       canvas.drawCircle(Offset(x, y), 4, pointPaint);
-      
+
       final valueText = TextPainter(
         text: TextSpan(
           text: '${data[i].value.toStringAsFixed(1)}%',
@@ -455,9 +482,9 @@ class Hba1cDataPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       );
       valueText.layout();
-      
+
       // Vẽ background cho value
-      final bgRect = RRect.fromRectAndRadius( 
+      final bgRect = RRect.fromRectAndRadius(
         Rect.fromCenter(
           center: Offset(x, y - valueText.height / 2 - 12),
           width: valueText.width + 8,
@@ -488,7 +515,7 @@ class Hba1cDataPainter extends CustomPainter {
       );
     }
   }
-  
+
   @override
   bool shouldRepaint(Hba1cDataPainter oldDelegate) {
     return oldDelegate.data != data;

@@ -18,6 +18,14 @@ class MealAnalysisRepositoryImpl implements MealAnalysisRepository {
   ) async {
     try {
       final result = await _aiService.analyzeMealImage(imagePath);
+
+      // Kiểm tra ảnh có hợp lệ không
+      final imageValid = result['imageValid'] as bool? ?? true;
+      if (!imageValid) {
+        final reason = result['invalidReason'] as String? ?? 'Ảnh không hợp lệ';
+        return Left(InvalidImageException(reason));
+      }
+
       final foodItems = result['foodItems'] as List<FoodItem>;
       final dishName = result['dishName'] as String?;
       final healthRecommendations = result['healthRecommendations'] as String?;
@@ -108,4 +116,14 @@ class MealAnalysisRepositoryImpl implements MealAnalysisRepository {
       return Left(Exception('Failed to delete meal analysis: $e'));
     }
   }
+}
+
+/// Exception khi ảnh không hợp lệ (không phải thức ăn, quá mờ, quá tối...)
+class InvalidImageException implements Exception {
+  final String reason;
+
+  const InvalidImageException(this.reason);
+
+  @override
+  String toString() => reason;
 }

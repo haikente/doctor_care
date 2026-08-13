@@ -24,6 +24,7 @@ class _StepCountScreenState extends State<StepCountScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   String? _selectedStatus;
+  String? _selectedSource;
 
   @override
   void initState() {
@@ -45,6 +46,12 @@ class _StepCountScreenState extends State<StepCountScreen> {
 
     if (_selectedStatus != null) {
       filtered = filtered.where((r) => r.status == _selectedStatus).toList();
+    }
+
+    if (_selectedSource != null) {
+      filtered = filtered
+          .where((r) => _sourceCode(r) == _selectedSource)
+          .toList();
     }
 
     return filtered;
@@ -149,14 +156,21 @@ class _StepCountScreenState extends State<StepCountScreen> {
 
     if (daysBack == 0) {
       // Đồng bộ hôm nay
-      final steps = await HealthSyncService.instance.getTodaysSteps();
+      final steps = await HealthSyncService.instance.getStepsForDay(
+        DateTime.now(),
+        requestPermission: false,
+      );
       if (!mounted) return;
 
       if (steps != null && steps > 0) {
         final now = DateTime.now();
         final midnight = DateTime(now.year, now.month, now.day);
-        final record = StepCount(steps: steps, timestamp: midnight);
-        cubit.insertStepCountRecord(record);
+        final record = StepCount(
+          steps: steps,
+          timestamp: midnight,
+          source: StepCountSource.healthConnect,
+        );
+        await cubit.insertStepCountRecord(record);
         messenger.showSnackBar(
           SnackBar(
             content: Text('Đã đồng bộ $steps bước hôm nay!'),
@@ -187,12 +201,18 @@ class _StepCountScreenState extends State<StepCountScreen> {
         final dayStart = DateTime(date.year, date.month, date.day);
 
         try {
-          final steps = await HealthSyncService.instance.getTodaysSteps();
-          if (steps != null && steps > 0 && i == 0) {
-            // Chỉ lấy được steps hôm nay qua getTotalStepsInInterval
-            final record = StepCount(steps: steps, timestamp: dayStart);
+          final steps = await HealthSyncService.instance.getStepsForDay(
+            dayStart,
+            requestPermission: false,
+          );
+          if (steps != null && steps > 0) {
+            final record = StepCount(
+              steps: steps,
+              timestamp: dayStart,
+              source: StepCountSource.healthConnect,
+            );
             try {
-              cubit.insertStepCountRecord(record);
+              await cubit.insertStepCountRecord(record);
               syncedCount++;
             } catch (_) {}
           }
@@ -273,9 +293,9 @@ class _StepCountScreenState extends State<StepCountScreen> {
                       ),
                     ),
                     const Gap(10),
-                    const Text(
-                      'Nhấn nút + để thêm bản ghi mới',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    Text(
+                      context.tr('add_new_record_hint'),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -299,7 +319,12 @@ class _StepCountScreenState extends State<StepCountScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "${filteredRecords.length} bản ghi",
+                                context.tr(
+                                  'record_count',
+                                  params: {
+                                    'count': '${filteredRecords.length}',
+                                  },
+                                ),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -350,18 +375,27 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                         initialStartDate: _startDate,
                                         initialEndDate: _endDate,
                                         initialStatus: _selectedStatus,
-                                        onApply: (startDate, endDate, status) {
-                                          setState(() {
-                                            _startDate = startDate;
-                                            _endDate = endDate;
-                                            _selectedStatus = status;
-                                          });
-                                        },
+                                        initialSource: _selectedSource,
+                                        onApply:
+                                            (
+                                              startDate,
+                                              endDate,
+                                              status,
+                                              source,
+                                            ) {
+                                              setState(() {
+                                                _startDate = startDate;
+                                                _endDate = endDate;
+                                                _selectedStatus = status;
+                                                _selectedSource = source;
+                                              });
+                                            },
                                         onReset: () {
                                           setState(() {
                                             _startDate = null;
                                             _endDate = null;
                                             _selectedStatus = null;
+                                            _selectedSource = null;
                                           });
                                         },
                                       );
@@ -379,7 +413,8 @@ class _StepCountScreenState extends State<StepCountScreen> {
                           // Filter chips
                           if (_startDate != null ||
                               _endDate != null ||
-                              _selectedStatus != null)
+                              _selectedStatus != null ||
+                              _selectedSource != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Wrap(
@@ -431,6 +466,31 @@ class _StepCountScreenState extends State<StepCountScreen> {
                                       ),
                                       onDeleted: () {
                                         setState(() => _selectedStatus = null);
+                                      },
+                                      backgroundColor: Colors.blue.shade50,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        side: BorderSide(
+                                          color: Colors.blue.shade900,
+                                        ),
+                                      ),
+                                    ),
+                                  if (_selectedSource != null)
+                                    Chip(
+                                      label: Text(
+                                        _sourceLabel(_selectedSource!),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.blue.shade900,
+                                        ),
+                                      ),
+                                      deleteIcon: Icon(
+                                        Icons.close,
+                                        size: 14,
+                                        color: Colors.blue.shade900,
+                                      ),
+                                      onDeleted: () {
+                                        setState(() => _selectedSource = null);
                                       },
                                       backgroundColor: Colors.blue.shade50,
                                       shape: RoundedRectangleBorder(
@@ -611,6 +671,39 @@ class _StepCountScreenState extends State<StepCountScreen> {
                         fontSize: 12,
                       ),
                     ),
+                    const Gap(8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: data.sourceColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: data.sourceColor.withOpacity(0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            data.sourceIcon,
+                            size: 12,
+                            color: data.sourceColor,
+                          ),
+                          const Gap(3),
+                          Text(
+                            _sourceLabel(_sourceCode(data)),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: data.sourceColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -636,5 +729,25 @@ class _StepCountScreenState extends State<StepCountScreen> {
         ),
       ),
     );
+  }
+
+  String _sourceCode(StepCount record) {
+    switch (record.source) {
+      case StepCountSource.manual:
+        return 'manual';
+      case StepCountSource.healthConnect:
+        return 'device';
+    }
+  }
+
+  String _sourceLabel(String source) {
+    switch (source) {
+      case 'manual':
+        return context.tr('manual_entry');
+      case 'device':
+        return context.tr('device');
+      default:
+        return context.tr('not_selected');
+    }
   }
 }

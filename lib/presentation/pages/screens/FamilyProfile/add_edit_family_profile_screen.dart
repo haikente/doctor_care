@@ -174,7 +174,7 @@ class _AddEditFamilyProfileScreenState
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: CustomStackAppBar(
           onBack: () => Navigator.pop(context),
           title: widget.profile != null
@@ -296,34 +296,83 @@ class _AddEditFamilyProfileScreenState
         ? Colors.blue
         : _getRelationshipColor(_selectedRelationship);
 
-    return Center(
-      child: Column(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withOpacity(0.95), color.withOpacity(0.62)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.20),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 76,
+            height: 76,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: Colors.white.withOpacity(0.20),
               borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withOpacity(0.22)),
             ),
             child: Center(
               child: Text(
                 initials,
-                style: TextStyle(
-                  color: color,
+                style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
           ),
-          const Gap(8),
-          Text(
-            name.isEmpty ? context.tr('enter_name_preview') : name,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: name.isEmpty ? Colors.grey : Colors.black87,
+          const Gap(16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name.isEmpty ? context.tr('enter_name_preview') : name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                const Gap(8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.16),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    _getRelationships(context).firstWhere(
+                          (r) => r['value'] == _selectedRelationship,
+                        )['label']
+                        as String,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -354,17 +403,28 @@ class _AddEditFamilyProfileScreenState
     return Row(
       children: [
         Container(
-          width: 4,
-          height: 20,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(2),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            title == context.tr('health_info')
+                ? Icons.monitor_heart_outlined
+                : Icons.badge_outlined,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        const Gap(8),
+        const Gap(10),
         Text(
           title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ],
     );
@@ -376,10 +436,27 @@ class _AddEditFamilyProfileScreenState
       decoration: InputDecoration(
         labelText: context.tr('full_name'),
         labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: const Icon(Icons.person_outline, color: Colors.black),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          Icons.person_outline,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.6,
+          ),
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).cardColor,
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -404,7 +481,11 @@ class _AddEditFamilyProfileScreenState
       children: [
         Text(
           context.tr('relationship_label'),
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         const Gap(8),
         Wrap(
@@ -426,12 +507,21 @@ class _AddEditFamilyProfileScreenState
                 decoration: BoxDecoration(
                   color: isSelected
                       ? color.withValues(alpha: 0.15)
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                      : Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected ? color : Colors.grey.shade300,
                     width: isSelected ? 1.5 : 1,
                   ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.10),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -468,7 +558,11 @@ class _AddEditFamilyProfileScreenState
       children: [
         Text(
           context.tr('gender'),
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         const Gap(8),
         Row(
@@ -517,8 +611,10 @@ class _AddEditFamilyProfileScreenState
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.15) : Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            color: isSelected
+                ? color.withValues(alpha: 0.15)
+                : Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected ? color : Colors.grey.shade300,
             ),
@@ -560,10 +656,24 @@ class _AddEditFamilyProfileScreenState
       decoration: InputDecoration(
         labelText: context.tr('blood_type'),
         labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: const Icon(Icons.bloodtype_outlined),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          Icons.bloodtype_outlined,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.6,
+          ),
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).cardColor,
       ),
       items: [
         DropdownMenuItem(
@@ -591,10 +701,24 @@ class _AddEditFamilyProfileScreenState
       decoration: InputDecoration(
         labelText: context.tr('height_cm'),
         labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: const Icon(Icons.height),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          Icons.height,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.6,
+          ),
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).cardColor,
       ),
       validator: (value) {
         if (value != null && value.isNotEmpty) {
@@ -615,10 +739,24 @@ class _AddEditFamilyProfileScreenState
       decoration: InputDecoration(
         labelText: context.tr('weight_kg'),
         labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: const Icon(Icons.monitor_weight_outlined),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          Icons.monitor_weight_outlined,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.6,
+          ),
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).cardColor,
       ),
       validator: (value) {
         if (value != null && value.isNotEmpty) {

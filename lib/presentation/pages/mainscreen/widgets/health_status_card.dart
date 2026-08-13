@@ -11,11 +11,12 @@ class HealthStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade400, Colors.orange.shade300],
+          colors: [primary.withOpacity(0.95), const Color(0xFF20A386)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

@@ -86,6 +86,58 @@ class RoleService {
     }
   }
 
+  /// Bật/tắt trạng thái hoạt động của tài khoản người dùng.
+  static Future<bool> toggleUserActiveStatus(String uid, bool isActive) async {
+    try {
+      final isCurrentUserAdmin = await isAdmin();
+      if (!isCurrentUserAdmin) {
+        return false;
+      }
+
+      final currentUser = _auth.currentUser;
+      if (currentUser?.uid == uid) {
+        return false;
+      }
+
+      await _firestore.collection('users').doc(uid).update({
+        'isActive': isActive,
+        'accountStatus': isActive ? 'active' : 'disabled',
+        'statusUpdatedAt': FieldValue.serverTimestamp(),
+        'statusUpdatedBy': currentUser?.uid,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Cập nhật quyền truy cập theo từng khu vực chức năng.
+  static Future<bool> updateAccessPermissions(
+    String uid,
+    Map<String, bool> permissions,
+  ) async {
+    try {
+      final isCurrentUserAdmin = await isAdmin();
+      if (!isCurrentUserAdmin) {
+        return false;
+      }
+
+      final currentUser = _auth.currentUser;
+      if (currentUser?.uid == uid) {
+        return false;
+      }
+
+      await _firestore.collection('users').doc(uid).update({
+        'accessPermissions': permissions,
+        'permissionsUpdatedAt': FieldValue.serverTimestamp(),
+        'permissionsUpdatedBy': currentUser?.uid,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Lấy tất cả users theo role
   static Future<List<Map<String, dynamic>>> getUsersByRole(String role) async {
     try {

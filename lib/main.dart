@@ -95,8 +95,7 @@ class MyApp extends StatelessWidget {
         ),
 
         BlocProvider(
-          create: (context) =>
-              NotificationCubit(di.notificationRepository)..startListening(),
+          create: (context) => NotificationCubit(di.notificationRepository),
         ),
 
         // HbA1c
@@ -250,8 +249,7 @@ class MyApp extends StatelessWidget {
             builder: (context, localeState) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: "Doctor Care",
-
+                title: "HealthCare+",
                 // Theme
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
@@ -276,7 +274,7 @@ class MyApp extends StatelessWidget {
                         context.read<NotificationCubit>().startListening();
                       }
                       if (state is Unauthenticated) {
-                        context.read<NotificationCubit>().startListening();
+                        context.read<NotificationCubit>().stopListening();
                         navigatorKey.currentState?.pushNamedAndRemoveUntil(
                           '/',
                           (route) => false,

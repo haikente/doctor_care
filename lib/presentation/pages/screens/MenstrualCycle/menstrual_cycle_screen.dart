@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
@@ -177,7 +178,10 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${filteredRecords.length} bản ghi",
+                          context.tr(
+                            'record_count',
+                            params: {'count': '${filteredRecords.length}'},
+                          ),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -332,7 +336,7 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                             ),
                             Gap(16),
                             Text(
-                              'Không tìm thấy kết quả',
+                              context.tr('no_results_found'),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey.shade600,
@@ -341,7 +345,7 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                             ),
                             Gap(8),
                             Text(
-                              'Thử thay đổi bộ lọc của bạn',
+                              context.tr('try_change_filters'),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade500,
@@ -357,7 +361,7 @@ class _MenstrualCycleScreenState extends State<MenstrualCycleScreen> {
                                 });
                               },
                               icon: Icon(Icons.refresh),
-                              label: Text('Xóa bộ lọc'),
+                              label: Text(context.tr('clear_filter')),
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.blue,
                               ),

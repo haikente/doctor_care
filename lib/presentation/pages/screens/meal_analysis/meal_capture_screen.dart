@@ -2,14 +2,15 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:doctor_care/core/images/images.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gap/gap.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 import 'package:doctor_care/presentation/pages/screens/meal_analysis/meal_analysis_result_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MealCaptureScreen extends StatefulWidget {
   const MealCaptureScreen({super.key});
@@ -23,7 +24,7 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
   String? _imagePath;
 
   Future<void> _pickImageFromCamera() async {
-    final XFile? image = await _picker.pickImage(
+    final image = await _picker.pickImage(
       source: ImageSource.camera,
       imageQuality: 85,
     );
@@ -32,12 +33,11 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
       setState(() {
         _imagePath = image.path;
       });
-      _analyzeImage(image.path);
     }
   }
 
   Future<void> _pickImageFromGallery() async {
-    final XFile? image = await _picker.pickImage(
+    final image = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
     );
@@ -46,7 +46,6 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
       setState(() {
         _imagePath = image.path;
       });
-      _analyzeImage(image.path);
     }
   }
 
@@ -54,88 +53,91 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
     context.read<MealAnalysisBloc>().add(AnalyzeMealImageEvent(imagePath));
   }
 
+  void _continueWithSelectedImage() {
+    final imagePath = _imagePath;
+    if (imagePath == null) return;
+    _analyzeImage(imagePath);
+  }
+
+  void _showInvalidImageDialog(String reason) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return _InvalidImageDialog(
+          reason: reason,
+          onRetakeCamera: () {
+            Navigator.pop(dialogContext);
+            setState(() {
+              _imagePath = null;
+            });
+            _pickImageFromCamera();
+          },
+          onPickGallery: () {
+            Navigator.pop(dialogContext);
+            setState(() {
+              _imagePath = null;
+            });
+            _pickImageFromGallery();
+          },
+          onCancel: () {
+            Navigator.pop(dialogContext);
+            setState(() {
+              _imagePath = null;
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      backgroundColor: theme.colorScheme.surface,
       body: Stack(
         children: [
+          Positioned.fill(child: Image.asset(Images.aifood, fit: BoxFit.cover)),
           Positioned.fill(
-            child: Image.asset(Images.aifood, fit: BoxFit.cover),
-          ),
-
-          Positioned.fill(
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.3, 0.6, 1.0],
                   colors: [
-                    Colors.black.withOpacity(0.5),
-                    Colors.black.withOpacity(0.15),
-                    Colors.black.withOpacity(0.25),
-                    Colors.black.withOpacity(0.75),
+                    Colors.black.withOpacity(0.55),
+                    Colors.black.withOpacity(0.08),
+                    Colors.black.withOpacity(0.72),
                   ],
                 ),
               ),
             ),
           ),
-
-          // ── Back button ──
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.25),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: _TopBar(onBack: () => Navigator.pop(context)),
             ),
           ),
-
-          // ── Main content ──
           BlocConsumer<MealAnalysisBloc, MealAnalysisState>(
             listener: (context, state) {
               if (state is MealAnalysisSuccess) {
+                final imagePath = _imagePath;
+                if (imagePath == null) return;
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => MealAnalysisResultScreen(
                       mealAnalysis: state.mealAnalysis,
-                      imagePath: _imagePath!,
+                      imagePath: imagePath,
                     ),
                   ),
                 );
+              } else if (state is MealAnalysisInvalidImage) {
+                _showInvalidImageDialog(state.reason);
               } else if (state is MealAnalysisError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -145,323 +147,595 @@ class _MealCaptureScreenState extends State<MealCaptureScreen> {
                         params: {'message': state.message},
                       ),
                     ),
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.red.shade700,
                   ),
                 );
               }
             },
             builder: (context, state) {
               if (state is MealAnalysisLoading) {
-                return _buildLoadingState(context);
+                return _LoadingView(imagePath: _imagePath);
               }
-              return _buildInitialState(context);
+
+              if (_imagePath != null) {
+                return _PreviewView(
+                  imagePath: _imagePath!,
+                  onContinue: _continueWithSelectedImage,
+                  onRetake: _pickImageFromCamera,
+                );
+              }
+
+              return _CaptureView(
+                onCamera: _pickImageFromCamera,
+                onGallery: _pickImageFromGallery,
+              );
             },
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildLoadingState(BuildContext context) {
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 36),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _GlassIconButton(
+          icon: Icons.arrow_back_rounded,
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: onBack,
+        ),
+        const Spacer(),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.22),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.white.withOpacity(0.18)),
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_imagePath != null) ...[
-                  Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                      image: DecorationImage(
-                        image: FileImage(File(_imagePath!)),
-                        fit: BoxFit.cover,
-                      ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: Colors.amber.shade300,
+                  ),
+                  const Gap(6),
+                  const Text(
+                    'AI Nutrition',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const Gap(28),
                 ],
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3.5,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-                const Gap(20),
-                Text(
-                  context.tr('analyzing_meal'),
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const Gap(8),
-                Text(
-                  context.tr('ai_analyzing'),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
+}
 
-  Widget _buildInitialState(BuildContext context) {
+class _PreviewView extends StatelessWidget {
+  const _PreviewView({
+    required this.imagePath,
+    required this.onContinue,
+    required this.onRetake,
+  });
+
+  final String imagePath;
+  final VoidCallback onContinue;
+  final VoidCallback onRetake;
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.fromLTRB(20, 76, 20, 20),
         child: Column(
           children: [
-            const Spacer(flex: 3),
-
-            // ── Icon illustration ──
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.25),
-                    Colors.white.withOpacity(0.08),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.15),
-                    blurRadius: 30,
-                    spreadRadius: 5,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.restaurant_menu_rounded,
-                size: 54,
-                color: Colors.white,
-              ),
-            ),
-            const Gap(28),
-
-            // ── Title ──
-            const Text(
-              'Phân tích dinh dưỡng\nbằng AI',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                height: 1.3,
-                color: Colors.white,
-                letterSpacing: -0.5,
-                shadows: [
-                  Shadow(
-                    color: Colors.black45,
-                    blurRadius: 12,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const Gap(14),
-
-            // ── Subtitle pill ──
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                    ),
-                  ),
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.9),
-                        fontWeight: FontWeight.w500,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(text: 'Chụp ảnh bữa ăn, '),
-                        TextSpan(
-                          text: 'AI ',
-                          style: TextStyle(
-                            color: Colors.amber.shade800,
-                            fontWeight: FontWeight.bold,
-                          ),
+            Expanded(
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.30),
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.18),
                         ),
-                        const TextSpan(text: 'sẽ phân tích '),
-                        TextSpan(
-                          text: 'dinh dưỡng chi tiết',
-                          style: TextStyle(
-                            color: Colors.lightBlue.shade800,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.file(
+                          File(imagePath),
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            const Spacer(flex: 1),
-
-            // ── Feature chips ──
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildFeatureChip(Icons.flash_on_rounded, 'Nhận diện nhanh'),
-                const Gap(10),
-                _buildFeatureChip(Icons.analytics_rounded, 'Chi tiết calo'),
-              ],
-            ),
-
-            const Spacer(flex: 2),
-
-            // ── Camera button ──
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: FilledButton.icon(
-                onPressed: _pickImageFromCamera,
-                icon: const Icon(Icons.camera_alt_rounded, size: 22),
-                label: const Text(
-                  'Chụp ảnh bữa ăn',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.blue.shade600,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                  shadowColor: Colors.blue.withOpacity(0.4),
-                ),
-              ),
-            ),
-            const Gap(12),
-
-            // ── Gallery button ──
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: _pickImageFromGallery,
-                    icon: const Icon(
-                      Icons.photo_library_rounded,
-                      size: 22,
-                      color: Colors.white,
-                    ),
-                    label: const Text(
-                      'Chọn từ thư viện',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      side: BorderSide(
-                        color: Colors.white.withOpacity(0.35),
-                        width: 1.5,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-            const Gap(40),
+            const Gap(18),
+            _PreviewActionPanel(onContinue: onContinue, onRetake: onRetake),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildFeatureChip(IconData icon, String label) {
+class _PreviewActionPanel extends StatelessWidget {
+  const _PreviewActionPanel({required this.onContinue, required this.onRetake});
+
+  final VoidCallback onContinue;
+  final VoidCallback onRetake;
+
+  @override
+  Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-            ),
+            color: Colors.white.withOpacity(0.14),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.20)),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: Colors.amber.shade300),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    onPressed: onRetake,
+                    icon: const Icon(Icons.camera_alt_rounded),
+                    label: const Text('Chụp lại'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.white.withOpacity(0.5)),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const Gap(10),
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: onContinue,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: const Text('Tiếp tục'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF145C9E),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CaptureView extends StatelessWidget {
+  const _CaptureView({required this.onCamera, required this.onGallery});
+
+  final VoidCallback onCamera;
+  final VoidCallback onGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 76, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Spacer(),
+            const Text(
+              'Phân tích bữa ăn',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 34,
+                fontWeight: FontWeight.w800,
+                height: 1.05,
+              ),
+            ),
+            const Gap(10),
+            Text(
+              'Chụp hoặc chọn ảnh món ăn để AI ước tính calo, macro và chỉ số dinh dưỡng.',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.82),
+                fontSize: 15,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Gap(18),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const [
+                _FeaturePill(icon: Icons.bolt_rounded, label: 'Nhanh'),
+                _FeaturePill(
+                  icon: Icons.pie_chart_rounded,
+                  label: 'Calo & macro',
+                ),
+                _FeaturePill(
+                  icon: Icons.health_and_safety_rounded,
+                  label: 'Gợi ý sức khỏe',
+                ),
+              ],
+            ),
+            const Gap(28),
+            _ActionPanel(onCamera: onCamera, onGallery: onGallery),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionPanel extends StatelessWidget {
+  const _ActionPanel({required this.onCamera, required this.onGallery});
+
+  final VoidCallback onCamera;
+  final VoidCallback onGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.14),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.20)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: onCamera,
+                    icon: const Icon(Icons.camera_alt_rounded),
+                    label: const Text('Chụp ảnh'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF145C9E),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const Gap(10),
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: Tooltip(
+                  message: 'Chọn từ thư viện',
+                  child: OutlinedButton(
+                    onPressed: onGallery,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.white.withOpacity(0.5)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Icon(Icons.photo_library_rounded, size: 24),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingView extends StatelessWidget {
+  const _LoadingView({required this.imagePath});
+
+  final String? imagePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.32),
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(color: Colors.white.withOpacity(0.18)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (imagePath != null) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Image.file(
+                          File(imagePath!),
+                          width: double.infinity,
+                          height: 220,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const Gap(22),
+                    ],
+                    const SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Gap(18),
+                    const Text(
+                      'Đang phân tích bữa ăn',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Gap(8),
+                    Text(
+                      'AI đang nhận diện món ăn và tính dinh dưỡng',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.72),
+                        fontSize: 14,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeaturePill extends StatelessWidget {
+  const _FeaturePill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.13),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withOpacity(0.18)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: Colors.white),
+              const Gap(6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassIconButton extends StatelessWidget {
+  const _GlassIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Tooltip(
+          message: tooltip,
+          child: IconButton(
+            onPressed: onPressed,
+            icon: Icon(icon),
+            color: Colors.white,
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black.withOpacity(0.22),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(color: Colors.white.withOpacity(0.18)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InvalidImageDialog extends StatelessWidget {
+  const _InvalidImageDialog({
+    required this.reason,
+    required this.onRetakeCamera,
+    required this.onPickGallery,
+    required this.onCancel,
+  });
+
+  final String reason;
+  final VoidCallback onRetakeCamera;
+  final VoidCallback onPickGallery;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      backgroundColor: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.notification_important_outlined,
+              color: Colors.blue,
+              size: 70,
+            ),
+          ),
+          const Gap(25),
+          Text(
+            context.tr('invalid_image_title'),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const Gap(12),
+          Text(
+            reason,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
+              fontSize: 14,
+            ),
+          ),
+          const Gap(8),
+          Text(
+            context.tr('invalid_image_hint'),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+              fontSize: 13,
+            ),
+          ),
+          const Gap(20),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: context.tr('invalid_image_retake'),
+                  onPressed: onRetakeCamera,
+                  gradient: [Colors.blue.shade50, Colors.blue.shade50],
+                  textColor: Colors.blue,
+                ),
+              ),
+              const Gap(10),
+              Expanded(
+                child: CustomButton(
+                  text: context.tr('invalid_image_pick_gallery'),
+                  onPressed: onPickGallery,
+                ),
+              ),
+            ],
+          ),
+          const Gap(8),
+          TextButton(
+            onPressed: onCancel,
+            child: Text(
+              context.tr('cancel'),
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

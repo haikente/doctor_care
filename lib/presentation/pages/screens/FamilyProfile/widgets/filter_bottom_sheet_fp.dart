@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -11,7 +12,10 @@ class FilterBottomSheetFP extends StatelessWidget {
     required this.onDateSelected,
   });
 
-  static Future<DateTime?> show(BuildContext context, {DateTime? initialDate}) async {
+  static Future<DateTime?> show(
+    BuildContext context, {
+    DateTime? initialDate,
+  }) async {
     DateTime? result;
     await showGeneralDialog(
       context: context,
@@ -57,7 +61,7 @@ class FilterBottomSheetFP extends StatelessWidget {
       },
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Ngày sinh',
+          labelText: context.tr('date_of_birth_label'),
           prefixIcon: const Icon(Icons.cake_outlined),
           suffixIcon: initialDate != null
               ? IconButton(
@@ -72,7 +76,7 @@ class FilterBottomSheetFP extends StatelessWidget {
         child: Text(
           initialDate != null
               ? _formatDate(initialDate!)
-              : 'Chọn ngày sinh',
+              : context.tr('choose_date_of_birth'),
           style: TextStyle(
             color: initialDate != null ? Colors.black87 : Colors.grey,
           ),
@@ -83,8 +87,8 @@ class FilterBottomSheetFP extends StatelessWidget {
 
   static String _formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
   }
 }
 
@@ -94,10 +98,7 @@ class _DatePickerDialog extends StatefulWidget {
   final DateTime? initialDate;
   final Function(DateTime) onConfirm;
 
-  const _DatePickerDialog({
-    this.initialDate,
-    required this.onConfirm,
-  });
+  const _DatePickerDialog({this.initialDate, required this.onConfirm});
 
   @override
   State<_DatePickerDialog> createState() => _DatePickerDialogState();
@@ -135,42 +136,69 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.keyboard_double_arrow_left, color: Colors.blue.shade800),
+                      icon: Icon(
+                        Icons.keyboard_double_arrow_left,
+                        color: Colors.blue.shade800,
+                      ),
                       onPressed: () {
                         setState(() {
-                          displayMonth = DateTime(displayMonth.year - 1, displayMonth.month);
+                          displayMonth = DateTime(
+                            displayMonth.year - 1,
+                            displayMonth.month,
+                          );
                         });
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.chevron_left, color: Colors.blue.shade800),
+                      icon: Icon(
+                        Icons.chevron_left,
+                        color: Colors.blue.shade800,
+                      ),
                       onPressed: () {
                         setState(() {
-                          displayMonth = DateTime(displayMonth.year, displayMonth.month - 1);
+                          displayMonth = DateTime(
+                            displayMonth.year,
+                            displayMonth.month - 1,
+                          );
                         });
                       },
                     ),
                     Expanded(
                       child: Center(
                         child: Text(
-                          "Tháng ${displayMonth.month} ${displayMonth.year}",
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          "${context.tr('month')} ${displayMonth.month} ${displayMonth.year}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.chevron_right, color: Colors.blue.shade800),
+                      icon: Icon(
+                        Icons.chevron_right,
+                        color: Colors.blue.shade800,
+                      ),
                       onPressed: () {
                         setState(() {
-                          displayMonth = DateTime(displayMonth.year, displayMonth.month + 1);
+                          displayMonth = DateTime(
+                            displayMonth.year,
+                            displayMonth.month + 1,
+                          );
                         });
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.keyboard_double_arrow_right_outlined, color: Colors.blue.shade800),
+                      icon: Icon(
+                        Icons.keyboard_double_arrow_right_outlined,
+                        color: Colors.blue.shade800,
+                      ),
                       onPressed: () {
                         setState(() {
-                          displayMonth = DateTime(displayMonth.year + 1, displayMonth.month);
+                          displayMonth = DateTime(
+                            displayMonth.year + 1,
+                            displayMonth.month,
+                          );
                         });
                       },
                     ),
@@ -181,21 +209,32 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                 // Weekday headers
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-                      .map((day) => SizedBox(
-                            width: 40,
-                            child: Center(
-                              child: Text(
-                                day,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  color: Colors.grey.shade400,
-                                  fontSize: 12,
+                  children:
+                      [
+                            context.tr('day_mon'),
+                            context.tr('day_tue'),
+                            context.tr('day_wed'),
+                            context.tr('day_thu'),
+                            context.tr('day_fri'),
+                            context.tr('day_sat'),
+                            context.tr('day_sun'),
+                          ]
+                          .map(
+                            (day) => SizedBox(
+                              width: 40,
+                              child: Center(
+                                child: Text(
+                                  day,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.grey.shade400,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
-                          ))
-                      .toList(),
+                          )
+                          .toList(),
                 ),
 
                 // Calendar grid
@@ -217,10 +256,15 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: Text("Huỷ", style: TextStyle(color: Colors.blue.shade900)),
+                          child: Text(
+                            context.tr('cancel'),
+                            style: TextStyle(color: Colors.blue.shade900),
+                          ),
                         ),
                       ),
                     ),
@@ -229,7 +273,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.blue.shade400, Colors.blue.shade900],
+                            colors: [
+                              Colors.blue.shade400,
+                              Colors.blue.shade900,
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -237,7 +284,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () {
                             if (selectedDate != null) {
@@ -245,7 +294,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                               Navigator.pop(context);
                             }
                           },
-                          child: const Text("Đồng ý", style: TextStyle(color: Colors.white)),
+                          child: Text(
+                            context.tr('confirm'),
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
@@ -261,7 +313,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   Widget _buildCalendarGrid() {
     final firstDayOfMonth = DateTime(displayMonth.year, displayMonth.month, 1);
-    final lastDayOfMonth = DateTime(displayMonth.year, displayMonth.month + 1, 0);
+    final lastDayOfMonth = DateTime(
+      displayMonth.year,
+      displayMonth.month + 1,
+      0,
+    );
     final daysInMonth = lastDayOfMonth.day;
     final firstWeekday = firstDayOfMonth.weekday;
 
@@ -275,25 +331,26 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     // Day cells
     for (int day = 1; day <= daysInMonth; day++) {
       final date = DateTime(displayMonth.year, displayMonth.month, day);
-      final isSelected = selectedDate != null && _isSameDay(date, selectedDate!);
+      final isSelected =
+          selectedDate != null && _isSameDay(date, selectedDate!);
       final isToday = _isSameDay(date, DateTime.now());
       final isFuture = date.isAfter(DateTime.now());
 
       dayWidgets.add(
         GestureDetector(
-          onTap: isFuture ? null : () {
-            setState(() {
-              selectedDate = date;
-            });
-          },
+          onTap: isFuture
+              ? null
+              : () {
+                  setState(() {
+                    selectedDate = date;
+                  });
+                },
           child: Container(
             width: 40,
             height: 40,
             margin: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? Colors.blue.shade800
-                  : Colors.transparent,
+              color: isSelected ? Colors.blue.shade800 : Colors.transparent,
               borderRadius: BorderRadius.circular(20),
               border: isToday && !isSelected
                   ? Border.all(color: Colors.blue.shade800, width: 1)
@@ -306,8 +363,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                   color: isSelected
                       ? Colors.white
                       : isFuture
-                          ? Colors.grey.shade300
-                          : Colors.black,
+                      ? Colors.grey.shade300
+                      : Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
@@ -328,7 +385,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     const cellSize = 40.0;
     const cellMargin = 8.0;
     const mainSpacing = 2.0;
-    const height = rowCount * (cellSize + cellMargin) + (rowCount - 1) * mainSpacing;
+    const height =
+        rowCount * (cellSize + cellMargin) + (rowCount - 1) * mainSpacing;
 
     return SizedBox(
       height: height,

@@ -10,7 +10,8 @@ class FilterBottomSheetStepCount {
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     String? initialStatus,
-    required Function(DateTime?, DateTime?, String?) onApply,
+    String? initialSource,
+    required Function(DateTime?, DateTime?, String?, String?) onApply,
     required Function() onReset,
   }) {
     showModalBottomSheet(
@@ -23,6 +24,7 @@ class FilterBottomSheetStepCount {
         initialStartDate: initialStartDate,
         initialEndDate: initialEndDate,
         initialStatus: initialStatus,
+        initialSource: initialSource,
         onApply: onApply,
         onReset: onReset,
       ),
@@ -34,13 +36,15 @@ class _FilterBottomSheetContent extends StatefulWidget {
   final DateTime? initialStartDate;
   final DateTime? initialEndDate;
   final String? initialStatus;
-  final Function(DateTime?, DateTime?, String?) onApply;
+  final String? initialSource;
+  final Function(DateTime?, DateTime?, String?, String?) onApply;
   final Function() onReset;
 
   const _FilterBottomSheetContent({
     required this.initialStartDate,
     required this.initialEndDate,
     required this.initialStatus,
+    required this.initialSource,
     required this.onApply,
     required this.onReset,
   });
@@ -54,6 +58,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
   DateTime? _startDate;
   DateTime? _endDate;
   String? _selectedStatus;
+  String? _selectedSource;
 
   @override
   void initState() {
@@ -61,6 +66,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
     _startDate = widget.initialStartDate;
     _endDate = widget.initialEndDate;
     _selectedStatus = widget.initialStatus;
+    _selectedSource = widget.initialSource;
   }
 
   String formatDate(DateTime date) {
@@ -72,7 +78,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 500,
+      height: 570,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -93,7 +99,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     child: Text(
                       context.tr('filter_results'),
                       style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -111,9 +119,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Text(context.tr('time'),
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  context.tr('time'),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 const Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -126,8 +135,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             child: GestureDetector(
               onTap: () => _openCustomDatePicker(context),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -140,13 +151,13 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                       _startDate != null && _endDate != null
                           ? "${formatDate(_startDate!)} - ${formatDate(_endDate!)}"
                           : "${formatDate(DateTime.now())} - ${formatDate(DateTime.now())}",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.black87
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.black87),
                     ),
-                    const Icon(Icons.calendar_today,
-                        size: 18, color: Colors.grey),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
                   ],
                 ),
               ),
@@ -155,9 +166,57 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
 
           // ========== TRẠNG THÁI ==========
           Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+            child: Text(
+              context.tr('classification'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const Gap(8),
+
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedSource = null),
+                    child: _buildChip(
+                      context.tr('all'),
+                      _selectedSource == null,
+                    ),
+                  ),
+                ),
+                const Gap(8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedSource = "device"),
+                    child: _buildChip(
+                      context.tr('device'),
+                      _selectedSource == "device",
+                    ),
+                  ),
+                ),
+                const Gap(8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedSource = "manual"),
+                    child: _buildChip(
+                      context.tr('manual_entry'),
+                      _selectedSource == "manual",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 16),
-            child: Text(context.tr('activity_level'),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              context.tr('activity_level'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
           const Gap(8),
 
@@ -168,7 +227,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedStatus = null),
-                    child: _buildChip(context.tr('all'), _selectedStatus == null),
+                    child: _buildChip(
+                      context.tr('all'),
+                      _selectedStatus == null,
+                    ),
                   ),
                 ),
                 const Gap(8),
@@ -177,7 +239,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Ít vận động"),
                     child: _buildChip(
-                        context.tr('activity_low'), _selectedStatus == "Ít vận động"),
+                      context.tr('activity_low'),
+                      _selectedStatus == "Ít vận động",
+                    ),
                   ),
                 ),
               ],
@@ -193,7 +257,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Vận động nhẹ"),
                     child: _buildChip(
-                        "Vận động nhẹ", _selectedStatus == "Vận động nhẹ"),
+                      "Vận động nhẹ",
+                      _selectedStatus == "Vận động nhẹ",
+                    ),
                   ),
                 ),
                 const Gap(8),
@@ -202,7 +268,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Vận động vừa"),
                     child: _buildChip(
-                        "Vận động vừa", _selectedStatus == "Vận động vừa"),
+                      "Vận động vừa",
+                      _selectedStatus == "Vận động vừa",
+                    ),
                   ),
                 ),
               ],
@@ -225,7 +293,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Rất tích cực"),
                     child: _buildChip(
-                        "Rất tích cực", _selectedStatus == "Rất tích cực"),
+                      "Rất tích cực",
+                      _selectedStatus == "Rất tích cực",
+                    ),
                   ),
                 ),
               ],
@@ -241,12 +311,13 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bỏ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         _startDate = null;
                         _endDate = null;
                         _selectedStatus = null;
+                        _selectedSource = null;
                       });
                       widget.onReset();
                     },
@@ -270,7 +341,12 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                           return;
                         }
                       }
-                      widget.onApply(_startDate, _endDate, _selectedStatus);
+                      widget.onApply(
+                        _startDate,
+                        _endDate,
+                        _selectedStatus,
+                        _selectedSource,
+                      );
                       Navigator.pop(context);
                     },
                     gradient: [Colors.blue.shade600, Colors.blue.shade900],

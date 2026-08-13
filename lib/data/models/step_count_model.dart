@@ -10,6 +10,7 @@ class StepCountModel extends StepCount {
     super.caloriesBurned,
     required super.timestamp,
     super.note,
+    super.source,
     this.profileId,
   });
 
@@ -26,6 +27,7 @@ class StepCountModel extends StepCount {
           : null,
       timestamp: DateTime.parse(map['timestamp']),
       note: map['note'],
+      source: _parseSource(map['source'] as String?),
     );
   }
 
@@ -38,6 +40,12 @@ class StepCountModel extends StepCount {
       'caloriesBurned': caloriesBurned,
       'timestamp': timestamp.toIso8601String(),
       'note': note,
+      'source': source.name,
     };
+  }
+
+  static StepCountSource _parseSource(String? value) {
+    if (value == 'healthConnect') return StepCountSource.healthConnect;
+    return StepCountSource.manual;
   }
 }

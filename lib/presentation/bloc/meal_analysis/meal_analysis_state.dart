@@ -53,6 +53,16 @@ class MealAnalysisDeleted extends MealAnalysisState {
   const MealAnalysisDeleted();
 }
 
+// trạng thái ảnh không hợp lệ (không phải thức ăn, quá mờ, quá tối...)
+class MealAnalysisInvalidImage extends MealAnalysisState {
+  final String reason;
+
+  const MealAnalysisInvalidImage(this.reason);
+
+  @override
+  List<Object?> get props => [reason];
+}
+
 // trạng thái lỗi
 class MealAnalysisError extends MealAnalysisState {
   final String message;

@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ class FilterBottomSheetBloodSugar {
     String? initialStatus,
     String? initialMealStatus,
     required Function(DateTime?, DateTime?, String?, String?) onApply,
-    required Function() onReset, 
+    required Function() onReset,
   }) {
     showModalBottomSheet(
       context: context,
@@ -98,7 +99,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     child: Text(
                       "Lọc kết quả",
                       style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -116,9 +119,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Text("Thời gian",
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Thời gian",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 const Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -131,8 +135,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             child: GestureDetector(
               onTap: () => _openCustomDatePicker(context),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -145,13 +151,13 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                       _startDate != null && _endDate != null
                           ? "${formatDate(_startDate!)} - ${formatDate(_endDate!)}"
                           : "${formatDate(DateTime.now().subtract(const Duration(days: 30)))} - ${formatDate(DateTime.now())}",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.black87,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.black87),
                     ),
-                    const Icon(Icons.calendar_today,
-                        size: 18, color: Colors.grey),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
                   ],
                 ),
               ),
@@ -161,8 +167,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           // ========== TRẠNG THÁI ĐƯỜNG HUYẾT ==========
           const Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 16),
-            child: Text("Trạng thái",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              "Trạng thái",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
           const Gap(8),
 
@@ -173,8 +181,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedStatus = null),
-                    child:
-                        _buildChip("Tất cả", _selectedStatus == null),
+                    child: _buildChip("Tất cả", _selectedStatus == null),
                   ),
                 ),
                 const Gap(8),
@@ -183,7 +190,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Hạ đường huyết"),
                     child: _buildChip(
-                        "Hạ đường huyết", _selectedStatus == "Hạ đường huyết"),
+                      "Hạ đường huyết",
+                      _selectedStatus == "Hạ đường huyết",
+                    ),
                   ),
                 ),
               ],
@@ -199,16 +208,20 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Bình thường"),
                     child: _buildChip(
-                        "Bình thường", _selectedStatus == "Bình thường"),
+                      "Bình thường",
+                      _selectedStatus == "Bình thường",
+                    ),
                   ),
                 ),
                 const Gap(8),
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(
-                        () => _selectedStatus = "Tiền đái tháo đường"),
-                    child: _buildChip("Tiền ĐTĐ",
-                        _selectedStatus == "Tiền đái tháo đường"),
+                    onTap: () =>
+                        setState(() => _selectedStatus = "Tiền đái tháo đường"),
+                    child: _buildChip(
+                      "Tiền ĐTĐ",
+                      _selectedStatus == "Tiền đái tháo đường",
+                    ),
                   ),
                 ),
               ],
@@ -224,7 +237,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedStatus = "Đái tháo đường"),
                     child: _buildChip(
-                        "Đái tháo đường", _selectedStatus == "Đái tháo đường"),
+                      "Đái tháo đường",
+                      _selectedStatus == "Đái tháo đường",
+                    ),
                   ),
                 ),
                 const Gap(8),
@@ -236,8 +251,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           // ========== THỜI ĐIỂM ĐO ==========
           const Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 8),
-            child: Text("Thời điểm đo",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              "Thời điểm đo",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
           const Gap(8),
 
@@ -248,8 +265,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedMealStatus = null),
-                    child: _buildChip(
-                        "Tất cả", _selectedMealStatus == null),
+                    child: _buildChip("Tất cả", _selectedMealStatus == null),
                   ),
                 ),
                 const Gap(8),
@@ -258,7 +274,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedMealStatus = "fasting"),
                     child: _buildChip(
-                        "Lúc đói", _selectedMealStatus == "fasting"),
+                      "Lúc đói",
+                      _selectedMealStatus == "fasting",
+                    ),
                   ),
                 ),
               ],
@@ -274,7 +292,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedMealStatus = "before_meal"),
                     child: _buildChip(
-                        "Trước ăn", _selectedMealStatus == "before_meal"),
+                      "Trước ăn",
+                      _selectedMealStatus == "before_meal",
+                    ),
                   ),
                 ),
                 const Gap(8),
@@ -283,7 +303,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     onTap: () =>
                         setState(() => _selectedMealStatus = "after_meal"),
                     child: _buildChip(
-                        "Sau ăn 2h", _selectedMealStatus == "after_meal"),
+                      "Sau ăn 2h",
+                      _selectedMealStatus == "after_meal",
+                    ),
                   ),
                 ),
               ],
@@ -296,10 +318,11 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () =>
-                        setState(() => _selectedMealStatus = "random"),
+                    onTap: () => setState(() => _selectedMealStatus = "random"),
                     child: _buildChip(
-                        "Ngẫu nhiên", _selectedMealStatus == "random"),
+                      "Ngẫu nhiên",
+                      _selectedMealStatus == "random",
+                    ),
                   ),
                 ),
                 const Gap(8),
@@ -317,7 +340,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bỏ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         _startDate = null;
@@ -340,8 +363,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         if (_startDate!.isAfter(_endDate!)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content:
-                                  Text('Ngày bắt đầu phải trước ngày kết thúc'),
+                              content: Text(
+                                'Ngày bắt đầu phải trước ngày kết thúc',
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -349,7 +373,11 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         }
                       }
                       widget.onApply(
-                          _startDate, _endDate, _selectedStatus, _selectedMealStatus);
+                        _startDate,
+                        _endDate,
+                        _selectedStatus,
+                        _selectedMealStatus,
+                      );
                       Navigator.pop(context);
                     },
                     gradient: [Colors.blue.shade600, Colors.blue.shade900],

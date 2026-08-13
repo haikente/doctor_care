@@ -1,26 +1,29 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/pages/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class FilterBottomSheetSpo2 extends StatefulWidget {
-  final DateTime? initialStartDate; 
+  final DateTime? initialStartDate;
   final DateTime? initialEndDate;
-  final String initialStatus; 
+  final String initialStatus;
+  final String initialClassify;
   final DateTime firstAvailableDate;
-  final DateTime lastAvailableDate; 
-  final Function(DateTime?, DateTime?, String) onApply; 
+  final DateTime lastAvailableDate;
+  final Function(DateTime?, DateTime?, String, String) onApply;
   final VoidCallback onReset;
 
   const FilterBottomSheetSpo2({
-    super.key, 
-    this.initialStartDate, 
-    this.initialEndDate, 
-    required this.initialStatus, 
-    required this.firstAvailableDate, 
-    required this.lastAvailableDate, 
-    required this.onApply, 
-    required this.onReset
+    super.key,
+    this.initialStartDate,
+    this.initialEndDate,
+    required this.initialStatus,
+    this.initialClassify = "",
+    required this.firstAvailableDate,
+    required this.lastAvailableDate,
+    required this.onApply,
+    required this.onReset,
   });
 
   @override
@@ -30,20 +33,22 @@ class FilterBottomSheetSpo2 extends StatefulWidget {
 class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
   late DateTime? tempStartDate;
   late DateTime? tempEndDate;
-  late String tempStatus; 
+  late String tempClassify;
+  late String tempStatus;
 
   @override
   void initState() {
     super.initState();
     tempStartDate = widget.initialStartDate;
     tempEndDate = widget.initialEndDate;
+    tempClassify = widget.initialClassify;
     tempStatus = widget.initialStatus;
   }
 
   String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
   }
 
   @override
@@ -68,26 +73,31 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Lọc kết quả",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      context.tr('filter_results'),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(Icons.clear, size: 24),
-                )
+                ),
               ],
             ),
           ),
           Divider(),
 
-          // ========== THá»œI GIAN ==========
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  context.tr('time'),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -121,10 +131,64 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
             ),
           ),
 
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              context.tr('classification'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            child: Wrap(
+              spacing: 5,
+              runSpacing: 8,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      tempClassify = "";
+                    });
+                  },
+                  child: _buildStatusChip(
+                    context.tr('all'),
+                    tempClassify == "",
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      tempClassify = "device";
+                    });
+                  },
+                  child: _buildStatusChip(
+                    context.tr('device'),
+                    tempClassify == "device",
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      tempClassify = "manual";
+                    });
+                  },
+                  child: _buildStatusChip(
+                    context.tr('manual_entry'),
+                    tempClassify == "manual",
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // ========== Trạng thái ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Trạng thái", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              context.tr('status'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           Padding(
@@ -139,39 +203,51 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                       tempStatus = "";
                     });
                   },
-                  child: _buildStatusChip("Tất cả", tempStatus == "" || tempStatus == "Tất cả"),
+                  child: _buildStatusChip(context.tr('all'), tempStatus == ""),
                 ),
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      tempStatus = "Bình thường";
+                      tempStatus = "normal";
                     });
                   },
-                  child: _buildStatusChip("Bình thường", tempStatus == "Bình thường",),
+                  child: _buildStatusChip(
+                    context.tr('status_normal'),
+                    tempStatus == "normal",
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      tempStatus = "Theo dõi";
+                      tempStatus = "monitoring";
                     });
                   },
-                  child: _buildStatusChip("Theo dõi", tempStatus == "Theo dõi",),
+                  child: _buildStatusChip(
+                    context.tr('status_monitoring'),
+                    tempStatus == "monitoring",
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      tempStatus = "Cần chú ý";
+                      tempStatus = "attention";
                     });
                   },
-                  child: _buildStatusChip("Cần chú ý", tempStatus == "Cần chú ý", ),
+                  child: _buildStatusChip(
+                    context.tr('status_attention'),
+                    tempStatus == "attention",
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      tempStatus = "Nguy hiểm";
+                      tempStatus = "danger";
                     });
                   },
-                  child: _buildStatusChip("Nguy hiểm", tempStatus == "Nguy hiểm",),
+                  child: _buildStatusChip(
+                    context.tr('status_danger'),
+                    tempStatus == "danger",
+                  ),
                 ),
               ],
             ),
@@ -186,11 +262,12 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    text: "Bộ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         tempStartDate = null;
                         tempEndDate = null;
+                        tempClassify = "";
                         tempStatus = "";
                       });
                       widget.onReset();
@@ -203,9 +280,14 @@ class _FilterBottomSheetSpo2State extends State<FilterBottomSheetSpo2> {
                 Gap(12),
                 Expanded(
                   child: CustomButton(
-                    text: "Áp dụng",
+                    text: context.tr('apply'),
                     onPressed: () {
-                      widget.onApply(tempStartDate, tempEndDate, tempStatus);
+                      widget.onApply(
+                        tempStartDate,
+                        tempEndDate,
+                        tempClassify,
+                        tempStatus,
+                      );
                       Navigator.pop(context);
                     },
                     gradient: [Colors.blue.shade700, Colors.blue.shade900],

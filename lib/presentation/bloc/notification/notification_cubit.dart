@@ -23,11 +23,17 @@ class NotificationCubit extends Cubit<NotificationState> {
         emit(NotificationLoaded(items, unreadCount: unreadCount));
       },
       onError: (e, stack) {
-        print('Lỗi tải thông báo: ');
+        print('Lỗi tải thông báo: $e');
         print(stack);
-        emit(NotificationError('Tải thông báo thất bại: '));
+        emit(NotificationError('Tải thông báo thất bại: $e'));
       },
     );
+  }
+
+  Future<void> stopListening() async {
+    await _subscription?.cancel();
+    _subscription = null;
+    emit(const NotificationInitial());
   }
 
   Future<void> refresh() async {
@@ -36,8 +42,8 @@ class NotificationCubit extends Cubit<NotificationState> {
       final items = await repository.getNotifications();
       final unreadCount = items.where((n) => !n.isRead).length;
       emit(NotificationLoaded(items, unreadCount: unreadCount));
-    } catch (_) {
-      emit(const NotificationError('Tải thông báo thất bại'));
+    } catch (e) {
+      emit(NotificationError('Tải thông báo thất bại: $e'));
     }
   }
 

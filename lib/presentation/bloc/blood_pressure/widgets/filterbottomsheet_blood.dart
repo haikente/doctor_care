@@ -1,25 +1,28 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class FilterbottomsheetBlood extends StatefulWidget {
-  final DateTime? initialStartDate; 
+  final DateTime? initialStartDate;
   final DateTime? initialEndDate;
-  final String initialStatus; 
+  final String initialStatus;
+  final String initialClassify;
   final DateTime firstAvailableDate;
-  final DateTime lastAvailableDate; 
-  final Function(DateTime?, DateTime?, String) onApply; 
+  final DateTime lastAvailableDate;
+  final Function(DateTime?, DateTime?, String, String) onApply;
   final VoidCallback onReset;
 
   const FilterbottomsheetBlood({
-    super.key, 
-    this.initialStartDate, 
-    this.initialEndDate, 
-    required this.initialStatus, 
-    required this.firstAvailableDate, 
-    required this.lastAvailableDate, 
-    required this.onApply, 
-    required this.onReset
+    super.key,
+    this.initialStartDate,
+    this.initialEndDate,
+    required this.initialStatus,
+    this.initialClassify = "",
+    required this.firstAvailableDate,
+    required this.lastAvailableDate,
+    required this.onApply,
+    required this.onReset,
   });
 
   @override
@@ -29,8 +32,8 @@ class FilterbottomsheetBlood extends StatefulWidget {
 class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
   late DateTime? tempStartDate;
   late DateTime? tempEndDate;
-  late String tempStatus; 
-  late String tempClassify; 
+  late String tempStatus;
+  late String tempClassify;
 
   @override
   void initState() {
@@ -38,13 +41,13 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
     tempStartDate = widget.initialStartDate;
     tempEndDate = widget.initialEndDate;
     tempStatus = widget.initialStatus;
-    tempClassify = ""; 
+    tempClassify = widget.initialClassify;
   }
 
   String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
-           "${date.month.toString().padLeft(2, '0')}/"
-           "${date.year}";
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
   }
 
   @override
@@ -69,15 +72,18 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Lọc kết quả",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      context.tr('filter_results'),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(Icons.clear, size: 24),
-                )
+                ),
               ],
             ),
           ),
@@ -88,7 +94,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text("Thời gian", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  context.tr('time'),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 Gap(4),
                 Icon(Icons.grade, color: Colors.red, size: 12),
               ],
@@ -125,7 +134,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
           // ========== PHÂN LOẠI (dùng tempClassify) ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Phân loại", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              context.tr('classification'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           Padding(
@@ -140,7 +152,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempClassify = "";
                       });
                     },
-                    child: _buildClassifyChip("Tất cả", tempClassify == ""),
+                    child: _buildClassifyChip(
+                      context.tr('all'),
+                      tempClassify == "",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -151,7 +166,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempClassify = "Nhập tay";
                       });
                     },
-                    child: _buildClassifyChip("Nhập tay", tempClassify == "Nhập tay"),
+                    child: _buildClassifyChip(
+                      context.tr('manual_entry'),
+                      tempClassify == "Nhập tay",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -162,7 +180,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempClassify = "Thiết bị";
                       });
                     },
-                    child: _buildClassifyChip("Thiết bị", tempClassify == "Thiết bị"),
+                    child: _buildClassifyChip(
+                      context.tr('device'),
+                      tempClassify == "Thiết bị",
+                    ),
                   ),
                 ),
               ],
@@ -172,7 +193,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
           // ========== TRẠNG THÁI (dùng tempStatus) ==========
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text("Trạng thái", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            child: Text(
+              context.tr('status'),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           Padding(
@@ -183,10 +207,13 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        tempStatus = ""; 
+                        tempStatus = "";
                       });
                     },
-                    child: _buildStatusChip("Tất cả", tempStatus == ""),
+                    child: _buildStatusChip(
+                      context.tr('all'),
+                      tempStatus == "",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -197,7 +224,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempStatus = "Huyết áp thấp";
                       });
                     },
-                    child: _buildStatusChip("Huyết áp thấp", tempStatus == "Huyết áp thấp"),
+                    child: _buildStatusChip(
+                      context.tr('blood_pressure_low'),
+                      tempStatus == "Huyết áp thấp",
+                    ),
                   ),
                 ),
               ],
@@ -215,7 +245,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempStatus = "Bình thường";
                       });
                     },
-                    child: _buildStatusChip("Bình thường", tempStatus == "Bình thường"),
+                    child: _buildStatusChip(
+                      context.tr('status_normal'),
+                      tempStatus == "Bình thường",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -226,7 +259,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempStatus = "Bình thường cao";
                       });
                     },
-                    child: _buildStatusChip("Bình thường cao", tempStatus == "Bình thường cao"),
+                    child: _buildStatusChip(
+                      context.tr('blood_pressure_elevated'),
+                      tempStatus == "Bình thường cao",
+                    ),
                   ),
                 ),
               ],
@@ -244,7 +280,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempStatus = "Tăng huyết áp độ 1";
                       });
                     },
-                    child: _buildStatusChip("Tăng huyết áp độ 1", tempStatus == "Tăng huyết áp độ 1"),
+                    child: _buildStatusChip(
+                      context.tr('blood_pressure_stage_1'),
+                      tempStatus == "Tăng huyết áp độ 1",
+                    ),
                   ),
                 ),
                 Gap(8),
@@ -255,7 +294,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempStatus = "Tăng huyết áp độ 2";
                       });
                     },
-                    child: _buildStatusChip("Tăng huyết áp độ 2", tempStatus == "Tăng huyết áp độ 2"),
+                    child: _buildStatusChip(
+                      context.tr('blood_pressure_stage_2'),
+                      tempStatus == "Tăng huyết áp độ 2",
+                    ),
                   ),
                 ),
               ],
@@ -270,7 +312,10 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                   tempStatus = "Tăng huyết áp độ 3";
                 });
               },
-              child: _buildStatusChip("Tăng huyết áp độ 3", tempStatus == "Tăng huyết áp độ 3"),
+              child: _buildStatusChip(
+                context.tr('blood_pressure_stage_3'),
+                tempStatus == "Tăng huyết áp độ 3",
+              ),
             ),
           ),
 
@@ -281,10 +326,9 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
             child: Row(
               children: [
-                
                 Expanded(
                   child: CustomButton(
-                    text: "Bộ lọc",
+                    text: context.tr('clear_filter'),
                     onPressed: () {
                       setState(() {
                         tempStartDate = widget.firstAvailableDate;
@@ -292,7 +336,7 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         tempStatus = "";
                         tempClassify = "";
                       });
-                    
+
                       widget.onReset();
                     },
                     gradient: [Colors.blue.shade50, Colors.blue.shade50],
@@ -300,16 +344,16 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                   ),
                 ),
                 Gap(10),
-               
+
                 Expanded(
                   child: CustomButton(
-                    text: "Áp dụng",
-                    onPressed: () {                  
+                    text: context.tr('apply'),
+                    onPressed: () {
                       if (tempStartDate != null && tempEndDate != null) {
                         if (tempStartDate!.isAfter(tempEndDate!)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Ngày bắt đầu phải trước ngày kết thúc'),
+                              content: Text(context.tr('date_range_invalid')),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -321,6 +365,7 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                       widget.onApply(
                         tempStartDate ?? widget.firstAvailableDate,
                         tempEndDate ?? widget.lastAvailableDate,
+                        tempClassify,
                         tempStatus,
                       );
                       Navigator.pop(context);
@@ -370,72 +415,110 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.keyboard_double_arrow_left, color: Colors.blue.shade800),
+                            icon: Icon(
+                              Icons.keyboard_double_arrow_left,
+                              color: Colors.blue.shade800,
+                            ),
                             onPressed: () {
                               setDialogState(() {
-                                displayMonth = DateTime(displayMonth.year - 1, displayMonth.month);
+                                displayMonth = DateTime(
+                                  displayMonth.year - 1,
+                                  displayMonth.month,
+                                );
                               });
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.chevron_left, color: Colors.blue.shade800),
+                            icon: Icon(
+                              Icons.chevron_left,
+                              color: Colors.blue.shade800,
+                            ),
                             onPressed: () {
                               setDialogState(() {
-                                displayMonth = DateTime(displayMonth.year, displayMonth.month - 1);
+                                displayMonth = DateTime(
+                                  displayMonth.year,
+                                  displayMonth.month - 1,
+                                );
                               });
                             },
                           ),
                           Expanded(
                             child: Center(
                               child: Text(
-                                "Tháng ${displayMonth.month}, ${displayMonth.year}",
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                "${context.tr('month')} ${displayMonth.month}, ${displayMonth.year}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.chevron_right, color: Colors.blue.shade800),
+                            icon: Icon(
+                              Icons.chevron_right,
+                              color: Colors.blue.shade800,
+                            ),
                             onPressed: () {
                               setDialogState(() {
-                                displayMonth = DateTime(displayMonth.year, displayMonth.month + 1);
+                                displayMonth = DateTime(
+                                  displayMonth.year,
+                                  displayMonth.month + 1,
+                                );
                               });
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.keyboard_double_arrow_right, color: Colors.blue.shade800),
+                            icon: Icon(
+                              Icons.keyboard_double_arrow_right,
+                              color: Colors.blue.shade800,
+                            ),
                             onPressed: () {
                               setDialogState(() {
-                                displayMonth = DateTime(displayMonth.year + 1, displayMonth.month);
+                                displayMonth = DateTime(
+                                  displayMonth.year + 1,
+                                  displayMonth.month,
+                                );
                               });
                             },
                           ),
                         ],
                       ),
-                      
+
                       Divider(color: Colors.grey.shade300),
-                      
+
                       // ========== WEEKDAY HEADERS ==========
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-                            .map((day) => SizedBox(
-                                  width: 40,
-                                  child: Center(
-                                    child: Text(
-                                      day,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey.shade600,
-                                        fontSize: 13,
+                        children:
+                            [
+                                  context.tr('day_mon'),
+                                  context.tr('day_tue'),
+                                  context.tr('day_wed'),
+                                  context.tr('day_thu'),
+                                  context.tr('day_fri'),
+                                  context.tr('day_sat'),
+                                  context.tr('day_sun'),
+                                ]
+                                .map(
+                                  (day) => SizedBox(
+                                    width: 40,
+                                    child: Center(
+                                      child: Text(
+                                        day,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey.shade600,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ))
-                            .toList(),
+                                )
+                                .toList(),
                       ),
-                      
+
                       Gap(8),
-                      
+
                       // ========== CALENDAR GRID ==========
                       Expanded(
                         child: _buildCalendarGrid(
@@ -444,48 +527,58 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                           selectedEndDate,
                           (date) {
                             setDialogState(() {
-                              if (selectedStartDate == null || (selectedStartDate != null && selectedEndDate != null)) {
+                              if (selectedStartDate == null ||
+                                  (selectedStartDate != null &&
+                                      selectedEndDate != null)) {
                                 selectedStartDate = date;
                                 selectedEndDate = null;
-                              } else if (date.isBefore(selectedStartDate!)) {                             
+                              } else if (date.isBefore(selectedStartDate!)) {
                                 selectedStartDate = date;
-                              } else {                             
+                              } else {
                                 selectedEndDate = date;
                               }
                             });
                           },
                         ),
                       ),
-                      
+
                       Divider(color: Colors.grey.shade300),
                       Gap(8),
-                                          
+
                       Row(
                         children: [
                           Expanded(
                             child: CustomButton(
-                              text: "Hủy",
+                              text: context.tr('cancel'),
                               onPressed: () => Navigator.pop(context),
-                              gradient: [Colors.blue.shade50, Colors.blue.shade50],
+                              gradient: [
+                                Colors.blue.shade50,
+                                Colors.blue.shade50,
+                              ],
                               textColor: Colors.blue,
                             ),
                           ),
                           Gap(10),
                           Expanded(
                             child: CustomButton(
-                              text: "Đồng ý",
+                              text: context.tr('confirm'),
                               onPressed: () {
-                                if (selectedStartDate != null && selectedEndDate != null) {                                
-                                  if (selectedStartDate!.isAfter(selectedEndDate!)) {
+                                if (selectedStartDate != null &&
+                                    selectedEndDate != null) {
+                                  if (selectedStartDate!.isAfter(
+                                    selectedEndDate!,
+                                  )) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Ngày bắt đầu phải trước ngày kết thúc'),
+                                        content: Text(
+                                          context.tr('date_range_invalid'),
+                                        ),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
                                     return;
                                   }
-                                  
+
                                   setState(() {
                                     tempStartDate = selectedStartDate;
                                     tempEndDate = selectedEndDate;
@@ -494,13 +587,18 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Vui lòng chọn khoảng thời gian'),
+                                      content: Text(
+                                        context.tr('please_select_date_range'),
+                                      ),
                                       backgroundColor: Colors.orange,
                                     ),
                                   );
                                 }
                               },
-                              gradient: [Colors.blue.shade600, Colors.blue.shade900],
+                              gradient: [
+                                Colors.blue.shade600,
+                                Colors.blue.shade900,
+                              ],
                               textColor: Colors.white,
                             ),
                           ),
@@ -535,7 +633,11 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
     Function(DateTime) onDateSelected,
   ) {
     final firstDayOfMonth = DateTime(displayMonth.year, displayMonth.month, 1);
-    final lastDayOfMonth = DateTime(displayMonth.year, displayMonth.month + 1, 0);
+    final lastDayOfMonth = DateTime(
+      displayMonth.year,
+      displayMonth.month + 1,
+      0,
+    );
     final daysInMonth = lastDayOfMonth.day;
     final firstWeekday = firstDayOfMonth.weekday; // 1 = Monday, 7 = Sunday
 
@@ -549,7 +651,8 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
       final date = DateTime(displayMonth.year, displayMonth.month, day);
       final isStartDate = startDate != null && _isSameDay(date, startDate);
       final isEndDate = endDate != null && _isSameDay(date, endDate);
-      final isInRange = startDate != null &&
+      final isInRange =
+          startDate != null &&
           endDate != null &&
           date.isAfter(startDate) &&
           date.isBefore(endDate);
@@ -566,8 +669,8 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
               color: (isStartDate || isEndDate)
                   ? Colors.blue.shade800
                   : isInRange
-                      ? Colors.blue.shade100
-                      : Colors.transparent,
+                  ? Colors.blue.shade100
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
               border: isToday && !isStartDate && !isEndDate
                   ? Border.all(color: Colors.blue.shade800, width: 2)
@@ -580,8 +683,8 @@ class _FilterbottomsheetBloodState extends State<FilterbottomsheetBlood> {
                   color: (isStartDate || isEndDate)
                       ? Colors.white
                       : isInRange
-                          ? Colors.blue.shade800
-                          : Colors.black87,
+                      ? Colors.blue.shade800
+                      : Colors.black87,
                   fontWeight: (isStartDate || isEndDate || isToday)
                       ? FontWeight.bold
                       : FontWeight.normal,

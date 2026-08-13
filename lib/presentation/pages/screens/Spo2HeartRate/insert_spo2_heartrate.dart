@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
 import 'package:doctor_care/core/ui/dialog_helper.dart';
@@ -11,7 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
 class InsertSpo2HeartRate extends StatefulWidget {
-  final SpO2HeartRate? record; // Optional parameter để edit
+  final SpO2HeartRate? record;
+
   const InsertSpo2HeartRate({super.key, this.record});
 
   @override
@@ -28,6 +30,24 @@ class _InsertSpo2HeartRateState extends State<InsertSpo2HeartRate> {
 
   DateTime? _selectedDateTime;
 
+  bool get isEditing => widget.record != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.record != null) {
+      _selectedDateTime = widget.record!.timestamp;
+      _dateTimeController.text = _formatDateTime(widget.record!.timestamp);
+      _spo2Controller.text = widget.record!.spo2.toString();
+      _heartRateController.text = widget.record!.heartRate.toString();
+      _noteController.text = widget.record!.note ?? '';
+    } else {
+      _selectedDateTime = DateTime.now();
+      _dateTimeController.text = _formatDateTime(DateTime.now());
+    }
+    _validate();
+  }
+
   @override
   void dispose() {
     _spo2Controller.dispose();
@@ -37,42 +57,27 @@ class _InsertSpo2HeartRateState extends State<InsertSpo2HeartRate> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Nếu có dữ liệu sẵn (edit mode), fill vào form
-    if (widget.record != null) {
-      _selectedDateTime = widget.record!.timestamp;
-      _dateTimeController.text = _formatDateTime(widget.record!.timestamp);
-      _spo2Controller.text = widget.record!.spo2.toString();
-      _heartRateController.text = widget.record!.heartRate.toString();
-      _noteController.text = widget.record!.note ?? '';
-    } else {
-      // Nếu thêm mới, dùng giá trị mặc định
-      _selectedDateTime = DateTime.now();
-      _dateTimeController.text = _formatDateTime(DateTime.now());
-    }
-    _validate();
-  }
-
   String _formatDateTime(DateTime dateTime) {
-    String date = "${dateTime.day}/${dateTime.month}/${dateTime.year}";
-    String time = "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
-    return "$time $date";
+    final date = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    final time =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    return '$time $date';
   }
 
   void _validate() {
     final spo2 = int.tryParse(_spo2Controller.text);
     final heartRate = int.tryParse(_heartRateController.text);
 
-    final valid = spo2 != null && 
-                  spo2 >= 70 && 
-                  spo2 <= 100 && 
-                  heartRate != null && 
-                  heartRate >= 30 && 
-                  heartRate <= 200;
-                  
-    final changed = widget.record == null ||
+    final valid =
+        spo2 != null &&
+        spo2 >= 70 &&
+        spo2 <= 100 &&
+        heartRate != null &&
+        heartRate >= 30 &&
+        heartRate <= 200;
+
+    final changed =
+        widget.record == null ||
         spo2 != widget.record!.spo2 ||
         heartRate != widget.record!.heartRate ||
         _noteController.text != (widget.record!.note ?? '') ||
@@ -91,56 +96,44 @@ class _InsertSpo2HeartRateState extends State<InsertSpo2HeartRate> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: widget.record != null ? "Cập nhật SPO2 & Nhịp tim" : "Thêm SPO2 & Nhịp tim",
+        title: isEditing
+            ? context.tr('edit_spo2_heart_rate_title')
+            : context.tr('add_spo2_heart_rate_title'),
         centerTitle: true,
-        icon: widget.record != null
-            ? const Icon(Icons.delete_forever_outlined, color: Colors.white, size: 22)
+        icon: isEditing
+            ? const Icon(
+                Icons.delete_forever_outlined,
+                color: Colors.white,
+                size: 22,
+              )
             : null,
-        onInfo: widget.record != null
-            ? () => AppDialog.showDeleteConfirm(
-                  context: context,
-                  content: "Bạn có chắc chắn muốn xoá bản ghi này không?",
-                  onConfirm: () {
-                    if (widget.record?.id != null) {
-                      context.read<Spo2heartrateBloc>().add(DeleteSpo2HeartRateRecord(widget.record!.id!.toString()));
-                    }
-                    AppSnackBar.show(
-                      context: context,
-                      type: SnackBarType.delete,
-                    );
-                    Navigator.pop(context);
-                  })
-            : null,
+        onInfo: isEditing ? _confirmDelete : null,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Chọn thời gian",
-                style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
+                context.tr('select_time'),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              Gap(8),
+              const Gap(8),
               TextField(
                 controller: _dateTimeController,
                 readOnly: true,
-                style: TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                style: const TextStyle(fontSize: 14),
+                decoration: _inputDecoration(
+                  suffixIcon: const Icon(
+                    Icons.access_time,
+                    color: Colors.grey,
+                    size: 24,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey, width: 1),
-                  ),
-                  suffixIcon: Icon(Icons.access_time, color: Colors.grey, size: 24),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
                 onTap: () {
                   CustomDateTimePicker.show(
@@ -154,128 +147,144 @@ class _InsertSpo2HeartRateState extends State<InsertSpo2HeartRate> {
                   );
                 },
               ),
-              Gap(20),
-
-              // SPO2
-              Row(
-                children: [
-                  Icon(Icons.water_drop, size: 18, color: Colors.blue),
-                  Gap(6),
-                  Text(
-                    "SPO2 (%)",
-                    style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
-                  ),
-                  Gap(5),
-                  Icon(Icons.grade, size: 15, color: Colors.red),
-                ],
+              const Gap(20),
+              _buildFieldLabel(
+                icon: Icons.water_drop,
+                iconColor: Colors.blue,
+                label: 'SPO2 (%)',
               ),
-              Gap(8),
+              const Gap(8),
               TextField(
                 controller: _spo2Controller,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                style: TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: "Nhập SPO2 (70-100%)",
-                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.blue, width: 1.5),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                style: const TextStyle(fontSize: 14),
+                decoration: _inputDecoration(
+                  hintText: context.tr('enter_spo2'),
+                  focusedColor: Colors.blue,
                 ),
                 onChanged: (value) => _validate(),
               ),
-              Gap(20),
-
-              // Heart Rate
-              Row(
-                children: [
-                  Icon(Icons.favorite, size: 18, color: Colors.red),
-                  Gap(6),
-                  Text(
-                    "Nhịp tim (bpm)",
-                    style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
-                  ),
-                  Gap(5),
-                  Icon(Icons.grade, size: 15, color: Colors.red),
-                ],
+              const Gap(20),
+              _buildFieldLabel(
+                icon: Icons.favorite,
+                iconColor: Colors.red,
+                label:
+                    "${context.tr('heart_rate_label')} (${context.tr('unit_bpm')})",
               ),
-              Gap(8),
+              const Gap(8),
               TextField(
                 controller: _heartRateController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                style: TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: "Nhập nhịp tim (30-200 bpm)",
-                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.red, width: 1.5),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                style: const TextStyle(fontSize: 14),
+                decoration: _inputDecoration(
+                  hintText: context.tr('enter_heart_rate'),
+                  focusedColor: Colors.red,
                 ),
                 onChanged: (value) => _validate(),
               ),
-              Gap(20),
-              // Save Button
+              const Gap(20),
               CustomButton(
-                text: widget.record != null ? "Cập nhật" : "Lưu",
-                onPressed: isValid && hasChanges
-                    ? () {
-                        final spo2 = int.parse(_spo2Controller.text);
-                        final heartRate = int.parse(_heartRateController.text);
-                        final note = _noteController.text.trim().isEmpty ? null : _noteController.text.trim();
-
-                        final record = SpO2HeartRate(
-                          id: widget.record?.id,
-                          spo2: spo2,
-                          heartRate: heartRate,
-                          timestamp: _selectedDateTime!,
-                          note: note,
-                        );
-
-                        if (widget.record != null) {
-                          // Update
-                          context.read<Spo2heartrateBloc>().add(UpdateSpo2HeartRateRecord(record));
-                          AppSnackBar.showSpo2heartRate(
-                            context: context,
-                            type: SnackBarType.update,
-                          );
-                        } else {
-                          // Add
-                          context.read<Spo2heartrateBloc>().add(AddSpo2HeartRateRecord(record));
-                          AppSnackBar.showSpo2heartRate(
-                            context: context,
-                            type: SnackBarType.add,
-                          );
-                        }
-                        Navigator.pop(context);
-                      }
-                    : null,
+                text: isEditing ? context.tr('update_btn') : context.tr('save'),
+                onPressed: isValid && hasChanges ? _submit : null,
                 expanded: true,
                 enabled: isValid && hasChanges,
               ),
-              Gap(20),
+              const Gap(20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildFieldLabel({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: iconColor),
+        const Gap(6),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Gap(5),
+        const Icon(Icons.grade, size: 15, color: Colors.red),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    String? hintText,
+    Widget? suffixIcon,
+    Color? focusedColor,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: focusedColor ?? Colors.grey, width: 1.5),
+      ),
+      suffixIcon: suffixIcon,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    );
+  }
+
+  void _confirmDelete() {
+    AppDialog.showDeleteConfirm(
+      context: context,
+      content: context.tr('confirm_delete_spo2_heart_rate'),
+      onConfirm: () {
+        if (widget.record?.id != null) {
+          context.read<Spo2heartrateBloc>().add(
+            DeleteSpo2HeartRateRecord(widget.record!.id!.toString()),
+          );
+        }
+        AppSnackBar.show(context: context, type: SnackBarType.delete);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  void _submit() {
+    final spo2 = int.parse(_spo2Controller.text);
+    final heartRate = int.parse(_heartRateController.text);
+    final note = _noteController.text.trim().isEmpty
+        ? null
+        : _noteController.text.trim();
+
+    final record = SpO2HeartRate(
+      id: widget.record?.id,
+      spo2: spo2,
+      heartRate: heartRate,
+      timestamp: _selectedDateTime!,
+      note: note,
+    );
+
+    if (widget.record != null) {
+      context.read<Spo2heartrateBloc>().add(UpdateSpo2HeartRateRecord(record));
+      AppSnackBar.showSpo2heartRate(
+        context: context,
+        type: SnackBarType.update,
+      );
+    } else {
+      context.read<Spo2heartrateBloc>().add(AddSpo2HeartRateRecord(record));
+      AppSnackBar.showSpo2heartRate(context: context, type: SnackBarType.add);
+    }
+    Navigator.pop(context);
   }
 }

@@ -56,6 +56,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
         _auth = auth;
 
   static const _tokenKey = 'device_push_token';
+  static const _maxBatchWrites = 450;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -106,7 +107,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     List<String>? userIds,
     String? topic,
   }) async {
-    final targets = <String>[];
+    final targets = <String>{};
 
     if (userIds != null) {
       for (final userId in userIds) {
@@ -136,8 +137,19 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
       if (topic != null) 'topic': topic,
     };
 
-    for (final userId in targets) {
-      await _collectionForUser(userId).add(payload);
+    final targetList = targets.toList(growable: false);
+    for (var start = 0; start < targetList.length; start += _maxBatchWrites) {
+      final end = (start + _maxBatchWrites < targetList.length)
+          ? start + _maxBatchWrites
+          : targetList.length;
+      final batch = _firestore.batch();
+
+      for (final userId in targetList.sublist(start, end)) {
+        final doc = _collectionForUser(userId).doc();
+        batch.set(doc, payload);
+      }
+
+      await batch.commit();
     }
   }
 

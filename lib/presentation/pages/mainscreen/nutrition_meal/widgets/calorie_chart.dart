@@ -1,4 +1,6 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
+import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_event.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
@@ -15,8 +17,6 @@ class CalorieChart extends StatefulWidget {
 }
 
 class _CalorieChartState extends State<CalorieChart> {
-  static const double _dailyGoal = 2000; // kcal
-
   @override
   void initState() {
     super.initState();
@@ -38,10 +38,10 @@ class _CalorieChartState extends State<CalorieChart> {
   //   return Colors.red;
   // }
 
-  IconData _getStatusIcon(double calories) {
-    if (calories >= _dailyGoal) return Icons.check_circle_rounded;
-    if (calories >= _dailyGoal * 0.75) return Icons.trending_up_rounded;
-    if (calories >= _dailyGoal * 0.5) return Icons.horizontal_rule_rounded;
+  IconData _getStatusIcon(double calories, double dailyGoal) {
+    if (calories >= dailyGoal) return Icons.check_circle_rounded;
+    if (calories >= dailyGoal * 0.75) return Icons.trending_up_rounded;
+    if (calories >= dailyGoal * 0.5) return Icons.horizontal_rule_rounded;
     return Icons.trending_down_rounded;
   }
 
@@ -62,6 +62,10 @@ class _CalorieChartState extends State<CalorieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final dailyGoal = context.select(
+      (HealthGoalCubit cubit) => cubit.state.dailyCalories.toDouble(),
+    );
+
     return BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
       builder: (context, state) {
         double totalCalories = 0;
@@ -82,27 +86,33 @@ class _CalorieChartState extends State<CalorieChart> {
           }
         }
 
-        final progress = (totalCalories / _dailyGoal).clamp(0.0, 1.0);
+        final progress = dailyGoal > 0
+            ? (totalCalories / dailyGoal).clamp(0.0, 1.0)
+            : 0.0;
+
         ///final progressColor = _getProgressColor(totalCalories);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Container(
             padding: const EdgeInsets.all(20),
-             decoration: BoxDecoration(
+            decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(20),
-              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.restaurant_rounded,
-                        color: Colors.blue, size: 22),
+                    Icon(
+                      Icons.restaurant_rounded,
+                      color: Colors.blue,
+                      size: 22,
+                    ),
                     const Gap(8),
                     Text(
-                      "Calories hôm nay",
+                      context.tr('today_calories'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -130,7 +140,7 @@ class _CalorieChartState extends State<CalorieChart> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                _getStatusIcon(totalCalories),
+                                _getStatusIcon(totalCalories, dailyGoal),
                                 color: Colors.blue,
                                 size: 28,
                               ),
@@ -144,7 +154,7 @@ class _CalorieChartState extends State<CalorieChart> {
                                 ),
                               ),
                               Text(
-                                "/ ${_formatNumber(_dailyGoal)}",
+                                "/ ${_formatNumber(dailyGoal)}",
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Colors.grey.shade500,
@@ -164,7 +174,7 @@ class _CalorieChartState extends State<CalorieChart> {
                             context,
                             icon: Icons.fitness_center_rounded,
                             iconColor: Colors.blue,
-                            label: "Protein",
+                            label: context.tr('protein'),
                             value: "${totalProtein.toStringAsFixed(1)}g",
                           ),
                           const Gap(16),
@@ -172,7 +182,7 @@ class _CalorieChartState extends State<CalorieChart> {
                             context,
                             icon: Icons.bakery_dining_rounded,
                             iconColor: Colors.amber,
-                            label: "Carbs",
+                            label: context.tr('carbs'),
                             value: "${totalCarbs.toStringAsFixed(1)}g",
                           ),
                           const Gap(16),
@@ -180,7 +190,7 @@ class _CalorieChartState extends State<CalorieChart> {
                             context,
                             icon: Icons.water_drop_rounded,
                             iconColor: Colors.red,
-                            label: "Chất béo",
+                            label: context.tr('fat'),
                             value: "${totalFat.toStringAsFixed(1)}g",
                           ),
                         ],
@@ -220,10 +230,7 @@ class _CalorieChartState extends State<CalorieChart> {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
               ),
               Text(
                 value,

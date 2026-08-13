@@ -1,6 +1,6 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
-import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/notification_entity.dart';
 import 'package:doctor_care/presentation/bloc/notification/notification_cubit.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +25,7 @@ class _NotificationpageState extends State<Notificationpage> {
     context.read<NotificationCubit>().startListening();
   }
 
-  List<NotificationEntity> _applyFilter(
-    List<NotificationEntity> items,
-  ) {
+  List<NotificationEntity> _applyFilter(List<NotificationEntity> items) {
     if (selectedFilter == 'unread') {
       return items.where((n) => !n.isRead).toList();
     }
@@ -52,8 +50,9 @@ class _NotificationpageState extends State<Notificationpage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       appBar: CustomStackAppBar(
         title: context.tr('notifications_title'),
         centerTitle: true,
@@ -62,7 +61,9 @@ class _NotificationpageState extends State<Notificationpage> {
       body: BlocBuilder<NotificationCubit, NotificationState>(
         builder: (context, state) {
           if (state is NotificationLoading || state is NotificationInitial) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(color: theme.primaryColor),
+            );
           }
 
           if (state is NotificationError) {
@@ -72,137 +73,33 @@ class _NotificationpageState extends State<Notificationpage> {
           final notifications = state is NotificationLoaded
               ? state.notifications
               : <NotificationEntity>[];
-          final unreadCount =
-              state is NotificationLoaded ? state.unreadCount : 0;
+          final unreadCount = state is NotificationLoaded
+              ? state.unreadCount
+              : 0;
           final filteredNotifications = _applyFilter(notifications);
 
           return Column(
             children: [
-              Container(
-                color: theme.colorScheme.surface,
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.notifications_active,
-                              color: Colors.blue.shade700,
-                              size: 20,
-                            ),
-                            Gap(8),
-                            Text(
-                              context.tr(
-                                'unread_count',
-                                params: {'count': unreadCount.toString()},
-                              ),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Mark all as read button
-                        if (unreadCount > 0)
-                          TextButton.icon(
-                            onPressed: markAllAsRead,
-                            icon: Icon(Icons.done_all, size: 18),
-                            label: Text(context.tr('mark_all')),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.blue.shade700,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    Gap(12),
-
-                    // Filter chips
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: filterOptions.map((filter) {
-                          final isSelected = selectedFilter == filter;
-                          final label = switch (filter) {
-                            'all' => context.tr('all'),
-                            'unread' => context.tr('filter_unread'),
-                            'read' => context.tr('filter_read'),
-                            _ => filter,
-                          };
-                          return Padding(
-                            padding: EdgeInsets.only(right: 8),
-                            child: FilterChip(
-                              label: Text(label),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setState(() {
-                                  selectedFilter = filter;
-                                });
-                              },
-                              backgroundColor: theme.brightness == Brightness.dark
-                                  ? Colors.grey.shade800
-                                  : Colors.grey.shade100,
-                              selectedColor: theme.primaryColor.withOpacity(0.1),
-                              labelStyle: TextStyle(
-                                color: isSelected
-                                    ? theme.primaryColor
-                                    : AppColor.textSecondary(context),
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
-                                fontSize: 13,
-                              ),
-                              side: BorderSide(
-                                color: isSelected
-                                    ? theme.primaryColor
-                                    : AppColor.divider(context),
-                                width: 1.5,
-                              ),
-                              checkmarkColor: theme.primaryColor,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
+              _buildHeader(
+                totalCount: notifications.length,
+                unreadCount: unreadCount,
               ),
-
-              Divider(height: 1, color: AppColor.divider(context)),
-
-              // ========== NOTIFICATION LIST ==========
               Expanded(
                 child: filteredNotifications.isEmpty
                     ? _buildEmptyState()
                     : RefreshIndicator(
+                        color: theme.primaryColor,
                         onRefresh: () async {
                           context.read<NotificationCubit>().startListening();
                         },
                         child: ListView.separated(
-                          padding: EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                           itemCount: filteredNotifications.length,
-                          separatorBuilder: (context, index) => Divider(
-                            height: 1,
-                            color: AppColor.divider(context),
-                            indent: 70,
-                          ),
+                          separatorBuilder: (_, __) => const Gap(12),
                           itemBuilder: (context, index) {
-                            final notification = filteredNotifications[index];
-                            return _buildNotificationItem(notification);
+                            return _buildNotificationItem(
+                              filteredNotifications[index],
+                            );
                           },
                         ),
                       ),
@@ -214,125 +111,432 @@ class _NotificationpageState extends State<Notificationpage> {
     );
   }
 
-  // ========== NOTIFICATION ITEM ==========
+  Widget _buildHeader({required int totalCount, required int unreadCount}) {
+    final theme = Theme.of(context);
+    final primary = theme.primaryColor;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  primary,
+                  Color.lerp(primary, Colors.teal, 0.45) ?? primary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withOpacity(0.18),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.24)),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_active_outlined,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+                const Gap(12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr(
+                          'unread_count',
+                          params: {'count': unreadCount.toString()},
+                        ),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const Gap(4),
+                      Text(
+                        '${context.tr('all')}: $totalCount',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.82),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (unreadCount > 0)
+                  TextButton.icon(
+                    onPressed: markAllAsRead,
+                    icon: const Icon(Icons.done_all_rounded, size: 18),
+                    label: Text(context.tr('mark_all')),
+                    style: TextButton.styleFrom(
+                      foregroundColor: primary,
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const Gap(14),
+          _buildFilterBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterBar() {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.06)
+            : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: filterOptions.map((filter) {
+          final isSelected = selectedFilter == filter;
+          final label = switch (filter) {
+            'all' => context.tr('all'),
+            'unread' => context.tr('filter_unread'),
+            'read' => context.tr('filter_read'),
+            _ => filter,
+          };
+
+          return Expanded(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                setState(() {
+                  selectedFilter = filter;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? theme.colorScheme.surface
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isSelected
+                        ? theme.primaryColor
+                        : AppColor.textSecondary(context),
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildNotificationItem(NotificationEntity notification) {
+    final theme = Theme.of(context);
+    final typeColor = notification.type.color;
+
     return Dismissible(
       key: Key(notification.id),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 20),
-        color: Colors.red,
-        child: Icon(Icons.delete, color: Colors.white),
+        padding: const EdgeInsets.only(right: 22),
+        decoration: BoxDecoration(
+          color: Colors.red.shade500,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
-      onDismissed: (direction) {
+      onDismissed: (_) {
         deleteNotification(notification.id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.tr('deleted_notification')),
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
         );
       },
-      child: InkWell(
-        onTap: () {
-          if (!notification.isRead) {
-            markAsRead(notification.id);
-          }
-        },
-        child: Container(
-          color: notification.isRead
-              ? Theme.of(context).colorScheme.surface
-              : Theme.of(context).primaryColor.withOpacity(0.05),
-          padding: EdgeInsets.all(15),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Icon
-              Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: notification.type.color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+      child: Material(
+        color: notification.isRead
+            ? theme.cardColor
+            : theme.primaryColor.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () {
+            if (!notification.isRead) {
+              markAsRead(notification.id);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: notification.isRead
+                    ? AppColor.divider(context)
+                    : theme.primaryColor.withOpacity(0.22),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: typeColor.withOpacity(0.13),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(
+                    notification.type.icon,
+                    color: typeColor,
+                    size: 24,
+                  ),
                 ),
-                child: Icon(
-                  notification.type.icon,
-                  color: notification.type.color,
-                  size: 24,
+                const Gap(12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              notification.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15,
+                                height: 1.25,
+                                fontWeight: notification.isRead
+                                    ? FontWeight.w700
+                                    : FontWeight.w800,
+                                color: AppColor.textPrimary(context),
+                              ),
+                            ),
+                          ),
+                          if (!notification.isRead) ...[
+                            const Gap(8),
+                            Container(
+                              width: 9,
+                              height: 9,
+                              margin: const EdgeInsets.only(top: 5),
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const Gap(7),
+                      Text(
+                        notification.body,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.45,
+                          color: AppColor.textSecondary(context),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Gap(10),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 14,
+                            color: AppColor.textSecondary(context),
+                          ),
+                          const Gap(5),
+                          Text(
+                            _formatTimestamp(notification.createdAt),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColor.textSecondary(context),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+    String message;
+    IconData icon;
+
+    if (selectedFilter == 'unread') {
+      message = context.tr('no_unread_notifications');
+      icon = Icons.mark_email_read_outlined;
+    } else if (selectedFilter == 'read') {
+      message = context.tr('no_read_notifications');
+      icon = Icons.notifications_none_rounded;
+    } else {
+      message = context.tr('no_notifications');
+      icon = Icons.notifications_off_outlined;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 46, color: theme.primaryColor),
+            ),
+            const Gap(18),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColor.textPrimary(context),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColor.divider(context)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  size: 34,
+                  color: Colors.red,
                 ),
               ),
-
-              Gap(12),
-
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            notification.title,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: notification.isRead
-                                  ? FontWeight.w500
-                                  : FontWeight.w600,
-                              color: AppColor.textPrimary(context),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (!notification.isRead)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            margin: EdgeInsets.only(left: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade700,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    Gap(4),
-
-                    Text(
-                      notification.body,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColor.textSecondary(context),
-                        height: 1.4,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    Gap(6),
-
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 12,
-                          color: AppColor.textSecondary(context),
-                        ),
-                        Gap(4),
-                        Text(
-                          _formatTimestamp(notification.createdAt),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColor.textSecondary(context),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              const Gap(14),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.45,
+                  color: AppColor.textSecondary(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Gap(16),
+              FilledButton.icon(
+                onPressed: () =>
+                    context.read<NotificationCubit>().startListening(),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(context.tr('retry')),
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ],
@@ -342,75 +546,6 @@ class _NotificationpageState extends State<Notificationpage> {
     );
   }
 
-  // ========== EMPTY STATE ==========
-  Widget _buildEmptyState() {
-    String message;
-    IconData icon;
-
-    if (selectedFilter == 'unread') {
-      message = context.tr('no_unread_notifications');
-      icon = Icons.check_circle_outline;
-    } else if (selectedFilter == 'read') {
-      message = context.tr('no_read_notifications');
-      icon = Icons.notifications_none;
-    } else {
-      message = context.tr('no_notifications');
-      icon = Icons.notifications_off_outlined;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 80,
-            color: AppColor.textSecondary(context).withOpacity(0.5),
-          ),
-          Gap(16),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 16,
-              color: AppColor.textSecondary(context),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: AppColor.textSecondary(context).withOpacity(0.6),
-          ),
-          Gap(12),
-          Text(
-            context.tr(message),
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColor.textSecondary(context),
-            ),
-          ),
-          Gap(12),
-          ElevatedButton(
-            onPressed: () =>
-                context.read<NotificationCubit>().startListening(),
-            child: Text(context.tr('retry')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ========== FORMAT TIMESTAMP ==========
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
@@ -418,11 +553,20 @@ class _NotificationpageState extends State<Notificationpage> {
     if (difference.inMinutes < 1) {
       return context.tr('just_now');
     } else if (difference.inMinutes < 60) {
-      return context.tr('minutes_ago', params: {'count': difference.inMinutes.toString()});
+      return context.tr(
+        'minutes_ago',
+        params: {'count': difference.inMinutes.toString()},
+      );
     } else if (difference.inHours < 24) {
-      return context.tr('hours_ago', params: {'count': difference.inHours.toString()});
+      return context.tr(
+        'hours_ago',
+        params: {'count': difference.inHours.toString()},
+      );
     } else if (difference.inDays < 7) {
-      return context.tr('days_ago', params: {'count': difference.inDays.toString()});
+      return context.tr(
+        'days_ago',
+        params: {'count': difference.inDays.toString()},
+      );
     } else {
       return DateFormat('dd/MM/yyyy').format(timestamp);
     }

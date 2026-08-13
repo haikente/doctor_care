@@ -213,7 +213,7 @@ class _TrackMealState extends State<TrackMeal> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            isFiltered ? Icons.filter_list_off : Icons.restaurant_menu,
+            isFiltered ? Icons.filter_alt_off_outlined : Icons.restaurant_menu,
             size: 64,
             // ignore: deprecated_member_use
             color: AppColor.textSecondary(context).withOpacity(0.5),
@@ -224,7 +224,7 @@ class _TrackMealState extends State<TrackMeal> {
                 ? context.tr('no_meals_in_range')
                 : context.tr('no_meals_today'),
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               color: AppColor.textSecondary(context),
             ),
             textAlign: TextAlign.center,

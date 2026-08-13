@@ -21,10 +21,12 @@ class BloodPressureScreen extends StatefulWidget {
 
 class _BloodPressureScreenState extends State<BloodPressureScreen> {
   String selectedStatus = "";
+  String selectedClassify = "";
   DateTime? startDate;
   DateTime? endDate;
 
   String chartSelectedStatus = "";
+  String chartSelectedClassify = "";
   DateTime? chartStartDate;
   DateTime? chartEndDate;
 
@@ -36,7 +38,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
 
   List<BloodPressure> filterChartData(List<BloodPressure> records) {
     List<BloodPressure> filtered = records;
-    
+
     // Lọc theo thời gian
     if (chartStartDate != null && chartEndDate != null) {
       filtered = filtered.where((record) {
@@ -55,11 +57,17 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
           chartEndDate!.month,
           chartEndDate!.day,
         );
-        return (recordDate.isAtSameMomentAs(start) || recordDate.isAfter(start)) &&
-               (recordDate.isAtSameMomentAs(end) || recordDate.isBefore(end));
+        return (recordDate.isAtSameMomentAs(start) ||
+                recordDate.isAfter(start)) &&
+            (recordDate.isAtSameMomentAs(end) || recordDate.isBefore(end));
       }).toList();
     }
-    
+
+    if (chartSelectedClassify.isNotEmpty) {
+      filtered = filtered
+          .where((record) => record.sourceLabel == chartSelectedClassify)
+          .toList();
+    }
 
     if (chartSelectedStatus.isNotEmpty) {
       filtered = filtered.where((record) {
@@ -69,7 +77,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
         } else if (record.systolic < 120 && record.diastolic < 80) {
           status = "Bình thường";
         } else if (record.systolic < 130 && record.diastolic < 80) {
-          status = "Bình thường cao"; 
+          status = "Bình thường cao";
         } else if (record.systolic < 140 || record.diastolic < 90) {
           status = "Tăng huyết áp độ 1";
         } else if (record.systolic < 180 || record.diastolic < 120) {
@@ -80,11 +88,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
         return status == chartSelectedStatus;
       }).toList();
     }
-    
+
     return filtered;
   }
 
-  
   List<BloodPressure> filterByStatus(List<BloodPressure> records) {
     List<BloodPressure> filtered = records;
 
@@ -96,40 +103,70 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
           record.timestamp.month,
           record.timestamp.day,
         );
-        final start = DateTime(startDate!.year, startDate!.month, startDate!.day);
+        final start = DateTime(
+          startDate!.year,
+          startDate!.month,
+          startDate!.day,
+        );
         final end = DateTime(endDate!.year, endDate!.month, endDate!.day);
-        return (recordDate.isAtSameMomentAs(start) || recordDate.isAfter(start)) &&
-               (recordDate.isAtSameMomentAs(end) || recordDate.isBefore(end));
+        return (recordDate.isAtSameMomentAs(start) ||
+                recordDate.isAfter(start)) &&
+            (recordDate.isAtSameMomentAs(end) || recordDate.isBefore(end));
       }).toList();
     }
 
-  
+    if (selectedClassify.isNotEmpty) {
+      filtered = filtered
+          .where((record) => record.sourceLabel == selectedClassify)
+          .toList();
+    }
+
     if (selectedStatus.isNotEmpty) {
       if (selectedStatus == "Huyết áp thấp") {
-        filtered = filtered.where((record) =>
-            record.systolic < 90 && record.diastolic < 60).toList();
+        filtered = filtered
+            .where((record) => record.systolic < 90 && record.diastolic < 60)
+            .toList();
       } else if (selectedStatus == "Bình thường") {
-        filtered = filtered.where((record) =>
-            record.systolic >= 90 &&
-            record.systolic < 120 &&
-            record.diastolic >= 60 &&
-            record.diastolic < 80).toList();
+        filtered = filtered
+            .where(
+              (record) =>
+                  record.systolic >= 90 &&
+                  record.systolic < 120 &&
+                  record.diastolic >= 60 &&
+                  record.diastolic < 80,
+            )
+            .toList();
       } else if (selectedStatus == "Bình thường cao") {
-        filtered = filtered.where((record) =>
-            record.systolic >= 120 &&
-            record.systolic < 130 &&
-            record.diastolic < 80).toList();
+        filtered = filtered
+            .where(
+              (record) =>
+                  record.systolic >= 120 &&
+                  record.systolic < 130 &&
+                  record.diastolic < 80,
+            )
+            .toList();
       } else if (selectedStatus == "Tăng huyết áp độ 1") {
-        filtered = filtered.where((record) =>
-            (record.systolic >= 130 && record.systolic < 140) ||
-            (record.diastolic >= 80 && record.diastolic < 90)).toList();
+        filtered = filtered
+            .where(
+              (record) =>
+                  (record.systolic >= 130 && record.systolic < 140) ||
+                  (record.diastolic >= 80 && record.diastolic < 90),
+            )
+            .toList();
       } else if (selectedStatus == "Tăng huyết áp độ 2") {
-        filtered = filtered.where((record) =>
-            (record.systolic >= 140 && record.systolic < 180) ||
-            (record.diastolic >= 90 && record.diastolic < 120)).toList();
+        filtered = filtered
+            .where(
+              (record) =>
+                  (record.systolic >= 140 && record.systolic < 180) ||
+                  (record.diastolic >= 90 && record.diastolic < 120),
+            )
+            .toList();
       } else if (selectedStatus == "Tăng huyết áp độ 3") {
-        filtered = filtered.where((record) =>
-            record.systolic >= 180 || record.diastolic >= 120).toList();
+        filtered = filtered
+            .where(
+              (record) => record.systolic >= 180 || record.diastolic >= 120,
+            )
+            .toList();
       }
     }
     return filtered;
@@ -146,13 +183,17 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     return Scaffold(
       appBar: CustomStackAppBar(
         onBack: () => Navigator.pop(context),
-        title: "Theo dõi huyết áp",
+        title: context.tr('track_blood_pressure'),
         centerTitle: true,
         onInfo: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => InsertBloodPressure()),
         ),
-        icon: Icon(Icons.add_circle_outline_outlined, color: Colors.white, size: 20),
+        icon: Icon(
+          Icons.add_circle_outline_outlined,
+          color: Colors.white,
+          size: 20,
+        ),
       ),
       body: BlocBuilder<BloodPressureCubit, BloodPressureState>(
         builder: (context, state) {
@@ -162,8 +203,9 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
             );
           } else if (state is BloodPressureLoaded) {
             final bloodRecords = state.records;
-            
-            if (bloodRecords.isNotEmpty && (startDate == null || endDate == null)) {
+
+            if (bloodRecords.isNotEmpty &&
+                (startDate == null || endDate == null)) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 setState(() {
                   // Set cho card filter
@@ -184,10 +226,14 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.bloodtype_outlined, size: 80, color: Colors.grey),
+                    Icon(
+                      Icons.bloodtype_outlined,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
                     Gap(20),
                     Text(
-                      'Chưa có dữ liệu huyết áp',
+                      context.tr('no_blood_pressure_data'),
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.grey,
@@ -196,7 +242,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                     ),
                     Gap(10),
                     Text(
-                      'Nhấn nút + để thêm bản ghi mới',
+                      context.tr('add_new_record_hint'),
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
@@ -221,19 +267,28 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                               initialStartDate: chartStartDate,
                               initialEndDate: chartEndDate,
                               initialStatus: chartSelectedStatus,
+                              initialClassify: chartSelectedClassify,
                               firstAvailableDate: bloodRecords.first.timestamp,
                               lastAvailableDate: bloodRecords.last.timestamp,
-                              onApply: (newStartDate, newEndDate, newStatus) {
-                                setState(() {
-                                  chartStartDate = newStartDate;
-                                  chartEndDate = newEndDate;
-                                  chartSelectedStatus = newStatus;
-                                });
-                              },
+                              onApply:
+                                  (
+                                    newStartDate,
+                                    newEndDate,
+                                    newClassify,
+                                    newStatus,
+                                  ) {
+                                    setState(() {
+                                      chartStartDate = newStartDate;
+                                      chartEndDate = newEndDate;
+                                      chartSelectedClassify = newClassify;
+                                      chartSelectedStatus = newStatus;
+                                    });
+                                  },
                               onReset: () {
                                 setState(() {
                                   chartStartDate = bloodRecords.first.timestamp;
                                   chartEndDate = bloodRecords.last.timestamp;
+                                  chartSelectedClassify = "";
                                   chartSelectedStatus = "";
                                 });
                               },
@@ -253,7 +308,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${filteredRecords.length} bản ghi",
+                          context.tr(
+                            'record_count',
+                            params: {'count': '${filteredRecords.length}'},
+                          ),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -268,19 +326,29 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                 initialStartDate: startDate,
                                 initialEndDate: endDate,
                                 initialStatus: selectedStatus,
-                                firstAvailableDate: bloodRecords.first.timestamp,
+                                initialClassify: selectedClassify,
+                                firstAvailableDate:
+                                    bloodRecords.first.timestamp,
                                 lastAvailableDate: bloodRecords.last.timestamp,
-                                onApply: (newStartDate, newEndDate, newStatus) {
-                                  setState(() {
-                                    startDate = newStartDate;
-                                    endDate = newEndDate;
-                                    selectedStatus = newStatus;
-                                  });
-                                },
+                                onApply:
+                                    (
+                                      newStartDate,
+                                      newEndDate,
+                                      newClassify,
+                                      newStatus,
+                                    ) {
+                                      setState(() {
+                                        startDate = newStartDate;
+                                        endDate = newEndDate;
+                                        selectedClassify = newClassify;
+                                        selectedStatus = newStatus;
+                                      });
+                                    },
                                 onReset: () {
                                   setState(() {
                                     startDate = bloodRecords.first.timestamp;
                                     endDate = bloodRecords.last.timestamp;
+                                    selectedClassify = "";
                                     selectedStatus = "";
                                   });
                                 },
@@ -290,7 +358,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                               enableDrag: true,
                             );
                           },
-                          child: Icon(Icons.science_outlined, color: AppColor.textSecondary(context)),
+                          child: Icon(
+                            Icons.science_outlined,
+                            color: AppColor.textSecondary(context),
+                          ),
                         ),
                       ],
                     ),
@@ -332,7 +403,8 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        startDate = bloodRecords.first.timestamp;
+                                        startDate =
+                                            bloodRecords.first.timestamp;
                                         endDate = bloodRecords.last.timestamp;
                                       });
                                     },
@@ -341,12 +413,52 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                       size: 14,
                                       color: Colors.blue.shade900,
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
 
                           // Chip trạng thái
+                          if (selectedClassify.isNotEmpty)
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: Colors.blue.shade900,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _sourceLabel(context, selectedClassify),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.5,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                  Gap(6),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedClassify = "";
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.clear,
+                                      size: 14,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
                           if (selectedStatus.isNotEmpty)
                             Container(
                               padding: EdgeInsets.all(5),
@@ -362,7 +474,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    selectedStatus,
+                                    _bloodPressureStatusLabel(
+                                      context,
+                                      selectedStatus,
+                                    ),
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -398,7 +513,8 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: filteredRecords.length,
                       itemBuilder: (context, index) {
-                        final data = filteredRecords[filteredRecords.length - 1 - index];
+                        final data =
+                            filteredRecords[filteredRecords.length - 1 - index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 13),
                           child: Slidable(
@@ -416,7 +532,8 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                           context
                                               .read<BloodPressureCubit>()
                                               .deleteBloodPressureRecord(
-                                                  data.id.toString());
+                                                data.id.toString(),
+                                              );
                                         }
                                       },
                                     );
@@ -436,7 +553,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                       ),
                                       Gap(2),
                                       Text(
-                                        'Xóa',
+                                        context.tr('delete'),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 10,
@@ -445,7 +562,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                       ),
                                     ],
                                   ),
-                                )
+                                ),
                               ],
                             ),
                             child: GestureDetector(
@@ -453,8 +570,9 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        InsertBloodPressure(bloodPressure: data),
+                                    builder: (context) => InsertBloodPressure(
+                                      bloodPressure: data,
+                                    ),
                                   ),
                                 );
                               },
@@ -481,27 +599,27 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
   Widget _buildDataCard(BloodPressure bloodPressure) {
     return Container(
       constraints: BoxConstraints(minHeight: 88),
-       decoration: BoxDecoration(
-      gradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [
-        Colors.blue.shade500,   // đoạn màu xanh
-        Colors.blue.shade300,   // giữ nguyên xanh đến điểm stops
-        Colors.white,  // phần còn lại màu trắng
-        Colors.white,
-      ],
-      stops: [
-        0.0,  // bắt đầu
-        0.2,  // xanh hết 0%
-        0.3,  // từ đây chuyển sang trắng
-        1.0,  // hết container
-      ]
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.blue.shade500, // đoạn màu xanh
+            Colors.blue.shade300, // giữ nguyên xanh đến điểm stops
+            Colors.white, // phần còn lại màu trắng
+            Colors.white,
+          ],
+          stops: [
+            0.0, // bắt đầu
+            0.2, // xanh hết 0%
+            0.3, // từ đây chuyển sang trắng
+            1.0, // hết container
+          ],
+        ),
+        color: Colors.white10,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blue.shade200, width: 1.5),
       ),
-    color: Colors.white10,
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: Colors.blue.shade200, width: 1.5),
-    ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -522,8 +640,11 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                     ),
                     Gap(5),
                     Text(
-                      'mmHg',
-                      style: TextStyle(color: AppColor.textSecondary(context), fontSize: 13),
+                      context.tr('unit_mmhg'),
+                      style: TextStyle(
+                        color: AppColor.textSecondary(context),
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -543,7 +664,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                         color: Colors.grey.shade600,
                         fontSize: 12,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ],
@@ -557,17 +678,50 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                 border: Border.all(color: bloodPressure.bloodPressureColor),
               ),
               child: Text(
-                bloodPressure.bloodPressureLevel.toString(),
+                _bloodPressureStatusLabel(
+                  context,
+                  bloodPressure.bloodPressureLevel,
+                ),
                 style: TextStyle(
                   fontSize: 11,
                   color: bloodPressure.bloodPressureColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
+  }
+
+  String _sourceLabel(BuildContext context, String sourceLabel) {
+    switch (sourceLabel) {
+      case 'Nhập tay':
+        return context.tr('manual_entry');
+      case 'Thiết bị':
+        return context.tr('device');
+      default:
+        return sourceLabel;
+    }
+  }
+
+  String _bloodPressureStatusLabel(BuildContext context, String status) {
+    switch (status) {
+      case 'Huyết áp thấp':
+        return context.tr('blood_pressure_low');
+      case 'Bình thường':
+        return context.tr('status_normal');
+      case 'Bình thường cao':
+        return context.tr('blood_pressure_elevated');
+      case 'Tăng huyết áp độ 1':
+        return context.tr('blood_pressure_stage_1');
+      case 'Tăng huyết áp độ 2':
+        return context.tr('blood_pressure_stage_2');
+      case 'Tăng huyết áp độ 3':
+        return context.tr('blood_pressure_stage_3');
+      default:
+        return status;
+    }
   }
 }

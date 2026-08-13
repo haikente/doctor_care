@@ -28,6 +28,30 @@ class _InsertDishState extends State<InsertDish> {
   final List<FoodItem> _foodItems = [];
   List<FoodNutrition> _searchResults = [];
   bool _isSearching = false;
+  String _selectedMealType = 'breakfast';
+
+  static const List<_MealTypeOption> _mealTypeOptions = [
+    _MealTypeOption(
+      value: 'breakfast',
+      labelKey: 'meal_suggestion_breakfast',
+      icon: Icons.free_breakfast_rounded,
+    ),
+    _MealTypeOption(
+      value: 'lunch',
+      labelKey: 'meal_suggestion_lunch',
+      icon: Icons.lunch_dining_rounded,
+    ),
+    _MealTypeOption(
+      value: 'dinner',
+      labelKey: 'meal_suggestion_dinner',
+      icon: Icons.dinner_dining_rounded,
+    ),
+    _MealTypeOption(
+      value: 'snack',
+      labelKey: 'meal_suggestion_snack',
+      icon: Icons.fastfood_rounded,
+    ),
+  ];
 
   double get _totalCalories =>
       _foodItems.fold(0.0, (sum, item) => sum + item.calories);
@@ -243,6 +267,7 @@ class _InsertDishState extends State<InsertDish> {
       dishName: _dishNameController.text.trim().isNotEmpty
           ? _dishNameController.text.trim()
           : context.tr('default_meal_name'),
+      mealType: _selectedMealType,
       foodItems: _foodItems,
       notes: _notesController.text.trim().isNotEmpty
           ? _notesController.text.trim()
@@ -312,6 +337,61 @@ class _InsertDishState extends State<InsertDish> {
                   const Gap(24),
 
                   // --- Tìm kiếm thực phẩm ---
+                  _buildSectionTitle(context.tr('meal_type_label')),
+                  const Gap(8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedMealType,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(
+                        Icons.schedule_rounded,
+                        color: Colors.blue,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).cardColor,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                    ),
+                    items: _mealTypeOptions.map((option) {
+                      return DropdownMenuItem<String>(
+                        value: option.value,
+                        child: Row(
+                          children: [
+                            Icon(option.icon, size: 20, color: Colors.blue),
+                            const Gap(10),
+                            Expanded(
+                              child: Text(
+                                context.tr(option.labelKey),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        _selectedMealType = value;
+                      });
+                    },
+                  ),
+
+                  const Gap(24),
+
                   _buildSectionTitle(context.tr('add_new_dish')),
                   const Gap(8),
                   TextField(
@@ -653,4 +733,16 @@ class _InsertDishState extends State<InsertDish> {
       ),
     );
   }
+}
+
+class _MealTypeOption {
+  const _MealTypeOption({
+    required this.value,
+    required this.labelKey,
+    required this.icon,
+  });
+
+  final String value;
+  final String labelKey;
+  final IconData icon;
 }

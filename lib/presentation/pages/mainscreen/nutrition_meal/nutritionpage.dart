@@ -1,6 +1,7 @@
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/domain/entities/meal_analysis.dart';
+import 'package:doctor_care/presentation/bloc/health_goal/health_goal_cubit.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_bloc.dart';
 import 'package:doctor_care/presentation/bloc/meal_analysis/meal_analysis_state.dart';
 import 'package:doctor_care/presentation/pages/mainscreen/nutrition_meal/insert_dish.dart';
@@ -20,28 +21,42 @@ class NutritionPage extends StatefulWidget {
 }
 
 class _NutritionPageState extends State<NutritionPage> {
-
   String formatDate(BuildContext context, DateTime date) {
     final isVi = context.l10n.languageCode == 'vi';
-    final weekdaysVi = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Chủ nhật"];
-    final weekdaysEn = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    final weekday = (isVi ? weekdaysVi : weekdaysEn)[date.weekday - 1];
+    final weekdayKeys = [
+      'weekday_mon',
+      'weekday_tue',
+      'weekday_wed',
+      'weekday_thu',
+      'weekday_fri',
+      'weekday_sat',
+      'weekday_sun',
+    ];
+    final weekday = context.tr(weekdayKeys[date.weekday - 1]);
 
     if (isVi) {
-      return "Thứ $weekday, ${date.day.toString().padLeft(2, '0')} Tháng ${date.month.toString().padLeft(2, '0')}";
+      return "$weekday, ${date.day.toString().padLeft(2, '0')} ${context.tr('month')} ${date.month.toString().padLeft(2, '0')}";
     }
 
     return "$weekday, ${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}";
   }
-  
+
   bool _isToday(DateTime date) {
     final now = DateTime.now();
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
   }
+
   @override
   Widget build(BuildContext context) {
+    final dailyCalories = context.select(
+      (HealthGoalCubit cubit) => cubit.state.dailyCalories.toDouble(),
+    );
+    final proteinGoal = dailyCalories * 0.20 / 4;
+    final carbsGoal = dailyCalories * 0.50 / 4;
+    final fatGoal = dailyCalories * 0.30 / 9;
+
     return SafeArea(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -54,35 +69,49 @@ class _NutritionPageState extends State<NutritionPage> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.white10,
-                    borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(formatDate(context, DateTime.now()), style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: AppColor.textSecondary(context),
-                        )),
+                        Text(
+                          formatDate(context, DateTime.now()),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: AppColor.textSecondary(context),
+                          ),
+                        ),
                         Gap(2),
-                        Text(context.tr('nutrition'),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: AppColor.textPrimary(context))),
+                        Text(
+                          context.tr('nutrition'),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppColor.textPrimary(context),
+                          ),
+                        ),
                       ],
                     ),
                     Spacer(),
                     GestureDetector(
-                    onTap: () =>  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const TrackMeal())),
-                      child: Icon(Icons.history, color: AppColor.textPrimary(context), size: 22,)),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TrackMeal(),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.history,
+                        color: AppColor.textPrimary(context),
+                        size: 22,
+                      ),
+                    ),
                   ],
-                 ),
-              ),  
+                ),
+              ),
 
               const Gap(20),
               const CalorieChart(),
@@ -136,8 +165,8 @@ class _NutritionPageState extends State<NutritionPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'AI Gợi ý bữa ăn',
+                            Text(
+                              context.tr('meal_suggestion_ai_title'),
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -146,7 +175,7 @@ class _NutritionPageState extends State<NutritionPage> {
                             ),
                             const Gap(2),
                             Text(
-                              'Dựa trên chỉ số sức khỏe của bạn',
+                              context.tr('meal_suggestion_ai_subtitle'),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.white.withOpacity(0.85),
@@ -178,77 +207,85 @@ class _NutritionPageState extends State<NutritionPage> {
                     ),
                   ),
                   Gap(10),
-                  Text(context.tr('nutrition_distribution'), style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColor.textPrimary(context)
-                   )
+                  Text(
+                    context.tr('nutrition_distribution'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.textPrimary(context),
+                    ),
                   ),
                 ],
               ),
               Gap(20),
-              
+
               BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
-                builder: (context, state){
-                 double totalProtein = 0;
-                 double totalCarbs = 0;
-                 double totalFat = 0;
-                    if (state is MealAnalysesLoaded) {
-                      final todayMeals = state.mealAnalyses
-                          .where((meal) => _isToday(meal.timestamp))
-                          .toList();
-                      totalProtein = todayMeals.fold<double>(
-                        0,
-                        (sum, meal) => sum + meal.totalProtein,
-                      );
-                      totalCarbs = todayMeals.fold(
-                        0,
-                        (sum, meal) => sum + meal.totalCarbs,
-                      );
-                      totalFat = todayMeals.fold(
-                        0,
-                        (sum, meal) => sum + meal.totalFat,
-                      );
-                    }
-                    return Column(
-                      children: [
-                        _buildMealCard(
-                          title: context.tr('protein'),
-                          current: "${totalProtein.toStringAsFixed(0)}g",
-                          goal: "100g",
-                          progress: (totalProtein / 100).clamp(0, 1),
-                          progressColor: Colors.blue,
-                          progressBgColor: Colors.blue.shade50,
-                        ),
-                      
-                      Gap(10),
-                        _buildMealCard(
-                          title: context.tr('carbs'),
-                          current: "${totalCarbs.toStringAsFixed(0)}g",
-                          goal: "250g",
-                          progress: (totalCarbs / 250).clamp(0, 1),
-                          progressColor: Colors.orange,
-                          progressBgColor: Colors.orange.shade50,
-                        ),
+                builder: (context, state) {
+                  double totalProtein = 0;
+                  double totalCarbs = 0;
+                  double totalFat = 0;
+                  if (state is MealAnalysesLoaded) {
+                    final todayMeals = state.mealAnalyses
+                        .where((meal) => _isToday(meal.timestamp))
+                        .toList();
+                    totalProtein = todayMeals.fold<double>(
+                      0,
+                      (sum, meal) => sum + meal.totalProtein,
+                    );
+                    totalCarbs = todayMeals.fold(
+                      0,
+                      (sum, meal) => sum + meal.totalCarbs,
+                    );
+                    totalFat = todayMeals.fold(
+                      0,
+                      (sum, meal) => sum + meal.totalFat,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      _buildMealCard(
+                        title: context.tr('protein'),
+                        current: "${totalProtein.toStringAsFixed(0)}g",
+                        goal: "${proteinGoal.toStringAsFixed(0)}g",
+                        progress: (totalProtein / proteinGoal)
+                            .clamp(0.0, 1.0)
+                            .toDouble(),
+                        progressColor: Colors.blue,
+                        progressBgColor: Colors.blue.shade50,
+                      ),
 
                       Gap(10),
-                        _buildMealCard(
-                          title: context.tr('fat'),
-                          current: "${totalFat.toStringAsFixed(0)}g",
-                          goal: "60g",
-                          progress: (totalFat / 60).clamp(0, 1),
-                          progressColor: Colors.red,
-                          progressBgColor: Colors.red.shade50,
-                        ),  
+                      _buildMealCard(
+                        title: context.tr('carbs'),
+                        current: "${totalCarbs.toStringAsFixed(0)}g",
+                        goal: "${carbsGoal.toStringAsFixed(0)}g",
+                        progress: (totalCarbs / carbsGoal)
+                            .clamp(0.0, 1.0)
+                            .toDouble(),
+                        progressColor: Colors.orange,
+                        progressBgColor: Colors.orange.shade50,
+                      ),
+
+                      Gap(10),
+                      _buildMealCard(
+                        title: context.tr('fat'),
+                        current: "${totalFat.toStringAsFixed(0)}g",
+                        goal: "${fatGoal.toStringAsFixed(0)}g",
+                        progress: (totalFat / fatGoal)
+                            .clamp(0.0, 1.0)
+                            .toDouble(),
+                        progressColor: Colors.red,
+                        progressBgColor: Colors.red.shade50,
+                      ),
                     ],
                   );
-                }
+                },
               ),
               Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
+                children: [
+                  Container(
                     width: 4,
                     height: 20,
                     decoration: BoxDecoration(
@@ -257,30 +294,47 @@ class _NutritionPageState extends State<NutritionPage> {
                     ),
                   ),
                   Gap(10),
-                    Text(context.tr('today_meals'), style: TextStyle(
+                  Text(
+                    context.tr('today_meals'),
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColor.textPrimary(context))),
-                    Spacer(),  
-                    GestureDetector(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => InsertDish(),));
-                      },
-                      child: Text(context.tr('add_new_dish'),
-                        style: TextStyle(color: Colors.blue.shade600, fontSize: 14),),
+                      color: AppColor.textPrimary(context),
                     ),
-                    Icon(Icons.arrow_forward_outlined, size: 13, color: Colors.blue.shade600,)  
-                  ],
-                ),
+                  ),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => InsertDish()),
+                      );
+                    },
+                    child: Text(
+                      context.tr('add_new_dish'),
+                      style: TextStyle(
+                        color: Colors.blue.shade600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_outlined,
+                    size: 13,
+                    color: Colors.blue.shade600,
+                  ),
+                ],
+              ),
               const Gap(10),
               // Danh sách bữa ăn hôm nay
               BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
                 builder: (context, state) {
                   if (state is MealAnalysesLoaded) {
-                    final todayMeals = state.mealAnalyses
-                        .where((meal) => _isToday(meal.timestamp))
-                        .toList()
-                      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                    final todayMeals =
+                        state.mealAnalyses
+                            .where((meal) => _isToday(meal.timestamp))
+                            .toList()
+                          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
                     if (todayMeals.isEmpty) {
                       return _buildEmptyMealState();
@@ -288,21 +342,23 @@ class _NutritionPageState extends State<NutritionPage> {
 
                     return Column(
                       children: todayMeals
-                          .map((meal) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: _buildMealItem(meal),
-                              ))
+                          .map(
+                            (meal) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _buildMealItem(meal),
+                            ),
+                          )
                           .toList(),
                     );
                   }
                   return _buildEmptyMealState();
                 },
               ),
-            Gap(100),
+              Gap(100),
             ],
           ),
         ),
-      ),  
+      ),
     );
   }
 
@@ -316,10 +372,10 @@ class _NutritionPageState extends State<NutritionPage> {
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
-       decoration: BoxDecoration(
+      decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-       ),
+      ),
       child: Row(
         children: [
           Expanded(
@@ -329,11 +385,13 @@ class _NutritionPageState extends State<NutritionPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(width: 8, height: 8,
-                    decoration: BoxDecoration(
-                      color: progressColor,
-                      shape: BoxShape.circle
-                    ),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: progressColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     Gap(8),
                     Text(
@@ -387,29 +445,26 @@ class _NutritionPageState extends State<NutritionPage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32),
       width: double.infinity,
-       decoration: BoxDecoration(
-         color: Theme.of(context).cardColor,
-         borderRadius: BorderRadius.circular(16),
-       ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         children: [
-          Icon(Icons.restaurant_menu_rounded,
-              size: 48, color: Colors.grey.shade300),
+          Icon(
+            Icons.restaurant_menu_rounded,
+            size: 48,
+            color: Colors.grey.shade300,
+          ),
           const Gap(12),
           Text(
-            "Chưa có bữa ăn nào hôm nay",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            context.tr('no_meals_today_full'),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
           const Gap(4),
           Text(
-            "Chụp ảnh món ăn để phân tích dinh dưỡng",
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade400,
-            ),
+            context.tr('capture_meal_to_analyze'),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
           ),
         ],
       ),
@@ -421,12 +476,17 @@ class _NutritionPageState extends State<NutritionPage> {
         "${meal.timestamp.hour.toString().padLeft(2, '0')}:${meal.timestamp.minute.toString().padLeft(2, '0')}";
     final hasImage =
         meal.imagePath.isNotEmpty && File(meal.imagePath).existsSync();
+    final mealTypeLabel = _getMealTypeLabel(meal.mealType);
+    final foodCount = context.tr(
+      'food_count',
+      params: {'count': '${meal.foodItems.length}'},
+    );
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-       color: Theme.of(context).cardColor,
-       borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -444,8 +504,11 @@ class _NutritionPageState extends State<NutritionPage> {
                     width: 64,
                     height: 64,
                     color: Colors.orange.shade50,
-                    child: Icon(Icons.fastfood_rounded,
-                        color: Colors.orange.shade300, size: 28),
+                    child: Icon(
+                      Icons.fastfood_rounded,
+                      color: Colors.orange.shade300,
+                      size: 28,
+                    ),
                   ),
           ),
           const Gap(14),
@@ -455,7 +518,7 @@ class _NutritionPageState extends State<NutritionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  meal.dishName ?? "Bữa ăn",
+                  meal.dishName ?? context.tr('default_meal_name'),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -465,31 +528,48 @@ class _NutritionPageState extends State<NutritionPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const Gap(4),
-                Text(
-                  "${meal.foodItems.length} món · $time",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-                const Gap(6),
                 Row(
                   children: [
+                    Icon(
+                      _getMealTypeIcon(meal.mealType),
+                      size: 14,
+                      color: Colors.blue.shade500,
+                    ),
+                    const Gap(4),
+                    Flexible(
+                      child: Text(
+                        "$mealTypeLabel - $foodCount - $time",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const Gap(6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
                     _buildMacroTag(
-                        "${meal.totalCalories.toStringAsFixed(0)} kcal",
-                        Colors.deepOrange),
-                    const Gap(6),
+                      "${meal.totalCalories.toStringAsFixed(0)} kcal",
+                      Colors.deepOrange,
+                    ),
                     _buildMacroTag(
-                        "P ${meal.totalProtein.toStringAsFixed(0)}g",
-                        Colors.blue),
-                    const Gap(6),
+                      "P ${meal.totalProtein.toStringAsFixed(0)}g",
+                      Colors.blue,
+                    ),
                     _buildMacroTag(
-                        "C ${meal.totalCarbs.toStringAsFixed(0)}g",
-                        Colors.orange),
-                    const Gap(6),
+                      "C ${meal.totalCarbs.toStringAsFixed(0)}g",
+                      Colors.orange,
+                    ),
                     _buildMacroTag(
-                        "F ${meal.totalFat.toStringAsFixed(0)}g",
-                        Colors.red),
+                      "F ${meal.totalFat.toStringAsFixed(0)}g",
+                      Colors.red,
+                    ),
                   ],
                 ),
               ],
@@ -517,5 +597,35 @@ class _NutritionPageState extends State<NutritionPage> {
         ),
       ),
     );
+  }
+
+  String _getMealTypeLabel(String? mealType) {
+    switch (mealType) {
+      case 'breakfast':
+        return context.tr('meal_suggestion_breakfast');
+      case 'lunch':
+        return context.tr('meal_suggestion_lunch');
+      case 'dinner':
+        return context.tr('meal_suggestion_dinner');
+      case 'snack':
+        return context.tr('meal_suggestion_snack');
+      default:
+        return context.tr('default_meal_name');
+    }
+  }
+
+  IconData _getMealTypeIcon(String? mealType) {
+    switch (mealType) {
+      case 'breakfast':
+        return Icons.free_breakfast_rounded;
+      case 'lunch':
+        return Icons.lunch_dining_rounded;
+      case 'dinner':
+        return Icons.dinner_dining_rounded;
+      case 'snack':
+        return Icons.fastfood_rounded;
+      default:
+        return Icons.restaurant_rounded;
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:doctor_care/core/localization/app_localizations.dart';
 import 'package:doctor_care/core/pages/app_color.dart';
 import 'package:doctor_care/core/pages/custom_appbar.dart';
 import 'package:doctor_care/core/pages/custom_button.dart';
@@ -18,16 +19,32 @@ class MealSuggestionScreen extends StatefulWidget {
 class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
   String? _selectedMealType;
 
-  final _mealTypes = [
-    {'key': null, 'label': 'Bữa ăn tiếp theo', 'icon': Icons.auto_awesome},
-    {'key': 'bữa sáng', 'label': 'Bữa sáng', 'icon': Icons.wb_sunny_rounded},
-    {'key': 'bữa trưa', 'label': 'Bữa trưa', 'icon': Icons.wb_twilight_rounded},
-    {'key': 'bữa tối', 'label': 'Bữa tối', 'icon': Icons.nights_stay_rounded},
-    {
-      'key': 'bữa phụ (snack)',
-      'label': 'Bữa phụ',
-      'icon': Icons.cookie_rounded,
-    },
+  final List<_MealTypeOption> _mealTypes = const [
+    _MealTypeOption(
+      key: null,
+      labelKey: 'meal_suggestion_next_meal',
+      icon: Icons.auto_awesome_rounded,
+    ),
+    _MealTypeOption(
+      key: 'bữa sáng',
+      labelKey: 'meal_suggestion_breakfast',
+      icon: Icons.wb_sunny_rounded,
+    ),
+    _MealTypeOption(
+      key: 'bữa trưa',
+      labelKey: 'meal_suggestion_lunch',
+      icon: Icons.wb_twilight_rounded,
+    ),
+    _MealTypeOption(
+      key: 'bữa tối',
+      labelKey: 'meal_suggestion_dinner',
+      icon: Icons.nights_stay_rounded,
+    ),
+    _MealTypeOption(
+      key: 'bữa phụ (snack)',
+      labelKey: 'meal_suggestion_snack',
+      icon: Icons.cookie_rounded,
+    ),
   ];
 
   void _requestSuggestion() {
@@ -40,326 +57,257 @@ class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomStackAppBar(
-        title: 'AI Gợi ý bữa ăn',
+        title: context.tr('meal_suggestion_ai_title'),
         centerTitle: true,
         onBack: () => Navigator.pop(context),
       ),
       body: BlocBuilder<MealAnalysisBloc, MealAnalysisState>(
         builder: (context, state) {
           if (state is MealAnalysisLoading) {
-            return _buildLoadingState();
+            return const _LoadingState();
           }
 
           if (state is MealSuggestionLoaded) {
-            return _buildSuggestionResult(state.suggestion);
+            return _SuggestionResult(
+              suggestion: state.suggestion,
+              onRegenerate: _requestSuggestion,
+            );
           }
 
           if (state is MealAnalysisError) {
-            return _buildErrorState(state.message);
+            return _ErrorState(
+              message: state.message,
+              onRetry: _requestSuggestion,
+            );
           }
 
-          return _buildInitialState();
+          return _InitialState(
+            mealTypes: _mealTypes,
+            selectedMealType: _selectedMealType,
+            onMealTypeSelected: (value) {
+              setState(() {
+                _selectedMealType = value;
+              });
+            },
+            onGenerate: _requestSuggestion,
+          );
         },
       ),
     );
   }
+}
 
-  Widget _buildInitialState() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const Gap(20),
+class _InitialState extends StatelessWidget {
+  const _InitialState({
+    required this.mealTypes,
+    required this.selectedMealType,
+    required this.onMealTypeSelected,
+    required this.onGenerate,
+  });
 
-          // Hero illustration
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade200, Colors.teal.shade100],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.restaurant_menu_rounded,
-              size: 56,
-              color: Colors.blue.shade700,
-            ),
-          ),
-          const Gap(24),
+  final List<_MealTypeOption> mealTypes;
+  final String? selectedMealType;
+  final ValueChanged<String?> onMealTypeSelected;
+  final VoidCallback onGenerate;
 
-          Text(
-            'Gợi ý bữa ăn thông minh',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColor.textPrimary(context),
-            ),
-          ),
-          const Gap(8),
-          Text(
-            'AI sẽ phân tích chỉ số sức khỏe, dinh dưỡng đã nạp\nvà đề xuất bữa ăn phù hợp nhất cho bạn',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade500,
-              height: 1.5,
-            ),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
-          const Gap(32),
-
-          // Meal type selector
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade400,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const Gap(10),
-                Text(
-                  'Chọn loại bữa ăn',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColor.textPrimary(context),
-                    letterSpacing: -0.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Gap(12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: _mealTypes.map((type) {
-              final isSelected = _selectedMealType == type['key'];
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedMealType = type['key'] as String?;
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.blue.shade50
-                        : Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isSelected
-                          ? Colors.blue.shade400
-                          : Colors.grey.shade200,
-                      width: isSelected ? 2 : 1,
+    return Container(
+      color: theme.colorScheme.surface,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _IntroPanel(onGenerate: onGenerate),
+                    const Gap(22),
+                    _SectionHeader(
+                      icon: Icons.schedule_rounded,
+                      title: context.tr('meal_suggestion_choose_type'),
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        type['icon'] as IconData,
-                        size: 18,
-                        color: isSelected
-                            ? Colors.blue.shade600
-                            : Colors.grey.shade500,
-                      ),
-                      const Gap(6),
-                      Text(
-                        type['label'] as String,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? Colors.blue.shade700
-                              : AppColor.textPrimary(context),
+                    const Gap(12),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: mealTypes.map((type) {
+                        final isSelected = selectedMealType == type.key;
+                        return _MealTypeChip(
+                          option: type,
+                          selected: isSelected,
+                          onTap: () => onMealTypeSelected(type.key),
+                        );
+                      }).toList(),
+                    ),
+                    const Gap(24),
+                    _SectionHeader(
+                      icon: Icons.psychology_alt_rounded,
+                      title: 'AI xét các dữ liệu',
+                    ),
+                    const Gap(12),
+                    _FeatureGrid(
+                      items: [
+                        _FeatureItem(
+                          icon: Icons.favorite_rounded,
+                          title: context.tr(
+                            'meal_suggestion_feature_health_metrics',
+                          ),
+                          color: Colors.red,
                         ),
-                      ),
-                    ],
-                  ),
+                        _FeatureItem(
+                          icon: Icons.calculate_rounded,
+                          title: context.tr(
+                            'meal_suggestion_feature_macro_gaps',
+                          ),
+                          color: Colors.orange,
+                        ),
+                        _FeatureItem(
+                          icon: Icons.monitor_weight_rounded,
+                          title: context.tr('meal_suggestion_feature_tdee'),
+                          color: Colors.blue,
+                        ),
+                        _FeatureItem(
+                          icon: Icons.ramen_dining_rounded,
+                          title: context.tr(
+                            'meal_suggestion_feature_vietnamese_food',
+                          ),
+                          color: Colors.green,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            }).toList(),
+              ),
+            ),
+            _BottomGenerateBar(onGenerate: onGenerate),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IntroPanel extends StatelessWidget {
+  const _IntroPanel({required this.onGenerate});
+
+  final VoidCallback onGenerate;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [primary.withOpacity(0.95), const Color(0xFF20A386)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withOpacity(0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
-
-          const Gap(32),
-
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
-              children: [
-                _buildFeatureRow(
-                  Icons.favorite_rounded,
-                  'Phân tích đường huyết, huyết áp, cholesterol',
-                  Colors.red,
-                ),
-                const Gap(10),
-                _buildFeatureRow(
-                  Icons.calculate_rounded,
-                  'Tính calo/macro còn thiếu trong ngày',
-                  Colors.orange,
-                ),
-                const Gap(10),
-                _buildFeatureRow(
-                  Icons.monitor_weight_rounded,
-                  'Tính TDEE dựa trên BMI và bước chân',
-                  Colors.blue,
-                ),
-                const Gap(10),
-                _buildFeatureRow(
-                  Icons.local_dining_rounded,
-                  'Gợi ý món Việt Nam phù hợp',
-                  Colors.green,
-                ),
-              ],
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: Colors.white,
+              size: 26,
             ),
           ),
-
-          const Gap(32),
-
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: FilledButton.icon(
-              onPressed: _requestSuggestion,
-              icon: const Icon(Icons.auto_awesome, size: 20),
-              label: const Text(
-                'AI Gợi ý ngay',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.blue.shade600,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+          const Gap(16),
+          Text(
+            context.tr('meal_suggestion_smart_title'),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              height: 1.15,
+              fontWeight: FontWeight.w800,
             ),
-          ),
-          const Gap(10),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureRow(IconData icon, String text, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 18, color: color),
-        ),
-        const Gap(12),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColor.textPrimary(context),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: Colors.blue.shade400),
-          const Gap(24),
-          const Text(
-            'AI đang phân tích sức khỏe...',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const Gap(8),
           Text(
-            'Đang đọc chỉ số đường huyết, huyết áp,\ncholesterol và dinh dưỡng hôm nay',
-            textAlign: TextAlign.center,
+            context.tr('meal_suggestion_smart_desc'),
             style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade500,
-              height: 1.5,
+              color: Colors.white.withOpacity(0.82),
+              fontSize: 14,
+              height: 1.45,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+class _MealTypeChip extends StatelessWidget {
+  const _MealTypeChip({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _MealTypeOption option;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? primary.withOpacity(0.10)
+              : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? primary : Colors.grey.shade200,
+            width: selected ? 1.6 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-            const Gap(16),
-            Text(
-              'Không thể tạo gợi ý',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColor.textPrimary(context),
-              ),
+            Icon(
+              option.icon,
+              size: 18,
+              color: selected ? primary : Colors.grey.shade600,
             ),
             const Gap(8),
             Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-            ),
-            const Gap(24),
-            FilledButton.icon(
-              onPressed: _requestSuggestion,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Thử lại'),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.green.shade600,
+              context.tr(option.labelKey),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: selected ? primary : AppColor.textPrimary(context),
               ),
             ),
           ],
@@ -367,193 +315,344 @@ class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSuggestionResult(Map<String, dynamic> suggestion) {
+class _BottomGenerateBar extends StatelessWidget {
+  const _BottomGenerateBar({required this.onGenerate});
+
+  final VoidCallback onGenerate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+
+      child: SizedBox(
+        width: double.infinity,
+        child: CustomButton(
+          text: context.tr('meal_suggestion_generate_now'),
+          onPressed: onGenerate,
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureGrid extends StatelessWidget {
+  const _FeatureGrid({required this.items});
+
+  final List<_FeatureItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.95,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: item.color.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(item.icon, size: 18, color: item.color),
+              ),
+              const Gap(8),
+              Expanded(
+                child: Text(
+                  item.title,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.25,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 86,
+                  height: 86,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 6,
+                    color: Theme.of(context).colorScheme.primary,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.12),
+                  ),
+                ),
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 30,
+                ),
+              ],
+            ),
+            const Gap(28),
+            Text(
+              context.tr('meal_suggestion_loading_title'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColor.textPrimary(context),
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const Gap(10),
+            Text(
+              context.tr('meal_suggestion_loading_desc'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                height: 1.45,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 40,
+                color: Colors.red.shade500,
+              ),
+            ),
+            const Gap(18),
+            Text(
+              context.tr('meal_suggestion_error_title'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColor.textPrimary(context),
+              ),
+            ),
+            const Gap(8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
+            ),
+            const Gap(24),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(context.tr('retry')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionResult extends StatelessWidget {
+  const _SuggestionResult({
+    required this.suggestion,
+    required this.onRegenerate,
+  });
+
+  final Map<String, dynamic> suggestion;
+  final VoidCallback onRegenerate;
+
+  @override
+  Widget build(BuildContext context) {
     final mealSuggestions =
         suggestion['mealSuggestions'] as List<dynamic>? ?? [];
     final dailySummary = suggestion['dailySummary'] as String? ?? '';
     final nutritionGaps = suggestion['nutritionGaps'] as String? ?? '';
     final waterReminder = suggestion['waterReminder'] as String? ?? '';
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+    return SafeArea(
+      top: false,
       child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              children: [
+                if (dailySummary.isNotEmpty)
+                  _InsightCard(
+                    icon: Icons.insights_rounded,
+                    title: context.tr('meal_suggestion_daily_summary'),
+                    text: dailySummary,
+                    color: Colors.green,
+                    filled: true,
+                  ),
+                if (dailySummary.isNotEmpty) const Gap(12),
+                if (nutritionGaps.isNotEmpty)
+                  _InsightCard(
+                    icon: Icons.warning_amber_rounded,
+                    title: context.tr('meal_suggestion_nutrition_gaps'),
+                    text: nutritionGaps,
+                    color: Colors.orange,
+                  ),
+                if (nutritionGaps.isNotEmpty) const Gap(12),
+                if (waterReminder.isNotEmpty)
+                  _InsightCard(
+                    icon: Icons.water_drop_rounded,
+                    title: 'Nước uống',
+                    text: waterReminder,
+                    color: Colors.blue,
+                  ),
+                const Gap(22),
+                _SectionHeader(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: context.tr('meal_suggestion_suggested_dishes'),
+                ),
+                const Gap(12),
+                ...mealSuggestions.asMap().entries.map((entry) {
+                  final meal = entry.value as Map<String, dynamic>;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _MealSuggestionCard(meal: meal, rank: entry.key + 1),
+                  );
+                }),
+              ],
+            ),
+          ),
+          _BottomGenerateBar(onGenerate: onRegenerate),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsightCard extends StatelessWidget {
+  const _InsightCard({
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.color,
+    this.filled = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String text;
+  final Color color;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = filled ? color : color.withOpacity(0.08);
+    final foreground = filled ? Colors.white : color;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(18),
+        border: filled ? null : Border.all(color: color.withOpacity(0.20)),
+      ),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Daily summary card
-          if (dailySummary.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.green.shade400, Colors.teal.shade400],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.insights_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      Gap(8),
-                      Text(
-                        'Tóm tắt sức khỏe hôm nay',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Gap(10),
-                  Text(
-                    dailySummary,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.95),
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const Gap(16),
-
-          // Nutrition gaps
-          if (nutritionGaps.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.orange.shade200),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    color: Colors.orange.shade700,
-                    size: 20,
-                  ),
-                  const Gap(10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Chất dinh dưỡng cần bổ sung',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade900,
-                          ),
-                        ),
-                        const Gap(4),
-                        Text(
-                          nutritionGaps,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange.shade800,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const Gap(16),
-
-          // Water reminder
-          if (waterReminder.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.water_drop_rounded,
-                    color: Colors.blue.shade600,
-                    size: 20,
-                  ),
-                  const Gap(10),
-                  Expanded(
-                    child: Text(
-                      waterReminder,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade800,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const Gap(20),
-
-          // Meal suggestions header
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade400,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const Gap(10),
-              Text(
-                'Món ăn gợi ý',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColor.textPrimary(context),
-                  letterSpacing: -0.3,
-                ),
-              ),
-            ],
-          ),
-          const Gap(14),
-
-          // Meal suggestion cards
-          ...mealSuggestions.asMap().entries.map((entry) {
-            final index = entry.key;
-            final meal = entry.value as Map<String, dynamic>;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: _buildMealSuggestionCard(meal, index + 1),
-            );
-          }),
-
-          const Gap(20),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: Row(
+          Icon(icon, color: foreground, size: 22),
+          const Gap(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: CustomButton(
-                    text: "Gợi ý lại",
-                    onPressed: _requestSuggestion,
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: filled
+                        ? Colors.white
+                        : AppColor.textPrimary(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const Gap(6),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: filled
+                        ? Colors.white.withOpacity(0.88)
+                        : AppColor.textPrimary(context).withOpacity(0.72),
+                    fontSize: 13,
+                    height: 1.45,
                   ),
                 ),
               ],
@@ -563,8 +662,16 @@ class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
       ),
     );
   }
+}
 
-  Widget _buildMealSuggestionCard(Map<String, dynamic> meal, int rank) {
+class _MealSuggestionCard extends StatelessWidget {
+  const _MealSuggestionCard({required this.meal, required this.rank});
+
+  final Map<String, dynamic> meal;
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
     final dishName = meal['dishName'] as String? ?? '';
     final description = meal['description'] as String? ?? '';
     final reason = meal['reason'] as String? ?? '';
@@ -575,44 +682,42 @@ class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
     final cookingTip = meal['cookingTip'] as String?;
     final nutritionHighlights =
         meal['nutritionHighlights'] as Map<String, dynamic>? ?? {};
+    final scoreColor = _scoreColor(suitabilityScore.toDouble());
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: _getScoreColor(suitabilityScore.toDouble())
-                      // ignore: deprecated_member_use
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: scoreColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Center(
                   child: Text(
                     '#$rank',
                     style: TextStyle(
+                      color: scoreColor,
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: _getScoreColor(suitabilityScore.toDouble()),
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -625,194 +730,103 @@ class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
                     Text(
                       dishName,
                       style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        height: 1.2,
+                        fontWeight: FontWeight.w800,
                         color: AppColor.textPrimary(context),
                       ),
                     ),
-                    if (description.isNotEmpty)
+                    if (description.isNotEmpty) ...[
+                      const Gap(4),
                       Text(
                         description,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade500,
+                          fontSize: 13,
+                          height: 1.35,
+                          color: Colors.grey.shade600,
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),
-              // Score badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: _getScoreColor(suitabilityScore.toDouble())
-                      // ignore: deprecated_member_use
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.star_rounded,
-                      size: 14,
-                      color: _getScoreColor(suitabilityScore.toDouble()),
-                    ),
-                    const Gap(2),
-                    Text(
-                      '${suitabilityScore.toInt()}/10',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: _getScoreColor(suitabilityScore.toDouble()),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const Gap(10),
+              _ScoreBadge(score: suitabilityScore.toInt(), color: scoreColor),
             ],
           ),
-          const Gap(12),
-
-          // Reason
-          if (reason.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 16,
-                    color: Colors.green.shade700,
-                  ),
-                  const Gap(8),
-                  Expanded(
-                    child: Text(
-                      reason,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.green.shade800,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const Gap(12),
-
-          // Nutrition row
-          Row(
+          const Gap(14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              _buildMiniNutrient(
-                '${estimatedCalories.toInt()}',
-                'kcal',
-                Colors.deepOrange,
+              _NutrientChip(
+                value: '${estimatedCalories.toInt()}',
+                label: 'kcal',
+                color: Colors.deepOrange,
               ),
-              const Gap(8),
               if (nutritionHighlights['protein'] != null)
-                _buildMiniNutrient(
-                  '${(nutritionHighlights['protein'] as num).toInt()}g',
-                  'Protein',
-                  Colors.blue,
+                _NutrientChip(
+                  value: '${(nutritionHighlights['protein'] as num).toInt()}g',
+                  label: context.tr('protein'),
+                  color: Colors.blue,
                 ),
-              const Gap(8),
               if (nutritionHighlights['carbs'] != null)
-                _buildMiniNutrient(
-                  '${(nutritionHighlights['carbs'] as num).toInt()}g',
-                  'Carbs',
-                  Colors.orange,
+                _NutrientChip(
+                  value: '${(nutritionHighlights['carbs'] as num).toInt()}g',
+                  label: context.tr('carbs'),
+                  color: Colors.orange,
                 ),
-              const Gap(8),
               if (nutritionHighlights['fat'] != null)
-                _buildMiniNutrient(
-                  '${(nutritionHighlights['fat'] as num).toInt()}g',
-                  'Fat',
-                  Colors.red,
+                _NutrientChip(
+                  value: '${(nutritionHighlights['fat'] as num).toInt()}g',
+                  label: context.tr('fat'),
+                  color: Colors.red,
                 ),
             ],
           ),
-          const Gap(10),
-
-          // Ingredients
-          if (ingredients.isNotEmpty)
+          if (reason.isNotEmpty) ...[
+            const Gap(14),
+            _TextNote(
+              icon: Icons.lightbulb_outline_rounded,
+              text: reason,
+              color: Colors.green,
+            ),
+          ],
+          if (ingredients.isNotEmpty) ...[
+            const Gap(12),
             Wrap(
               spacing: 6,
               runSpacing: 6,
               children: ingredients
-                  .take(6)
+                  .take(7)
                   .map(
-                    (ing) => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
+                    (ing) => Chip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(
                         ing.toString(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade700,
-                        ),
+                        style: const TextStyle(fontSize: 11),
                       ),
+                      backgroundColor: Colors.grey.shade100,
+                      side: BorderSide.none,
                     ),
                   )
                   .toList(),
             ),
-
-          // Cooking tip
+          ],
           if (cookingTip != null && cookingTip.isNotEmpty) ...[
             const Gap(10),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.tips_and_updates_rounded,
-                  size: 14,
-                  color: Colors.amber.shade700,
-                ),
-                const Gap(6),
-                Expanded(
-                  child: Text(
-                    cookingTip,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.amber.shade800,
-                    ),
-                  ),
-                ),
-              ],
+            _TextNote(
+              icon: Icons.tips_and_updates_rounded,
+              text: cookingTip,
+              color: Colors.amber.shade700,
             ),
           ],
-
-          // Warning
           if (warnings != null && warnings.isNotEmpty) ...[
-            const Gap(8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.info_outline, size: 14, color: Colors.red.shade400),
-                const Gap(6),
-                Expanded(
-                  child: Text(
-                    warnings,
-                    style: TextStyle(fontSize: 11, color: Colors.red.shade600),
-                  ),
-                ),
-              ],
+            const Gap(10),
+            _TextNote(
+              icon: Icons.info_outline_rounded,
+              text: warnings,
+              color: Colors.red,
             ),
           ],
         ],
@@ -820,33 +834,168 @@ class _MealSuggestionScreenState extends State<MealSuggestionScreen> {
     );
   }
 
-  Widget _buildMiniNutrient(String value, String label, Color color) {
+  Color _scoreColor(double score) {
+    if (score >= 8) return Colors.green.shade600;
+    if (score >= 6) return Colors.orange.shade600;
+    return Colors.red.shade500;
+  }
+}
+
+class _ScoreBadge extends StatelessWidget {
+  const _ScoreBadge({required this.score, required this.color});
+
+  final int score;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(999),
       ),
-      child: Column(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star_rounded, size: 15, color: color),
+          const Gap(3),
+          Text(
+            '$score/10',
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NutrientChip extends StatelessWidget {
+  const _NutrientChip({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             value,
             style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
               color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          Text(label, style: TextStyle(fontSize: 9, color: color)),
+          const Gap(4),
+          Text(label, style: TextStyle(color: color, fontSize: 11)),
         ],
       ),
     );
   }
+}
 
-  Color _getScoreColor(double score) {
-    if (score >= 8) return Colors.green.shade600;
-    if (score >= 6) return Colors.orange.shade600;
-    return Colors.red.shade400;
+class _TextNote extends StatelessWidget {
+  const _TextNote({
+    required this.icon,
+    required this.text,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 17),
+          const Gap(8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: color, fontSize: 12, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
   }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
+        const Gap(8),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AppColor.textPrimary(context),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MealTypeOption {
+  const _MealTypeOption({
+    required this.key,
+    required this.labelKey,
+    required this.icon,
+  });
+
+  final String? key;
+  final String labelKey;
+  final IconData icon;
+}
+
+class _FeatureItem {
+  const _FeatureItem({
+    required this.icon,
+    required this.title,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final Color color;
 }

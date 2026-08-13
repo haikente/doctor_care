@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"drcare-90960","appId":"1:972427288907:android:203815a1d4f8ff678108ce","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"drcare-90960","configurations":{"android":"1:972427288907:android:203815a1d4f8ff678108ce","ios":"1:972427288907:ios:6c5035864a8da5148108ce"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "drcare-90960",
+          "appId": "1:972427288907:android:203815a1d4f8ff678108ce",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "drcare-90960",
+          "configurations": {
+            "android": "1:972427288907:android:203815a1d4f8ff678108ce",
+            "ios": "1:972427288907:ios:6c5035864a8da5148108ce"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
